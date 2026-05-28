@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dock="using:GOZA.Dock"
+             x:Class="GOZA.Dock.Controls.DockRegion"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             MinWidth="20"
+             MinHeight="20">
+  <Grid x:Name="LayoutGrid">
+    <TabControl x:Name="TabStrip"
+                ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=DockRegion}}"
+                SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DockRegion}, Mode=TwoWay}">
+      <TabControl.ItemTemplate>
+        <DataTemplate x:DataType="dock:IDockTabItem">
+          <TextBlock Margin="8,4" Text="{Binding Header}" />
+        </DataTemplate>
+      </TabControl.ItemTemplate>
+      <TabControl.ContentTemplate>
+        <DataTemplate>
+          <Panel />
+        </DataTemplate>
+      </TabControl.ContentTemplate>
+    </TabControl>
+
+    <Border x:Name="ContentPane" MinHeight="32" MinWidth="32">
+      <Grid>
+      <ContentControl x:Name="ContentHost"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Content="{Binding ActiveContent, RelativeSource={RelativeSource AncestorType=DockRegion}}" />
+
+      <!-- Drop target overlay when dragging a tab into this region's content area -->
+      <Border x:Name="DropHint"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              Background="#66808080"
+              BorderBrush="#AA909090"
+              BorderThickness="1"
+              CornerRadius="2"
+              IsVisible="False"
+              IsHitTestVisible="False" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

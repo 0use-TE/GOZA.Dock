@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "./src/GOZA.Dock",
+          "files": ["**/*.csproj"]
+        }
+      ],
+      "dest": "api",
+      "filter": "docfx/filter.yml",
+      "properties": {
+        "TargetFramework": "net10.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["index.md", "toc.yml"]
+      },
+      {
+        "files": ["**/*.{md,yml}"],
+        "src": "docs",
+        "dest": "docs"
+      },
+      {
+        "files": ["**/*.yml"],
+        "src": "api",
+        "dest": "api"
+      }
+    ],
+    "resource": [
+      {
+        "files": ["images/**"]
+      }
+    ],
+    "output": "_site",
+    "template": ["default", "modern"],
+    "globalMetadata": {
+      "_appName": "GOZA.Dock",
+      "_appTitle": "GOZA.Dock Documentation",
+      "_enableSearch": true,
+      "pdf": false,
+      "_appFooter": "© GOZA.Dock contributors",
+      "_gitContribute": {
+        "repo": "https://github.com/GOZA/GOZA.Dock",
+        "branch": "main"
+      }
+    }
+  }
+}

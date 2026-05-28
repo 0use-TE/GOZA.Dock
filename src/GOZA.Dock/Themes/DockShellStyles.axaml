@@ -1,0 +1,28 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- DockSplitter uses GridSplitter styling; gutter line is drawn in OnRender to keep ShowsPreview working -->
+  <Style Selector=":is(GridSplitter)">
+    <Setter Property="ShowsPreview" Value="True" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinWidth" Value="8" />
+    <Setter Property="MinHeight" Value="8" />
+  </Style>
+
+  <!-- DockRegion: TabControl is header-only; real content lives in ContentHost -->
+  <Style Selector="DockRegion TabControl#TabStrip">
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Left]">
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Right]">
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="DockRegion TabControl#TabStrip /template/ ContentPresenter#PART_SelectedContentHost">
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="Height" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+</Styles>

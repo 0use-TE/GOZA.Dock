@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "GOZA.Dock.Demo.Browser": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54407;http://localhost:54408"
+    }
+  }
+}

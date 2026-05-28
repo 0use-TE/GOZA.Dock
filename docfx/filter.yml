@@ -1,0 +1,10 @@
+apiRules:
+  - exclude:
+      hasAttribute:
+        uidRegex: ^System\.ComponentModel\.EditorBrowsableAttribute$
+        ctorArguments:
+          - System.ComponentModel.EditorBrowsableState.Never
+  - exclude:
+      uidRegex: ^GOZA\.Dock\.Controls\.DockLayoutExpansion
+  - exclude:
+      uidRegex: ^GOZA\.Dock\.DockTabStripPlacementExtensions

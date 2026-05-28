@@ -1,0 +1,28 @@
+- name: Introduction
+  href: introduction.md
+- name: Getting Started
+  href: getting-started.md
+- name: Architecture
+  href: architecture.md
+- name: AOT Compatibility
+  href: aot-compatibility.md
+- name: Guides
+  items:
+    - name: Layout and Grid
+      href: guides/layout-and-grid.md
+    - name: Tab Strip Placement
+      href: guides/tab-strip-placement.md
+    - name: Tab Drag and Drop
+      href: guides/tab-drag-drop.md
+    - name: Parking Lot
+      href: guides/parking-lot.md
+    - name: Layout Expansion
+      href: guides/layout-expansion.md
+    - name: Crystal.Avalonia
+      href: guides/crystal-avalonia.md
+    - name: Modular Dock Modules
+      href: guides/modular-dock-modules.md
+    - name: Layout Persistence (JSON)
+      href: guides/layout-persistence.md
+- name: Upgrade from v0.9
+  href: upgrade-from-0.9.md

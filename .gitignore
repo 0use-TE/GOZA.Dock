@@ -1,0 +1,20 @@
+## Build
+bin/
+obj/
+out/
+
+## DocFX (generated on CI / local docfx build)
+_site/
+api/
+
+## IDE / OS
+.vs/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+## NuGet
+*.nupkg
+*.snupkg

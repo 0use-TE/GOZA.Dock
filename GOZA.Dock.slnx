@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GOZA.Dock/GOZA.Dock.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/GOZA.Dock.Demo/GOZA.Dock.Demo.csproj" />
+    <Project Path="samples/GOZA.Dock.Demo.Desktop/GOZA.Dock.Demo.Desktop.csproj" />
+    <Project Path="samples/GOZA.Dock.Demo.Browser/GOZA.Dock.Demo.Browser.csproj" />
+    <Project Path="samples/GOZA.Dock.Demo.Android/GOZA.Dock.Demo.Android.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="samples/GOZA.Dock.Demo.iOS/GOZA.Dock.Demo.iOS.csproj">
+      <Deploy />
+    </Project>
+  </Folder>
+</Solution>

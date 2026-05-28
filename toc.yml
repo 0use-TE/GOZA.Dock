@@ -1,0 +1,11 @@
+- name: Home
+  href: index.md
+- name: Documentation
+  dropdown: true
+  items:
+    - name: v1.0 (Current)
+      href: docs/v1.0/
+    - name: v0.9 (Preview)
+      href: docs/v0.9/
+- name: API Reference
+  href: api/
