@@ -38,6 +38,12 @@ Verify with:
 dotnet publish samples/GOZA.Dock.Demo.Desktop -c Release
 ```
 
+**Visual Studio publish profiles:** Do **not** set `<PublishTrimmed>false</PublishTrimmed>` in `.pubxml` when `PublishAot` is enabled. Native AOT always trims; the SDK error is:
+
+`PublishTrimmed is implied by native compilation and cannot be disabled.`
+
+Remove `PublishTrimmed` from the profile (or set it to `true`) and publish again.
+
 ### 3. Content factory and modules
 
 Avoid `Type.GetType(string)` or `Activator.CreateInstance` for tab content. Use:

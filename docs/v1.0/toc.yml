@@ -24,5 +24,3 @@
       href: guides/modular-dock-modules.md
     - name: Layout Persistence (JSON)
       href: guides/layout-persistence.md
-- name: Upgrade from v0.9
-  href: upgrade-from-0.9.md

@@ -27,10 +27,9 @@ Cross-platform Avalonia docking layout library (Desktop, Browser, Android, iOS).
 
 | Version | Link |
 |---------|------|
-| **v1.0 (Current)** | [docs/v1.0/introduction.md](docs/v1.0/introduction.md) |
-| **v0.9 (Preview)** | [docs/v0.9/introduction.md](docs/v0.9/introduction.md) |
+| **v1.0** | [docs/v1.0/introduction.md](docs/v1.0/introduction.md) |
 
-Topics in v1.0: [AOT](docs/v1.0/aot-compatibility.md), [Crystal.Avalonia](docs/v1.0/guides/crystal-avalonia.md), [modular modules](docs/v1.0/guides/modular-dock-modules.md), [JSON layout](docs/v1.0/guides/layout-persistence.md).
+Topics: [AOT](docs/v1.0/aot-compatibility.md), [Crystal.Avalonia](docs/v1.0/guides/crystal-avalonia.md), [modular modules](docs/v1.0/guides/modular-dock-modules.md), [JSON layout](docs/v1.0/guides/layout-persistence.md).
 
 Build the DocFX site locally:
 
@@ -58,7 +57,7 @@ dotnet add package GOZA.Dock
 
 - `src/GOZA.Dock/` — NuGet library (Avalonia only)
 - `samples/` — multi-platform demo
-- `docs/v1.0/`, `docs/v0.9/` — versioned documentation (DocFX)
+- `docs/v1.0/` — documentation (DocFX)
 - `DEVELOPMENT.md` — contributor guide (Chinese)
 
 ## CI

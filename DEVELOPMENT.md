@@ -1,6 +1,6 @@
 # GOZA.Dock 开发指南
 
-> **English user documentation:** build with DocFX — see [README.md](README.md#documentation). Versioned docs live under `docs/v1.0/` and `docs/v0.9/`; API reference is generated from XML comments in `src/GOZA.Dock/`.
+> **English user documentation:** build with DocFX — see [README.md](README.md#documentation). Docs live under `docs/v1.0/`; API reference is generated from XML comments in `src/GOZA.Dock/`.
 
 本文档面向将 **GOZA.Dock** 迁出 GOZAReframe、作为独立仓库继续开发的场景，涵盖架构、集成方式、交互约定与常见坑。
 

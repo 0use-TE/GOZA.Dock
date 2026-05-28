@@ -8,8 +8,7 @@ Cross-platform Avalonia docking layout: free-form `Grid` regions, draggable tabs
 
 | Version | Description | Link |
 |---------|-------------|------|
-| **v1.0 (Current)** | Tab strip on top/bottom/left/right, cross-region drag, parking lot | [Documentation](docs/v1.0/introduction.md) |
-| **v0.9 (Preview)** | Early preview notes (superseded by v1.0) | [Documentation](docs/v0.9/introduction.md) |
+| **v1.0** | Current documentation | [Documentation](docs/v1.0/introduction.md) |
 
 ## Quick links
 
@@ -19,7 +18,7 @@ Cross-platform Avalonia docking layout: free-form `Grid` regions, draggable tabs
 - [Crystal.Avalonia](docs/v1.0/guides/crystal-avalonia.md)
 - [Modular modules](docs/v1.0/guides/modular-dock-modules.md)
 - [Layout persistence (JSON)](docs/v1.0/guides/layout-persistence.md)
-- [API Reference](api/)
+- [API Reference](api/GOZA.Dock.html)
 
 ## NuGet
 
