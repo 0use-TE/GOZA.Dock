@@ -1,7 +1,5 @@
 # Architecture
 
-English · [简体中文](zh-CN/architecture.md)
-
 ## Visual tree
 
 ```

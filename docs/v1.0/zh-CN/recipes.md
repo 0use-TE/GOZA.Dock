@@ -1,7 +1,5 @@
 # 进阶
 
-[English](../recipes.md) · 简体中文
-
 按需复制代码块。
 
 ## Grid 布局

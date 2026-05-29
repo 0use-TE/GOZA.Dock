@@ -1,7 +1,5 @@
 # Quick Start
 
-English · [简体中文](zh-CN/getting-started.md)
-
 ## 1. Run the sample
 
 ```bash

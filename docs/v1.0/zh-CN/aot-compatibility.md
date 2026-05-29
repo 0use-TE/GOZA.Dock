@@ -1,7 +1,5 @@
 # AOT
 
-[English](../aot-compatibility.md) · 简体中文
-
 ## App.axaml（必须）
 
 ```xml

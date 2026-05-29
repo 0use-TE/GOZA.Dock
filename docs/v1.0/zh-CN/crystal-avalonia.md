@@ -1,7 +1,5 @@
 # Crystal.Avalonia
 
-[English](../crystal-avalonia.md) · 简体中文
-
 GOZA.Dock **不**引用 Crystal。本文演示 Crystal 壳 + MVVM DI + `DockShell`。
 
 Demo：`samples/GOZA.Dock.Demo/`

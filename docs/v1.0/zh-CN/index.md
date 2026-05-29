@@ -1,10 +1,7 @@
 ---
-_layout: landing
-title: v1.0 文档
+redirect_url: getting-started.html
 ---
 
 # v1.0
 
-| English | 简体中文 |
-|---------|----------|
-| [Quick Start](../getting-started.html) | [快速开始](getting-started.html) |
+请使用顶栏 **Version** / **Lang** 切换。

@@ -1,7 +1,5 @@
 # Recipes
 
-English · [简体中文](zh-CN/recipes.md)
-
 Optional patterns. Copy the block you need.
 
 ## Grid layout

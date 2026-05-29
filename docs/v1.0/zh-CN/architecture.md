@@ -1,7 +1,5 @@
 # 架构
 
-[English](../architecture.md) · 简体中文
-
 ## 视觉树
 
 ```

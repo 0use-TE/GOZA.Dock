@@ -1,7 +1,5 @@
 # Crystal.Avalonia
 
-English · [简体中文](zh-CN/crystal-avalonia.md)
-
 GOZA.Dock has **no** Crystal reference. This page wires Crystal shell + MVVM DI + `DockShell`.
 
 Demo: `samples/GOZA.Dock.Demo/`
