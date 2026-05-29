@@ -1,3 +1,5 @@
+- name: 简介
+  href: introduction.md
 - name: 快速开始
   href: getting-started.md
 - name: Crystal.Avalonia

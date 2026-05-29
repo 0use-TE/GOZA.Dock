@@ -5,7 +5,7 @@ English · [简体中文](zh-CN/getting-started.md)
 ## 1. Run the sample
 
 ```bash
-git clone https://github.com/GOZA/GOZA.Dock.git
+git clone https://github.com/0use-TE/GOZA.Dock.git
 cd GOZA.Dock
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
@@ -23,7 +23,7 @@ dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
 > - **Crystal.Avalonia** DI → [Crystal.Avalonia](crystal-avalonia.md)
 > - ReactiveUI / other toolkits — same bindings, swap the view model base.
 
-> **Layout persistence is your choice.** The library does not save/load dock state. Demo uses **System.Text.Json** + source generator (AOT-safe). You can use XML, SQLite, or anything else — you own tab collections and grid topology. See [Recipes — JSON](recipes.md#json-layout-saveload).
+> **Layout persistence is your choice.** The library does not save/load dock state. Demo uses **System.Text.Json** + source generator (AOT-safe). You can use XML, SQLite, or anything else — you own tab collections and grid topology. See [Recipes](recipes.md).
 
 ## 3. Files (left + right regions, CommunityToolkit.Mvvm)
 

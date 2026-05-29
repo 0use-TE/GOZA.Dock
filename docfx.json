@@ -37,16 +37,17 @@
       }
     ],
     "output": "_site",
-    "template": ["default", "modern"],
+    "template": ["default", "modern", "docfx/template"],
     "globalMetadata": {
       "_appName": "GOZA.Dock",
       "_appTitle": "GOZA.Dock Documentation",
+      "_appBasePath": "/GOZA.Dock/",
       "_enableSearch": true,
       "pdf": false,
       "_appFooter": "© GOZA.Dock contributors",
       "_gitContribute": {
-        "repo": "https://github.com/GOZA/GOZA.Dock",
-        "branch": "main"
+        "repo": "https://github.com/0use-TE/GOZA.Dock",
+        "branch": "master"
       }
     }
   }

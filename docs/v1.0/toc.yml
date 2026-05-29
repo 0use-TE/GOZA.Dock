@@ -1,3 +1,5 @@
+- name: Introduction
+  href: introduction.md
 - name: Quick Start
   href: getting-started.md
 - name: Crystal.Avalonia

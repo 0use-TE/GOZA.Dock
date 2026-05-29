@@ -1,0 +1,21 @@
+.goza-switchers {
+  margin-left: auto;
+  margin-right: 0.75rem;
+}
+
+.goza-switchers label {
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.goza-switchers select {
+  min-width: 6.5rem;
+}
+
+@media (max-width: 767.98px) {
+  .goza-switchers {
+    margin: 0.5rem 0 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -1,8 +1,7 @@
 - name: Home
   href: index.md
-- name: Documentation (English)
+- name: v1.0
   href: docs/v1.0/
-- name: 文档 (简体中文)
-  href: docs/v1.0/zh-CN/
+  topicHref: docs/v1.0/getting-started.md
 - name: API Reference
   href: api/

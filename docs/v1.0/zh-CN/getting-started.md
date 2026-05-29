@@ -5,7 +5,7 @@
 ## 1. 运行示例
 
 ```bash
-git clone https://github.com/GOZA/GOZA.Dock.git
+git clone https://github.com/0use-TE/GOZA.Dock.git
 cd GOZA.Dock
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
@@ -23,7 +23,7 @@ dotnet add package CommunityToolkit.Mvvm   # 可选 — 见下方 MVVM 说明
 > - **Crystal.Avalonia** DI → [Crystal.Avalonia](crystal-avalonia.md)
 > - ReactiveUI 等 — 绑定相同，换 ViewModel 基类即可。
 
-> **布局持久化自选。** 库不内置存盘。Demo 用 **System.Text.Json** + Source Generator（AOT 安全）。也可用 XML、SQLite 等 — Tab 集合与 Grid 拓扑由应用负责。见 [进阶 — JSON](recipes.md#json-layout-saveload)。
+> **布局持久化自选。** 库不内置存盘。Demo 用 **System.Text.Json** + Source Generator（AOT 安全）。也可用 XML、SQLite 等 — Tab 集合与 Grid 拓扑由应用负责。见 [进阶](recipes.md)。
 
 ## 3. 文件（左右两区域，CommunityToolkit.Mvvm）
 
