@@ -1,3 +1,4 @@
+# 暂未完成，请勿使用！
 # GOZA.Dock
 
 Cross-platform Avalonia docking layout library (Desktop, Browser, Android, iOS).
