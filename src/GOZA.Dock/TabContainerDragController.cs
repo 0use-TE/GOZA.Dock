@@ -45,6 +45,7 @@ public sealed class TabContainerDragController : IDisposable
     private bool _visualDragActive;
     private bool _attached;
     private long _lastReleaseTick;
+    private string? _lastReleaseTabId;
     private TopLevel? _subscribedTopLevel;
 
     private const double DragStartThreshold = 6.0;
@@ -173,7 +174,11 @@ public sealed class TabContainerDragController : IDisposable
         if (e.ClickCount >= 2)
         {
             AbortInteraction();
-            ApplyLayoutToggle(e);
+            var tabId = e.Source is Visual dblClickVisual ? GetTabId(dblClickVisual) : null;
+            if (tabId is not null && tabId == _lastReleaseTabId)
+                ApplyLayoutToggle(e);
+
+            ResetDoubleTapState();
             return;
         }
 
@@ -450,15 +455,20 @@ public sealed class TabContainerDragController : IDisposable
 
             if (IsTabStripHit(e.Source))
             {
+                var tabId = e.Source is Visual visual ? GetTabId(visual) : null;
                 var now = Environment.TickCount64;
-                if (_lastReleaseTick != 0 && now - _lastReleaseTick <= DoubleTapWindowMs)
+                if (tabId is not null
+                    && tabId == _lastReleaseTabId
+                    && _lastReleaseTick != 0
+                    && now - _lastReleaseTick <= DoubleTapWindowMs)
                 {
-                    _lastReleaseTick = 0;
+                    ResetDoubleTapState();
                     ApplyLayoutToggle(e);
                 }
                 else
                 {
                     _lastReleaseTick = now;
+                    _lastReleaseTabId = tabId;
                 }
             }
 
@@ -553,6 +563,18 @@ public sealed class TabContainerDragController : IDisposable
         }
 
         CleanupVisuals();
+    }
+
+    private void ResetDoubleTapState()
+    {
+        _lastReleaseTick = 0;
+        _lastReleaseTabId = null;
+    }
+
+    private string? GetTabId(Visual source)
+    {
+        var container = FindTabHeaderContainer(source);
+        return container?.DataContext is IDockTabItem tab ? tab.Id : null;
     }
 
     private void ApplyLayoutToggle(RoutedEventArgs e)
