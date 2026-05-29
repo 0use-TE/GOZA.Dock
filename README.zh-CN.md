@@ -9,7 +9,7 @@ dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 dotnet add package GOZA.Dock
 ```
 
-文档：https://0use.net/GOZA.Dock/（顶栏 **Version** / **Lang** 切换）
+文档：https://0use.net/GOZA.Dock/（顶栏 **Version** / **Lang** 切换）。浏览器 Demo（WASM）：https://0use.net/GOZA.Dock/demo/
 
 本地文档：`docfx docfx.json && docfx serve _site --port 8080`
 

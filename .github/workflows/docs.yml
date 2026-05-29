@@ -28,8 +28,20 @@ jobs:
       - name: Install DocFX
         run: dotnet tool update -g docfx
 
+      - name: Install wasm workload
+        run: dotnet workload install wasm-tools
+
       - name: Build docs
         run: docfx docfx.json
+
+      - name: Publish WASM demo
+        run: dotnet publish samples/GOZA.Dock.Demo.Browser/GOZA.Dock.Demo.Browser.csproj -c Release
+
+      - name: Merge WASM demo into site
+        run: |
+          mkdir -p _site/demo
+          cp -r samples/GOZA.Dock.Demo.Browser/bin/Release/net10.0-browser/publish/wwwroot/. _site/demo/
+          touch _site/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

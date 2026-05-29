@@ -9,7 +9,7 @@ dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 dotnet add package GOZA.Dock
 ```
 
-Docs: https://0use.net/GOZA.Dock/ — use **Version** / **Lang** in the top navbar.
+Docs: https://0use.net/GOZA.Dock/ — use **Version** / **Lang** in the top navbar. Browser demo (WASM): https://0use.net/GOZA.Dock/demo/
 
 Local docs: `docfx docfx.json && docfx serve _site --port 8080`
 

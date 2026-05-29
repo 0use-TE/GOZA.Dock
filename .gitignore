@@ -2,6 +2,7 @@
 bin/
 obj/
 out/
+artifacts/
 
 ## DocFX (generated on CI / local docfx build)
 _site/
