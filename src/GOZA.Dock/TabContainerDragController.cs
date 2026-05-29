@@ -333,7 +333,6 @@ public sealed class TabContainerDragController : IDisposable
         double localDeltaY = currentPosTab.Y - _startPosTab.Y;
 
         var inSourceHeader = DockRegionDragCoordinator.IsPointerInTabStripHeader(_tabSelector, currentPosTab);
-        var leftSourceHeader = !inSourceHeader;
         var horizontalStrip = IsHorizontalTabStrip;
 
         if (_dragGhost.RenderTransform is not TranslateTransform ghostTt)
@@ -342,21 +341,40 @@ public sealed class TabContainerDragController : IDisposable
         ghostTt.X = _ghostStartPos.X + overlayDeltaX;
         ghostTt.Y = _ghostStartPos.Y + overlayDeltaY;
 
-        UpdateDropTargetHighlight(e, inSourceHeader);
+        var topLevel = TopLevel.GetTopLevel(_host);
+        var pointerPos = topLevel is not null ? e.GetPosition(topLevel) : default;
+        var targetHeaderTab = topLevel is not null
+            ? DockRegionDragCoordinator.FindTargetTabControlAtHeaderPoint(topLevel, pointerPos, _tabSelector)
+            : null;
 
-        if (leftSourceHeader)
+        UpdateDropTargetHighlight(topLevel, pointerPos, targetHeaderTab);
+
+        if (inSourceHeader)
         {
-            foreach (var child in _tabSelector.GetRealizedContainers().Cast<Control>())
-            {
-                if (!ReferenceEquals(child, _draggedContainer))
-                    child.RenderTransform = null;
-            }
+            ApplySourceHeaderReorderPreview(localDeltaX, localDeltaY, horizontalStrip, ghostTt);
         }
-        else if (horizontalStrip)
+        else if (targetHeaderTab is not null)
+        {
+            DockRegionDragCoordinator.ClearTabStripTransforms(_tabSelector);
+            ApplyTargetHeaderInsertPreview(targetHeaderTab, e.GetPosition(targetHeaderTab));
+        }
+        else
+        {
+            DockRegionDragCoordinator.ClearAllTabStripTransforms();
+        }
+    }
+
+    private void ApplySourceHeaderReorderPreview(
+        double localDeltaX,
+        double localDeltaY,
+        bool horizontalStrip,
+        TranslateTransform ghostTt)
+    {
+        if (horizontalStrip)
         {
             ghostTt.Y = _ghostStartPos.Y;
 
-            double myVirtualLeft = _draggedContainer.Bounds.X + localDeltaX;
+            double myVirtualLeft = _draggedContainer!.Bounds.X + localDeltaX;
             double myVirtualRight = myVirtualLeft + _draggedWidth;
 
             foreach (var child in _tabSelector.GetRealizedContainers().Cast<Control>())
@@ -378,7 +396,7 @@ public sealed class TabContainerDragController : IDisposable
         {
             ghostTt.X = _ghostStartPos.X;
 
-            double myVirtualTop = _draggedContainer.Bounds.Y + localDeltaY;
+            double myVirtualTop = _draggedContainer!.Bounds.Y + localDeltaY;
             double myVirtualBottom = myVirtualTop + _draggedHeight;
 
             foreach (var child in _tabSelector.GetRealizedContainers().Cast<Control>())
@@ -398,22 +416,44 @@ public sealed class TabContainerDragController : IDisposable
         }
     }
 
+    private void ApplyTargetHeaderInsertPreview(SelectingItemsControl targetTab, Point positionInTarget)
+    {
+        DockRegionDragCoordinator.ClearTabStripTransforms(targetTab);
+
+        var insertIndex = DockRegionDragCoordinator.GetTabInsertIndex(targetTab, positionInTarget);
+        var horizontal = DockRegionDragCoordinator.IsHorizontalTabStrip(targetTab);
+
+        foreach (var child in targetTab.GetRealizedContainers().Cast<Control>())
+        {
+            var index = targetTab.IndexFromContainer(child);
+            if (index < 0)
+                continue;
+
+            if (index >= insertIndex)
+            {
+                child.RenderTransform = horizontal
+                    ? new TranslateTransform(_draggedWidth, 0)
+                    : new TranslateTransform(0, _draggedHeight);
+            }
+        }
+    }
+
     private bool IsHorizontalTabStrip =>
         _region.TabStripPlacement.IsHorizontal();
 
-    private void UpdateDropTargetHighlight(PointerEventArgs e, bool inSourceHeader)
+    private void UpdateDropTargetHighlight(
+        TopLevel? topLevel,
+        Point pointerPos,
+        SelectingItemsControl? targetHeaderTab)
     {
-        var topLevel = TopLevel.GetTopLevel(_host);
         if (topLevel is null)
         {
             DockRegionDragCoordinator.SetDropTarget(null);
             return;
         }
 
-        var pointerPos = e.GetPosition(topLevel);
-
-        // Header 内仅水平重排 Tab，不显示内容区灰色预览
-        if (inSourceHeader
+        // 在任意 Tab 条上拖放时显示插入预览，不显示内容区灰色遮罩
+        if (targetHeaderTab is not null
             || DockRegionDragCoordinator.IsPointerOverAnyTabStripHeader(topLevel, pointerPos))
         {
             DockRegionDragCoordinator.SetDropTarget(null);
@@ -484,34 +524,26 @@ public sealed class TabContainerDragController : IDisposable
         var inSourceHeader = DockRegionDragCoordinator.IsPointerInTabStripHeader(_tabSelector, currentPosTab);
 
         var topLevel = TopLevel.GetTopLevel(_host);
-        var pointerOverHeader = topLevel is not null
-            && DockRegionDragCoordinator.IsPointerOverAnyTabStripHeader(topLevel, e.GetPosition(topLevel));
+        var pointerPos = topLevel is not null ? e.GetPosition(topLevel) : default;
+        var targetHeaderTab = topLevel is not null
+            ? DockRegionDragCoordinator.FindTargetTabControlAtHeaderPoint(topLevel, pointerPos, _tabSelector)
+            : null;
 
         var targetContainer = FindTargetContainerAtPointer(e);
 
-        if (targetContainer is not null
-            && targetContainer != _tabSelector
-            && _globalDraggedItem is not null
-            && !DockDragInteractionGuard.IsCrossRegionDropSuppressed()
-            && !pointerOverHeader
-            && _tabSelector.ItemsSource is IList sourceList
-            && targetContainer.ItemsSource is IList targetList)
+        if (TryCrossRegionDrop(
+                targetHeaderTab,
+                e.GetPosition(targetHeaderTab),
+                targetHeaderTab is not null))
         {
-            sourceList.Remove(_globalDraggedItem);
-
-            var insertIndex = DockRegionDragCoordinator.GetTabInsertIndex(
-                targetContainer,
-                e.GetPosition(targetContainer));
-
-            if (!targetList.Contains(_globalDraggedItem))
-                targetList.Insert(Math.Clamp(insertIndex, 0, targetList.Count), _globalDraggedItem);
-
-            targetContainer.SelectedItem = _globalDraggedItem;
-
-            DockRegionDragCoordinator.NotifyCrossContainerDrop(
-                _tabSelector,
-                targetContainer,
-                _globalDraggedItem);
+            // handled
+        }
+        else if (TryCrossRegionDrop(
+                     targetContainer,
+                     targetContainer is not null ? e.GetPosition(targetContainer) : default,
+                     targetHeaderTab is null && targetContainer is not null))
+        {
+            // handled
         }
         else if (inSourceHeader)
         {
@@ -563,6 +595,39 @@ public sealed class TabContainerDragController : IDisposable
         }
 
         CleanupVisuals();
+    }
+
+    private bool TryCrossRegionDrop(
+        SelectingItemsControl? targetTab,
+        Point positionInTarget,
+        bool canDrop)
+    {
+        if (!canDrop
+            || targetTab is null
+            || targetTab == _tabSelector
+            || _globalDraggedItem is null
+            || DockDragInteractionGuard.IsCrossRegionDropSuppressed()
+            || _tabSelector.ItemsSource is not IList sourceList
+            || targetTab.ItemsSource is not IList targetList)
+        {
+            return false;
+        }
+
+        sourceList.Remove(_globalDraggedItem);
+
+        var insertIndex = DockRegionDragCoordinator.GetTabInsertIndex(targetTab, positionInTarget);
+
+        if (!targetList.Contains(_globalDraggedItem))
+            targetList.Insert(Math.Clamp(insertIndex, 0, targetList.Count), _globalDraggedItem);
+
+        targetTab.SelectedItem = _globalDraggedItem;
+
+        DockRegionDragCoordinator.NotifyCrossContainerDrop(
+            _tabSelector,
+            targetTab,
+            _globalDraggedItem);
+
+        return true;
     }
 
     private void ResetDoubleTapState()
@@ -655,11 +720,10 @@ public sealed class TabContainerDragController : IDisposable
         if (_draggedContainer is not null)
             _draggedContainer.Opacity = 1;
 
+        DockRegionDragCoordinator.ClearAllTabStripTransforms();
+
         foreach (var child in _tabSelector.GetRealizedContainers().Cast<Control>())
-        {
             child.Opacity = 1;
-            child.RenderTransform = null;
-        }
 
         _dragGhost = null;
         _draggedContainer = null;

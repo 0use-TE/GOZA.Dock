@@ -68,6 +68,57 @@ public static class DockRegionDragCoordinator
         && tabControl.Bounds.Height > 0
         && new Rect(0, 0, tabControl.Bounds.Width, tabControl.Bounds.Height).Contains(positionInTabStrip);
 
+    /// <summary>Finds the smallest tab strip whose header contains the pointer.</summary>
+    internal static SelectingItemsControl? FindTargetTabControlAtHeaderPoint(
+        TopLevel topLevel,
+        Point topLevelPoint,
+        SelectingItemsControl? exclude)
+    {
+        SelectingItemsControl? best = null;
+        var bestArea = double.MaxValue;
+
+        foreach (var tabControl in Regions.Keys)
+        {
+            if (tabControl == exclude)
+                continue;
+
+            if (tabControl.Bounds.Width <= 0 || tabControl.Bounds.Height <= 0)
+                continue;
+
+            var local = topLevel.TranslatePoint(topLevelPoint, tabControl);
+            if (local is null)
+                continue;
+
+            var header = new Rect(0, 0, tabControl.Bounds.Width, tabControl.Bounds.Height);
+            if (!header.Contains(local.Value))
+                continue;
+
+            var area = tabControl.Bounds.Width * tabControl.Bounds.Height;
+            if (area < bestArea)
+            {
+                bestArea = area;
+                best = tabControl;
+            }
+        }
+
+        return best;
+    }
+
+    internal static bool IsHorizontalTabStrip(SelectingItemsControl tabControl) =>
+        Regions.TryGetValue(tabControl, out var session) && session.TabStripPlacement.IsHorizontal();
+
+    internal static void ClearTabStripTransforms(SelectingItemsControl tabControl)
+    {
+        foreach (var child in tabControl.GetRealizedContainers().Cast<Control>())
+            child.RenderTransform = null;
+    }
+
+    internal static void ClearAllTabStripTransforms()
+    {
+        foreach (var tabControl in Regions.Keys)
+            ClearTabStripTransforms(tabControl);
+    }
+
     /// <summary>Finds the smallest dock region host containing the pointer (top-level coordinates).</summary>
     internal static SelectingItemsControl? FindTargetTabControlAtPoint(
         TopLevel topLevel,
