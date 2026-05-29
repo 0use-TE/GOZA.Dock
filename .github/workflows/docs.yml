@@ -41,6 +41,12 @@ jobs:
         run: |
           mkdir -p _site/demo
           cp -r samples/GOZA.Dock.Demo.Browser/bin/Release/net10.0-browser/publish/wwwroot/. _site/demo/
+          BUILD_ID="${{ github.sha }}"
+          # GitHub Pages subpath + cache bust (stale dotnet.js → 404 wasm → SRI error)
+          sed -i 's|<head>|<head>\n    <base href="/GOZA.Dock/demo/" />|' _site/demo/index.html
+          sed -i "s|\./main.js|\./main.js?v=${BUILD_ID}|g" _site/demo/index.html
+          sed -i "s|'\./_framework/dotnet.js'|'./_framework/dotnet.js?v=${BUILD_ID}'|g" _site/demo/main.js
+          cp _site/demo/index.html _site/demo/404.html
           touch _site/.nojekyll
 
       - name: Upload Pages artifact
