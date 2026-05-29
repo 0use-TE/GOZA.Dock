@@ -32,10 +32,53 @@ Content = `*`, splitter gutter = fixed px (e.g. `8`).
 | Gesture | Effect |
 |---------|--------|
 | Drag in strip | Reorder |
-| Drag to content | Cross-region move (gray hint) |
+| Drag to content | Cross-region move (drop hint overlay) |
 | Double-click strip | Maximize region |
 
 Capture lost (screen recorder, etc.) → tab auto-restores, no data change.
+
+Active drags are cancelled when the app theme changes (light/dark toggle).
+
+## Drag theme resources
+
+Keys are defined on `DockThemeResources` and default brushes live in `Themes/DockShellStyles.axaml`.
+Override after the GOZA.Dock style include:
+
+```xml
+<Application.Styles>
+  <semi:SemiTheme />
+  <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+  <StyleInclude Source="avares://MyApp/DockThemeOverrides.axaml" />
+</Application.Styles>
+```
+
+```xml
+<!-- DockThemeOverrides.axaml -->
+<Styles xmlns="https://github.com/avaloniaui">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#400078D4" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#EE2D2D2D" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+</Styles>
+```
+
+| `DockThemeResources` constant | Used for |
+|-------------------------------|----------|
+| `DropHintBackgroundBrush` | Cross-region drop overlay fill |
+| `DropHintBorderBrush` | Cross-region drop overlay border |
+| `DragGhostBackgroundBrush` | Tab ghost while dragging |
+| `DragGhostBorderBrush` | Tab ghost border |
+| `DragGhostForegroundBrush` | Tab ghost header text |
+
+C# ghost controls resolve the same keys at runtime via `Application.TryGetResource` (see `DockThemeResources`).
 
 ## Layout expansion
 

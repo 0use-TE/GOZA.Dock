@@ -21,6 +21,9 @@
                             Command="{Binding LoadLayoutCommand}" />
                     <Button Content="Reset default"
                             Command="{Binding ResetLayoutCommand}" />
+                    <Button MinWidth="72"
+                            Content="{Binding ThemeToggleLabel}"
+                            Command="{Binding ToggleThemeCommand}" />
                     <TextBlock VerticalAlignment="Center"
                                Opacity="0.75"
                                Text="{Binding LayoutStatus}" />

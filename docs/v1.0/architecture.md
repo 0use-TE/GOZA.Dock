@@ -32,6 +32,7 @@ DockRegion
 |------|---------|
 | `IDockTabItem` | `Id`, `Header`, `ReuseSurface` (default `false`) |
 | `DockTabStripPlacement` | `Top`, `Bottom`, `Left`, `Right` |
+| `DockThemeResources` | Resource key constants for drag/drop hint brushes (override in app styles) |
 
 ### Optional app hooks
 

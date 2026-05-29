@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using Avalonia;
+using Avalonia.Styling;
 using GOZA.Dock;
 using GOZA.Dock.Minimal.ViewModels;
 
@@ -17,9 +20,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private IDockTabItem? _centerTopSelected;
     private IDockTabItem? _centerBottomSelected;
     private IDockTabItem? _rightSelected;
+    private string _themeToggleLabel = "Dark";
 
     public MainViewModel()
     {
+        ToggleThemeCommand = new RelayCommand(ToggleTheme);
+        ThemeToggleLabel = GetThemeToggleLabel();
+
         LeftTabs.Add(new PlainTabViewModel("left-home", "Home"));
         LeftTabs.Add(new PlainTabViewModel("left-info", "Info"));
         LeftSelected = LeftTabs[0];
@@ -59,7 +66,28 @@ public sealed class MainViewModel : INotifyPropertyChanged
         set => SetField(ref _rightSelected, value);
     }
 
+    public ICommand ToggleThemeCommand { get; }
+
+    public string ThemeToggleLabel
+    {
+        get => _themeToggleLabel;
+        private set => SetField(ref _themeToggleLabel, value);
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void ToggleTheme()
+    {
+        if (Application.Current is not Application app)
+            return;
+
+        var useDark = app.ActualThemeVariant != ThemeVariant.Dark;
+        app.RequestedThemeVariant = useDark ? ThemeVariant.Dark : ThemeVariant.Light;
+        ThemeToggleLabel = useDark ? "Light" : "Dark";
+    }
+
+    private static string GetThemeToggleLabel() =>
+        Application.Current?.ActualThemeVariant == ThemeVariant.Dark ? "Light" : "Dark";
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {
@@ -68,5 +96,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         field = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    private sealed class RelayCommand(Action execute) : ICommand
+    {
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+
+        public bool CanExecute(object? parameter) => true;
+
+        public void Execute(object? parameter) => execute();
     }
 }

@@ -1,4 +1,5 @@
-using Avalonia.Controls;
+using Avalonia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GOZA.Dock;
@@ -33,9 +34,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _layoutStatus = "Default layout (modular modules)";
 
+    [ObservableProperty]
+    private string _themeToggleLabel = "Dark";
+
     public MainViewModel(IEnumerable<IDockModule> modules)
     {
         _modules = modules.ToList();
+        ThemeToggleLabel = GetThemeToggleLabel();
 
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
             ApplySnapshot(saved);
@@ -70,6 +75,20 @@ public partial class MainViewModel : ObservableObject
         ApplyModuleRegistrations();
         LayoutStatus = "Reset to default modular layout";
     }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        if (Application.Current is not Application app)
+            return;
+
+        var useDark = app.ActualThemeVariant != ThemeVariant.Dark;
+        app.RequestedThemeVariant = useDark ? ThemeVariant.Dark : ThemeVariant.Light;
+        ThemeToggleLabel = useDark ? "Light" : "Dark";
+    }
+
+    private static string GetThemeToggleLabel() =>
+        Application.Current?.ActualThemeVariant == ThemeVariant.Dark ? "Light" : "Dark";
 
     private void ApplyModuleRegistrations()
     {

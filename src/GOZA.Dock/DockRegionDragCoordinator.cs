@@ -42,6 +42,13 @@ public static class DockRegionDragCoordinator
             pair.Value.IsVisible = ReferenceEquals(pair.Key, target);
     }
 
+    /// <summary>Hides every registered drop hint (e.g. after theme change or aborted drag).</summary>
+    internal static void HideAllDropHints()
+    {
+        foreach (var hint in DropHints.Values)
+            hint.IsVisible = false;
+    }
+
     /// <summary>True if the pointer is over any registered tab strip (header area).</summary>
     internal static bool IsPointerOverAnyTabStripHeader(TopLevel topLevel, Point topLevelPoint)
     {

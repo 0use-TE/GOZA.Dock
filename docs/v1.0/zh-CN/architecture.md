@@ -32,6 +32,7 @@ DockRegion
 |------|------|
 | `IDockTabItem` | `Id`、`Header`、`ReuseSurface`（默认 `false`） |
 | `DockTabStripPlacement` | `Top`、`Bottom`、`Left`、`Right` |
+| `DockThemeResources` | 拖拽/拖放提示画刷的资源键（可在应用样式中覆盖） |
 
 ### 可选接口
 

@@ -3,7 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System.Collections;
@@ -18,11 +20,9 @@ namespace GOZA.Dock;
 /// </summary>
 public sealed class TabContainerDragController : IDisposable
 {
-    private static readonly SolidColorBrush GhostBorderBrush =
-        new(Color.FromArgb(0xAA, 0x90, 0x90, 0x90));
-
     private static object? _globalDraggedItem;
     private static TabContainerDragController? _activeController;
+    private static bool _themeChangeSubscribed;
 
     private readonly Control _host;
     private readonly SelectingItemsControl _tabSelector;
@@ -69,13 +69,39 @@ public sealed class TabContainerDragController : IDisposable
         return controller;
     }
 
-    public static void CancelPointerInteraction() =>
+    public static void CancelPointerInteraction()
+    {
         _activeController?.AbortInteraction();
+        DockRegionDragCoordinator.HideAllDropHints();
+    }
+
+    private static void EnsureThemeChangeSubscription()
+    {
+        if (_themeChangeSubscribed)
+            return;
+
+        if (Application.Current is not Application app)
+            return;
+
+        _themeChangeSubscribed = true;
+        app.PropertyChanged += (_, e) =>
+        {
+            if (e.Property != Application.ActualThemeVariantProperty
+                && e.Property != Application.RequestedThemeVariantProperty)
+            {
+                return;
+            }
+
+            CancelPointerInteraction();
+        };
+    }
 
     private void AttachHandlers()
     {
         if (_attached)
             return;
+
+        EnsureThemeChangeSubscription();
 
         _host.AddHandler(InputElement.PointerPressedEvent, OnPressed, RoutingStrategies.Tunnel);
         _host.AddHandler(InputElement.PointerMovedEvent, OnMoved, RoutingStrategies.Tunnel);
@@ -123,6 +149,8 @@ public sealed class TabContainerDragController : IDisposable
             _activeController = null;
 
         DetachTopLevelHandlers();
+
+        DockRegionDragCoordinator.HideAllDropHints();
 
         if (needsCleanup)
             CleanupVisuals();
@@ -281,17 +309,8 @@ public sealed class TabContainerDragController : IDisposable
         var width = Math.Ceiling(_draggedContainer.Bounds.Width);
         var height = Math.Ceiling(_draggedContainer.Bounds.Height);
 
-        _dragGhost = new Border
-        {
-            Width = width,
-            Height = height,
-            Background = new SolidColorBrush(Color.FromArgb(0xEE, 0x30, 0x30, 0x30)),
-            BorderBrush = GhostBorderBrush,
-            BorderThickness = new Thickness(1),
-            Child = new TabItem { Header = dragItem.Header },
-            RenderTransform = new TranslateTransform(_ghostStartPos.X, _ghostStartPos.Y),
-            IsHitTestVisible = false,
-        };
+        _dragGhost = CreateDragGhost(width, height, dragItem);
+        _dragGhost.RenderTransform = new TranslateTransform(_ghostStartPos.X, _ghostStartPos.Y);
 
         _overlayLayer.Children.Add(_dragGhost);
         _draggedContainer.Opacity = 0;
@@ -729,5 +748,32 @@ public sealed class TabContainerDragController : IDisposable
         _draggedContainer = null;
         _overlayLayer = null;
         _globalDraggedItem = null;
+    }
+
+    private static Border CreateDragGhost(double width, double height, IDockTabItem dragItem)
+    {
+        return new Border
+        {
+            Width = width,
+            Height = height,
+            Background = DockThemeBrushHelper.Resolve(
+                DockThemeResources.DragGhostBackgroundBrush,
+                DockThemeBrushHelper.DragGhostBackgroundFallback()),
+            BorderBrush = DockThemeBrushHelper.Resolve(
+                DockThemeResources.DragGhostBorderBrush,
+                DockThemeBrushHelper.DragGhostBorderFallback()),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(2),
+            IsHitTestVisible = false,
+            Child = new TextBlock
+            {
+                Margin = new Thickness(8, 4),
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = DockThemeBrushHelper.Resolve(
+                    DockThemeResources.DragGhostForegroundBrush,
+                    DockThemeBrushHelper.DragGhostForegroundFallback()),
+                Text = dragItem.Header,
+            },
+        };
     }
 }

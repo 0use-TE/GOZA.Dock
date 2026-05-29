@@ -11,8 +11,16 @@
             Padding="12,8"
             BorderBrush="LightGray"
             BorderThickness="0,0,0,1">
-      <TextBlock Opacity="0.8"
-                 Text="Native Avalonia · App.axaml DataTemplates · Parking Lot for ReuseSurface tabs" />
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Opacity="0.8"
+                   Text="Native Avalonia · App.axaml DataTemplates · Parking Lot for ReuseSurface tabs" />
+        <Button Grid.Column="1"
+                MinWidth="72"
+                Content="{Binding ThemeToggleLabel}"
+                Command="{Binding ToggleThemeCommand}" />
+      </Grid>
     </Border>
 
     <DockShell>

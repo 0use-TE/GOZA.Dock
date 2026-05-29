@@ -446,6 +446,7 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 | ReuseSurface Tab 空白 / 不缓存 | 无 DataTemplate 或 `EnableParkingLot=false` | 注册 View 映射；保持默认 Parking Lot |
 | WebView 报错 native control host | Desktop 缺少 `app.manifest` supportedOS | 见 `samples/*.Desktop/app.manifest` |
 | 样式未生效 | 未 Include 主题或顺序不对 | `App.axaml` 中 SemiTheme 后再 Include 库样式 |
+| 拖拽在暗色/亮色下样式不对 | 覆盖了 `DockThemeResources` 键或主题切换时仍在拖拽 | 见 [进阶](recipes.md) 拖拽主题资源；切换主题会自动取消拖拽 |
 
 ---
 
