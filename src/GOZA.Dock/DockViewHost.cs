@@ -1,10 +1,9 @@
-using Avalonia;
 using Avalonia.Controls;
 
 namespace GOZA.Dock;
 
 /// <summary>
-/// Optional parking lot for reusable control surfaces (WebView, media, etc.).
+/// Parking lot for reusable control surfaces (WebView, media, etc.).
 /// Activated when <see cref="Controls.DockShell.EnableParkingLot"/> is true.
 /// </summary>
 public sealed class DockViewHost
@@ -18,12 +17,6 @@ public sealed class DockViewHost
         Height = 0,
     };
 
-    private readonly Func<IDockTabItem, Control>? _factory;
-
-    /// <summary>Creates a host with an optional fallback factory when no provider is on the data context.</summary>
-    public DockViewHost(Func<IDockTabItem, Control>? factory = null) =>
-        _factory = factory;
-
     /// <summary>Adds the hidden parking lot panel as a child of the shell content root.</summary>
     public void AttachParkingLot(Panel root)
     {
@@ -31,12 +24,12 @@ public sealed class DockViewHost
             root.Children.Add(_parkingLot);
     }
 
-    /// <summary>Attaches a tab surface to <paramref name="host"/> (from cache or newly created).</summary>
-    public Control? Activate(IDockTabItem tab, ContentControl host, Control? surface = null)
+    /// <summary>Attaches a tab surface to <paramref name="host"/> (from cache or <paramref name="surface"/> on first use).</summary>
+    public Control Activate(IDockTabItem tab, ContentControl host, Control surface)
     {
         var control = tab.ReuseSurface
             ? GetOrCreateCached(tab, surface)
-            : surface ?? CreateSurface(tab);
+            : surface;
 
         Detach(control);
         host.Content = control;
@@ -58,24 +51,14 @@ public sealed class DockViewHost
             Park(surface);
     }
 
-    private Control GetOrCreateCached(IDockTabItem tab, Control? surface)
+    private Control GetOrCreateCached(IDockTabItem tab, Control surface)
     {
         if (_cached.TryGetValue(tab.Id, out var existing))
             return existing;
 
-        var created = surface ?? CreateSurface(tab);
-        _cached[tab.Id] = created;
-        Park(created);
-        return created;
-    }
-
-    private Control CreateSurface(IDockTabItem tab)
-    {
-        if (_factory is null)
-            throw new InvalidOperationException(
-                $"Tab '{tab.Id}' requires ReuseSurface but no factory was provided to DockViewHost.");
-
-        return _factory(tab);
+        _cached[tab.Id] = surface;
+        Park(surface);
+        return surface;
     }
 
     private void Park(Control surface)

@@ -30,9 +30,16 @@ dotnet add package CommunityToolkit.Mvvm   # 可选 — 见下方 MVVM 说明
 ```xml
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="MyApp.App"
              xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:MyApp.ViewModels"
+             xmlns:views="using:MyApp.Views"
+             x:Class="MyApp.App"
              RequestedThemeVariant="Default">
+  <Application.DataTemplates>
+    <DataTemplate DataType="vm:PlainTabViewModel">
+      <views:PlainPanel />
+    </DataTemplate>
+  </Application.DataTemplates>
   <Application.Styles>
     <semi:SemiTheme />
     <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
@@ -42,17 +49,18 @@ dotnet add package CommunityToolkit.Mvvm   # 可选 — 见下方 MVVM 说明
 
 > AOT：`StyleInclude` 必须。见 [AOT](aot-compatibility.md)。
 
-### DockTabItem.cs
+### PlainTabViewModel.cs
 
 ```csharp
 using GOZA.Dock;
 
-namespace MyApp;
+namespace MyApp.ViewModels;
 
-public sealed class DockTabItem(string id, string header) : IDockTabItem
+public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
     public string Id { get; } = id;
     public string Header { get; } = header;
+    public bool ReuseSurface => false;
 }
 ```
 
@@ -60,7 +68,11 @@ public sealed class DockTabItem(string id, string header) : IDockTabItem
 |----------------|------|
 | `Id` | 稳定键；`ReuseSurface` 时必填 |
 | `Header` | Tab 标题 |
-| `ReuseSurface` | 默认 `false`；配合 `EnableParkingLot` 缓存控件 |
+| `ReuseSurface` | 默认 `false`；设为 `true` 时在 Parking Lot 缓存 **视图控件** |
+
+每种 Tab 对应一个 ViewModel 类型。用 `Application.DataTemplates`（原生 Avalonia）或 Crystal `AddMvvmTransient` 映射到 View。见 [Crystal.Avalonia](crystal-avalonia.md)。
+
+参考：`samples/GOZA.Dock.Minimal/`（原生 DataTemplate + 可选 `BrowserTabViewModel` / `NativeWebView`）。
 
 ### MainViewModel.cs
 
@@ -73,24 +85,24 @@ namespace MyApp;
 public partial class MainViewModel : ObservableObject
 {
     /// <summary>左区域 Tab 列表 → DockRegion ItemsSource。</summary>
-    public ObservableCollection<DockTabItem> LeftTabs { get; } = new();
+    public ObservableCollection<PlainTabViewModel> LeftTabs { get; } = new();
 
     /// <summary>右区域 Tab 列表 → DockRegion ItemsSource。</summary>
-    public ObservableCollection<DockTabItem> RightTabs { get; } = new();
+    public ObservableCollection<PlainTabViewModel> RightTabs { get; } = new();
 
     [ObservableProperty]
-    private DockTabItem? _leftSelected;
+    private PlainTabViewModel? _leftSelected;
 
     [ObservableProperty]
-    private DockTabItem? _rightSelected;
+    private PlainTabViewModel? _rightSelected;
 
     public MainViewModel()
     {
-        LeftTabs.Add(new DockTabItem("home", "Home"));
-        LeftTabs.Add(new DockTabItem("info", "Info"));
+        LeftTabs.Add(new PlainTabViewModel("home", "Home"));
+        LeftTabs.Add(new PlainTabViewModel("info", "Info"));
         LeftSelected = LeftTabs[0];
 
-        RightTabs.Add(new DockTabItem("tools", "Tools"));
+        RightTabs.Add(new PlainTabViewModel("tools", "Tools"));
         RightSelected = RightTabs[0];
     }
 }
@@ -194,7 +206,7 @@ internal sealed class Program
 
 | 成员 | 类型 | 说明 |
 |------|------|------|
-| `EnableParkingLot` | `bool` | 启用 Parking Lot |
+| `EnableParkingLot` | `bool` | 默认 `true`；为 `ReuseSurface` Tab 启用 Parking Lot |
 | `IsLayoutExpanded` | `bool` | 只读；是否有区域最大化 |
 | `Content` | `object?` | 放置 `Grid` |
 | `ToggleLayoutExpansion` | 方法 | 同双击 Tab 条 |
@@ -217,9 +229,10 @@ internal sealed class Program
 
 | 接口 | 作用 |
 |------|------|
-| `IDockContentFactoryProvider` | 自定义 Tab 内容 |
 | `ILayoutExpansionHost` | `DockShell` 布局展开 |
 | `IDockRegionSession` | 拖拽回调 |
+
+Tab 视图：为每种 Tab ViewModel 注册 `DataTemplate`（原生）或 `AddMvvmTransient<View, ViewModel>`（Crystal）。库内无内容工厂接口。
 
 详见 [架构](architecture.md)。
 

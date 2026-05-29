@@ -28,7 +28,7 @@
             </StackPanel>
         </Border>
 
-        <DockShell EnableParkingLot="True">
+        <DockShell>
             <Grid ColumnDefinitions="*,8,*,8,*">
                 <DockRegion Grid.Column="0"
                             TabStripPlacement="Left"

@@ -6,7 +6,7 @@
 DockShell
 ├── Content: Grid (DockRegion + DockSplitter)
 ├── DockLayoutExpansion
-├── DockViewHost? (EnableParkingLot)
+├── DockViewHost? (EnableParkingLot，默认 true)
 └── 样式：App.axaml StyleInclude（非 AOT 可运行时注入）
 
 DockRegion
@@ -22,42 +22,45 @@ DockRegion
 
 | 类型 | 主要成员 |
 |------|----------|
-| `DockShell` | `EnableParkingLot`, `IsLayoutExpanded`, `Content`, `ToggleLayoutExpansion` |
-| `DockRegion` | `ItemsSource`, `SelectedItem`, `ActiveContent`, `AutoManageContent`, `TabStripPlacement` |
+| `DockShell` | `EnableParkingLot`（默认 `true`）、`IsLayoutExpanded`、`Content`、`ToggleLayoutExpansion` |
+| `DockRegion` | `ItemsSource`、`SelectedItem`、`ActiveContent`、`AutoManageContent`、`TabStripPlacement` |
 | `DockSplitter` | `GridSplitter` + 根据 gutter 像素自动方向 |
 
 ### 模型 / 枚举
 
 | 类型 | 成员 |
 |------|------|
-| `IDockTabItem` | `Id`, `Header`, `ReuseSurface` |
-| `DockTabStripPlacement` | `Top`, `Bottom`, `Left`, `Right` |
+| `IDockTabItem` | `Id`、`Header`、`ReuseSurface`（默认 `false`） |
+| `DockTabStripPlacement` | `Top`、`Bottom`、`Left`、`Right` |
 
 ### 可选接口
 
 | 接口 | 作用 |
 |------|------|
-| `IDockContentFactoryProvider` | 每 Tab 自定义 `Control` |
 | `ILayoutExpansionHost` | `DockShell` 布局展开 |
 | `IDockRegionSession` | 拖拽离开/进入回调 |
+
+Tab **视图**不由库内工厂创建。用 Avalonia `DataTemplate` 或 Crystal `AddMvvmTransient`（ViewLocator）把 Tab ViewModel 类型映射到 `Control`。
 
 ## 协调器（内部）
 
 | 类型 | 作用 |
 |------|------|
+| `DockTabContentBuilder` | `FindDataTemplate(tab)` 构建视图；无模板则显示标题 |
 | `DockRegionDragCoordinator` | 拖放提示、命中、跨区域插入 |
 | `TabContainerDragController` | 指针拖拽、捕获丢失恢复 |
 | `DockDragInteractionGuard` | 折叠后禁止误 drop |
-| `DockViewHost` | Parking Lot 激活/释放 |
+| `DockViewHost` | Parking Lot 激活/释放（按 `tab.Id` 缓存 `Control`） |
 
 ## 内容流
 
 `AutoManageContent == true`（默认）：
 
 1. `SelectedItem` 变化
-2. `ReuseSurface` + Parking Lot → `DockViewHost.Activate`
-3. 否则 `IDockContentFactoryProvider.CreateContent`
-4. 否则默认标题文本
+2. `DockTabContentBuilder.Build` 查找 Tab ViewModel 的 `DataTemplate`（应用级或 Crystal ViewLocator）
+3. 生成的 `Control` 设置 `DataContext = tab`
+4. 若 `ReuseSurface` 且 Parking Lot 开启 → `DockViewHost.Activate` 按 `Id` 复用缓存控件
+5. 无模板 → 居中显示 `Header` 文本
 
 ## 布局展开
 

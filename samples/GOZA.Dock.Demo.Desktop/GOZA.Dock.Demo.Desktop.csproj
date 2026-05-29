@@ -5,6 +5,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<PublishAot>true</PublishAot>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 
 	</PropertyGroup>
 

@@ -14,7 +14,7 @@ namespace GOZA.Dock.Controls;
 /// <summary>
 /// Root docking host. Set <see cref="ContentControl.Content"/> to a <see cref="Grid"/> containing
 /// <see cref="DockRegion"/> and <see cref="DockSplitter"/> controls.
-/// Handles theme injection, optional <see cref="DockViewHost"/> parking lot, and layout expansion.
+/// Handles theme injection, <see cref="DockViewHost"/> parking lot (on by default), and layout expansion.
 /// </summary>
 public class DockShell : ContentControl, ILayoutExpansionHost
 {
@@ -28,11 +28,11 @@ public class DockShell : ContentControl, ILayoutExpansionHost
     internal DockViewHost? ViewHost { get; private set; }
 
     /// <summary>
-    /// When true, attaches a hidden parking lot panel and enables surface reuse for tabs with
-    /// <see cref="IDockTabItem.ReuseSurface"/>.
+    /// When true (default), attaches a hidden parking lot panel and enables surface reuse for tabs with
+    /// <see cref="IDockTabItem.ReuseSurface"/>. Set false to disable caching.
     /// </summary>
     public static readonly StyledProperty<bool> EnableParkingLotProperty =
-        AvaloniaProperty.Register<DockShell, bool>(nameof(EnableParkingLot), false);
+        AvaloniaProperty.Register<DockShell, bool>(nameof(EnableParkingLot), true);
 
     static DockShell()
     {
@@ -119,8 +119,7 @@ public class DockShell : ContentControl, ILayoutExpansionHost
         if (!EnableParkingLot || ViewHost is not null || Content is not Panel root)
             return;
 
-        var factory = ResolveContentFactory();
-        ViewHost = new DockViewHost(tab => factory?.CreateContent(tab) ?? new Panel());
+        ViewHost = new DockViewHost();
         ViewHost.AttachParkingLot(root);
     }
 
@@ -131,20 +130,5 @@ public class DockShell : ContentControl, ILayoutExpansionHost
 
         if (change.Property == ContentProperty)
             TrySetupParkingLot();
-    }
-
-    /// <summary>Walks logical/visual parents for <see cref="IDockContentFactoryProvider"/>.</summary>
-    private IDockContentFactoryProvider? ResolveContentFactory()
-    {
-        var current = this as Control;
-        while (current is not null)
-        {
-            if (current.DataContext is IDockContentFactoryProvider provider)
-                return provider;
-
-            current = current.GetVisualParent() as Control;
-        }
-
-        return null;
     }
 }

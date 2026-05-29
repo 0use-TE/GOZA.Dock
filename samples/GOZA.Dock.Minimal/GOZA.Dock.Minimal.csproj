@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" />
+		<PackageReference Include="Avalonia.Controls.WebView" />
 		<PackageReference Include="Semi.Avalonia" />
 	</ItemGroup>
 

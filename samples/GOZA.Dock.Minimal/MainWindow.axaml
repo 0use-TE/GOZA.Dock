@@ -12,7 +12,7 @@
             BorderBrush="LightGray"
             BorderThickness="0,0,0,1">
       <TextBlock Opacity="0.8"
-                 Text="Minimal sample · same grid layout · tabs only (no persistence, modules, or parking lot)" />
+                 Text="Native Avalonia · App.axaml DataTemplates · Parking Lot for ReuseSurface tabs" />
     </Border>
 
     <DockShell>

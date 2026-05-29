@@ -13,7 +13,7 @@ public interface IDockTabItem
 
     /// <summary>
     /// When true, the control surface is cached in <see cref="DockViewHost"/> instead of recreated on each selection.
-    /// Requires <see cref="Controls.DockShell.EnableParkingLot"/> and <see cref="IDockContentFactoryProvider"/>.
+    /// Register the tab view model with Crystal AddMvvmTransient, or an app-level data template.
     /// </summary>
     bool ReuseSurface => false;
 }

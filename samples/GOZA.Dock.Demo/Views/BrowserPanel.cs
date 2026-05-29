@@ -1,52 +1,72 @@
+using Avalonia;
 using Avalonia.Controls;
-using GOZA.Dock.Demo.Models;
+using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace GOZA.Dock.Demo.Views;
 
-/// <summary>Simulates a WebView: one instance is reused when switching tabs (parking lot).</summary>
+/// <summary>
+/// Desktop: embedded NativeWebView (parking lot reuses the control).
+/// Browser/WASM: placeholder — NativeWebView is not supported in the browser host.
+/// </summary>
 public sealed class BrowserPanel : UserControl
 {
-    private readonly TextBlock _stateLabel;
-    private int _visitCount;
+    private const string DefaultUrl = "https://0use.net";
 
     public BrowserPanel()
     {
-        _visitCount = 1;
-        _stateLabel = new TextBlock
+        HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        VerticalContentAlignment = VerticalAlignment.Stretch;
+        Content = OperatingSystem.IsBrowser() ? CreateBrowserPlaceholder() : CreateWebView();
+    }
+
+    private static Control CreateWebView() =>
+        new NativeWebView
         {
-            FontSize = 16,
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            Source = new Uri(DefaultUrl),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
         };
 
-        Content = new StackPanel
+    private Control CreateBrowserPlaceholder()
+    {
+        var stateLabel = new TextBlock
         {
-            Margin = new Avalonia.Thickness(16),
+            FontSize = 16,
+            TextWrapping = TextWrapping.Wrap,
+        };
+
+        var panel = new StackPanel
+        {
+            Margin = new Thickness(16),
             Spacing = 8,
             Children =
             {
                 new TextBlock
                 {
                     FontSize = 20,
-                    FontWeight = Avalonia.Media.FontWeight.Bold,
-                    Text = "Reusable Surface (WebView simulation)",
+                    FontWeight = FontWeight.Bold,
+                    Text = "Browser tab (WASM)",
                 },
-                _stateLabel,
+                stateLabel,
                 new TextBlock
                 {
                     Opacity = 0.7,
-                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                    Text = "This panel has ReuseSurface=true. Switching tabs keeps the instance in the parking lot instead of recreating it.",
+                    TextWrapping = TextWrapping.Wrap,
+                    Text = $"NativeWebView is not available in the browser host. Open {DefaultUrl} in a separate tab, or run the Desktop sample for an embedded WebView.",
                 },
             },
         };
 
+        var visitCount = 1;
+        void UpdateLabel()
+        {
+            stateLabel.Text =
+                $"Reusable surface placeholder · instance #{GetHashCode():X8} · activation {visitCount++}";
+        }
+
         DataContextChanged += (_, _) => UpdateLabel();
         UpdateLabel();
-    }
-
-    private void UpdateLabel()
-    {
-        var header = DataContext is DockTabModel tab ? tab.Header : "Browser";
-        _stateLabel.Text = $"[{header}] Instance #{GetHashCode():X8} · Activation count {_visitCount++}";
+        return panel;
     }
 }

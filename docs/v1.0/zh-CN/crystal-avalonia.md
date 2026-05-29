@@ -1,6 +1,6 @@
 # Crystal.Avalonia
 
-GOZA.Dock **不**引用 Crystal。本文演示 Crystal 壳 + MVVM DI + `DockShell`。
+GOZA.Dock **不**依赖 Crystal。本文说明 Crystal 壳 + MVVM DI + `DockShell` 的接法。
 
 Demo：`samples/GOZA.Dock.Demo/`
 
@@ -10,6 +10,7 @@ Demo：`samples/GOZA.Dock.Demo/`
 dotnet add package GOZA.Dock
 dotnet add package Crystal.Avalonia
 dotnet add package Semi.Avalonia
+dotnet add package Avalonia.Controls.WebView   # 可选 — Desktop WebView Tab
 ```
 
 ## App.axaml
@@ -27,138 +28,67 @@ dotnet add package Semi.Avalonia
 </Application>
 ```
 
+Demo 不写 `Application.DataTemplates`，由 Crystal ViewLocator 按 DI 解析 View。
+
 ## App.axaml.cs
 
 ```csharp
-using Avalonia.Markup.Xaml;
-using Crystal.Avalonia;
-using GOZA.Dock.Demo.ViewModels;
-using GOZA.Dock.Demo.Views;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace GOZA.Dock.Demo;
-
-public partial class App : CrystalApplication
+public override void RegisterServices(IServiceCollection services)
 {
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    services.AddSingleton<MainWindow>();
+    services.AddSingleton<MainView>();
+    services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
+    services.AddMvvmSingleton<MainView, MainViewModel>();
 
-    public override void RegisterServices(IServiceCollection services)
-    {
-        services.AddSingleton<MainWindow>();
-        services.AddSingleton<MainView>();
-        services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
-        services.AddMvvmSingleton<MainView, MainViewModel>();
-    }
+    services.AddMvvmTransient<PlainPanel, PlainTabViewModel>();
+    services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
 
-    public override void CreateShell(IServiceProvider serviceProvider) =>
-        CreateShellFromDi<MainWindow, MainView>(serviceProvider);
+    services.AddSingleton<IDockModule, HomeDockModule>();
+    services.AddSingleton<IDockModule, AnalyticsDockModule>();
+    services.AddSingleton<IDockModule, OutputDockModule>();
+    services.AddSingleton<IDockModule, ToolsDockModule>();
 }
 ```
 
-## MainWindow.axaml（仅壳）
+Tab 选中时 `DockRegion` 调用 `FindDataTemplate(tab)`，Crystal ViewLocator 返回已注册的 View。
 
-```xml
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
-        xmlns:views="using:GOZA.Dock.Demo.Views"
-        x:Class="GOZA.Dock.Demo.Views.MainWindow"
-        ViewModelLocator.AutoWireViewModel="True"
-        x:DataType="vm:MainWindowViewModel"
-        Width="1100" Height="720"
-        Title="GOZA.Dock Demo">
-  <views:MainView />
-</Window>
-```
-
-## MainView.axaml（Dock 布局）
-
-```xml
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
-             x:Class="GOZA.Dock.Demo.Views.MainView"
-             x:DataType="vm:MainViewModel"
-             ViewModelLocator.AutoWireViewModel="True"
-             MinWidth="320"
-             MinHeight="240">
-  <DockPanel>
-    <Border DockPanel.Dock="Top"
-            Padding="12,8"
-            BorderBrush="LightGray"
-            BorderThickness="0,0,0,1">
-      <StackPanel Spacing="8">
-        <TextBlock Opacity="0.8"
-                   Text="Grid + DockRegion + DockSplitter · Crystal DI · modular tabs · JSON layout · Release AOT" />
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="Save layout" Command="{Binding SaveLayoutCommand}" />
-          <Button Content="Load layout" Command="{Binding LoadLayoutCommand}" />
-          <Button Content="Reset default" Command="{Binding ResetLayoutCommand}" />
-          <TextBlock VerticalAlignment="Center"
-                     Opacity="0.75"
-                     Text="{Binding LayoutStatus}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <DockShell EnableParkingLot="True">
-      <Grid ColumnDefinitions="*,8,*,8,*">
-        <DockRegion Grid.Column="0"
-                    TabStripPlacement="Left"
-                    ItemsSource="{Binding LeftTabs}"
-                    SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
-
-        <DockSplitter Grid.Column="1" ShowsPreview="True" />
-
-        <Grid Grid.Column="2" RowDefinitions="*,8,*">
-          <DockRegion Grid.Row="0"
-                      ItemsSource="{Binding CenterTopTabs}"
-                      SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
-
-          <DockSplitter Grid.Row="1" ShowsPreview="True" />
-
-          <DockRegion Grid.Row="2"
-                      TabStripPlacement="Bottom"
-                      ItemsSource="{Binding CenterBottomTabs}"
-                      SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
-        </Grid>
-
-        <DockSplitter Grid.Column="3" ShowsPreview="True" />
-
-        <DockRegion Grid.Column="4"
-                    TabStripPlacement="Right"
-                    ItemsSource="{Binding RightTabs}"
-                    SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
-      </Grid>
-    </DockShell>
-  </DockPanel>
-</UserControl>
-```
-
-## MainViewModel（可绑定属性）
+## Tab ViewModel
 
 ```csharp
-public partial class MainViewModel : ObservableObject, IDockContentFactoryProvider
+public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
-    public ObservableCollection<DockTabModel> LeftTabs { get; } = new();
-    public ObservableCollection<DockTabModel> CenterTopTabs { get; } = new();
-    public ObservableCollection<DockTabModel> CenterBottomTabs { get; } = new();
-    public ObservableCollection<DockTabModel> RightTabs { get; } = new();
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool ReuseSurface => false;
+}
 
-    [ObservableProperty] private DockTabModel? _leftSelected;
-    [ObservableProperty] private DockTabModel? _centerTopSelected;
-    [ObservableProperty] private DockTabModel? _centerBottomSelected;
-    [ObservableProperty] private DockTabModel? _rightSelected;
-    [ObservableProperty] private string _layoutStatus = string.Empty;
-
-    public Control CreateContent(IDockTabItem tab) =>
-        _modules.TryCreateContent(tab) ?? new PlainPanel { DataContext = tab };
-
-    [RelayCommand] private void SaveLayout() { /* ... */ }
-    [RelayCommand] private void LoadLayout() { /* ... */ }
-    [RelayCommand] private void ResetLayout() { /* ... */ }
+public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
+{
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool ReuseSurface => true;
 }
 ```
+
+## MainViewModel
+
+```csharp
+public partial class MainViewModel : ObservableObject
+{
+    private readonly IReadOnlyList<IDockModule> _modules;
+
+    public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
+    // CenterTopTabs, CenterBottomTabs, RightTabs ...
+
+    public MainViewModel(IEnumerable<IDockModule> modules)
+    {
+        _modules = modules.ToList();
+        ApplyModuleRegistrations();
+    }
+}
+```
+
+构造函数注入 `IEnumerable<IDockModule>`，遍历 `GetRegistrations()` 把 Tab ViewModel 分配到各区域集合。
 
 | 属性 | 绑定 |
 |------|------|
@@ -166,10 +96,14 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
 | `CenterTopTabs` / `CenterTopSelected` | 中上区域 |
 | `CenterBottomTabs` / `CenterBottomSelected` | 中下区域 |
 | `RightTabs` / `RightSelected` | 右区域 |
-| `LayoutStatus` | 工具栏状态 |
-| `SaveLayoutCommand` 等 | 工具栏按钮 |
 
-同一 ViewModel 实现 `IDockContentFactoryProvider`，`DockShell` 从 `DataContext` 解析 Tab 内容与 Parking Lot。
+`DockShell` 的 `EnableParkingLot` 默认为 `true`，无需显式设置。
+
+## WebView Tab（Desktop）
+
+Desktop 上 `BrowserPanel` 嵌入 `NativeWebView`；WASM Demo 为占位（浏览器宿主不支持 `NativeWebView`）。
+
+Desktop 项目需 `app.manifest` 声明 Windows 10+ `supportedOS`，见 [AOT 兼容](aot-compatibility.md)。
 
 ## 运行
 
@@ -177,4 +111,4 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
 dotnet run --project samples/GOZA.Dock.Demo.Desktop
 ```
 
-AOT：[AOT 兼容](aot-compatibility.md)
+原生 Avalonia（无 Crystal）：`samples/GOZA.Dock.Minimal/` — [快速开始](getting-started.md)

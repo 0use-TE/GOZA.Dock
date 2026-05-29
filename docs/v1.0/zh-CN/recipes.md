@@ -47,29 +47,37 @@ dockShell.ToggleLayoutExpansion(region);
 
 ## Parking Lot
 
+Parking Lot **默认开启**（`DockShell.EnableParkingLot` 默认 `true`）。
+
+```csharp
+public bool ReuseSurface => true; // IDockTabItem — 缓存的是 Control，不是 ViewModel
+```
+
+为该 Tab 类型提供 View（DataTemplate 或 Crystal 注册）：
+
 ```xml
-<DockShell EnableParkingLot="True">
+<DataTemplate DataType="vm:BrowserTabViewModel">
+  <views:BrowserPanel />
+</DataTemplate>
 ```
 
 ```csharp
-public bool ReuseSurface => true; // IDockTabItem
+services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
 ```
 
-```csharp
-public Control CreateContent(IDockTabItem tab) => new MyPanel { DataContext = tab };
+流程：首次选中 → 创建 View → 按 `tab.Id` 缓存；切走 → 控件移入隐藏 Parking Lot；再选中 → 复用同一实例（WebView 状态保留）。
+
+## 自定义 Tab 内容（原生 Avalonia）
+
+```xml
+<Application.DataTemplates>
+  <DataTemplate DataType="vm:HomeTabViewModel">
+    <views:HomePanel />
+  </DataTemplate>
+</Application.DataTemplates>
 ```
 
-在 `DataContext` 祖先实现 `IDockContentFactoryProvider`。
-
-## 自定义 Tab 内容
-
-```csharp
-public Control CreateContent(IDockTabItem tab) => tab.Id switch
-{
-    "home" => new HomePanel(),
-    _ => new TextBlock { Text = tab.Header }
-};
-```
+无模板 → 居中显示 `Header` 文本。
 
 ## JSON 布局存取（可选，序列化方案自选）
 
@@ -79,13 +87,8 @@ Demo 选用 **System.Text.Json** + Source Generator（AOT 安全）：
 
 ```csharp
 [JsonSerializable(typeof(DockLayoutSnapshot))]
-[JsonSourceGenerationOptions(WriteIndented = true)]
 internal partial class DockJsonContext : JsonSerializerContext;
-
-var json = JsonSerializer.Serialize(snapshot, DockJsonContext.Default.DockLayoutSnapshot);
 ```
-
-也可用 XML、SQLite、YAML 等 — 均在应用层；加载后写回同一套 `ObservableCollection` + `SelectedItem` 即可。
 
 Demo：`samples/GOZA.Dock.Demo/Services/DockLayoutPersistence.cs`
 
@@ -96,9 +99,11 @@ Crystal DI：[Crystal.Avalonia](crystal-avalonia.md)
 ```csharp
 public interface IDockModule
 {
+    string Name { get; }
     IEnumerable<DockTabRegistration> GetRegistrations();
-    Control? TryCreateContent(IDockTabItem tab);
 }
 ```
+
+各模块只注册 Tab ViewModel 实例到区域；View 由 DataTemplate / ViewLocator 解析，不由模块创建。
 
 Demo：`samples/GOZA.Dock.Demo/Modules/`

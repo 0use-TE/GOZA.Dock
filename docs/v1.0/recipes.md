@@ -47,29 +47,37 @@ dockShell.ToggleLayoutExpansion(region);
 
 ## Parking lot
 
+Parking lot is **on by default** (`DockShell.EnableParkingLot` default `true`).
+
+```csharp
+public bool ReuseSurface => true; // on IDockTabItem — caches the Control, not the ViewModel
+```
+
+Provide a view for that tab type (DataTemplate or Crystal registration). Example:
+
 ```xml
-<DockShell EnableParkingLot="True">
+<DataTemplate DataType="vm:BrowserTabViewModel">
+  <views:BrowserPanel />
+</DataTemplate>
 ```
 
 ```csharp
-public bool ReuseSurface => true; // IDockTabItem
+services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
 ```
 
-```csharp
-public Control CreateContent(IDockTabItem tab) => new MyPanel { DataContext = tab };
+Flow: first select → build view → cache by `tab.Id`; deselect → move control to hidden parking lot; reselect → reuse same instance (WebView state preserved).
+
+## Custom tab content (native Avalonia)
+
+```xml
+<Application.DataTemplates>
+  <DataTemplate DataType="vm:HomeTabViewModel">
+    <views:HomePanel />
+  </DataTemplate>
+</Application.DataTemplates>
 ```
 
-Implement `IDockContentFactoryProvider` on a `DataContext` ancestor.
-
-## Custom tab content
-
-```csharp
-public Control CreateContent(IDockTabItem tab) => tab.Id switch
-{
-    "home" => new HomePanel(),
-    _ => new TextBlock { Text = tab.Header }
-};
-```
+No template → centered `Header` text fallback.
 
 ## JSON layout save/load (optional, your serializer)
 
@@ -96,9 +104,11 @@ Crystal DI shell: [Crystal.Avalonia](crystal-avalonia.md)
 ```csharp
 public interface IDockModule
 {
+    string Name { get; }
     IEnumerable<DockTabRegistration> GetRegistrations();
-    Control? TryCreateContent(IDockTabItem tab);
 }
 ```
+
+Each registration adds a tab ViewModel instance to a region. Views come from DataTemplate / ViewLocator — not from the module.
 
 Demo: `samples/GOZA.Dock.Demo/Modules/`

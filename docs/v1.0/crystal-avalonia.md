@@ -10,6 +10,7 @@ Demo: `samples/GOZA.Dock.Demo/`
 dotnet add package GOZA.Dock
 dotnet add package Crystal.Avalonia
 dotnet add package Semi.Avalonia
+dotnet add package Avalonia.Controls.WebView   # optional — Desktop WebView tab
 ```
 
 ## App.axaml
@@ -27,11 +28,14 @@ dotnet add package Semi.Avalonia
 </Application>
 ```
 
+No `Application.DataTemplates` in Demo — Crystal ViewLocator resolves views from DI.
+
 ## App.axaml.cs
 
 ```csharp
 using Avalonia.Markup.Xaml;
 using Crystal.Avalonia;
+using GOZA.Dock.Demo.Modules;
 using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +52,16 @@ public partial class App : CrystalApplication
         services.AddSingleton<MainView>();
         services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
         services.AddMvvmSingleton<MainView, MainViewModel>();
+
+        // Tab View ↔ ViewModel (ViewLocator → DataTemplate at runtime)
+        services.AddMvvmTransient<PlainPanel, PlainTabViewModel>();
+        services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
+
+        // Feature modules → injected into MainViewModel
+        services.AddSingleton<IDockModule, HomeDockModule>();
+        services.AddSingleton<IDockModule, AnalyticsDockModule>();
+        services.AddSingleton<IDockModule, OutputDockModule>();
+        services.AddSingleton<IDockModule, ToolsDockModule>();
     }
 
     public override void CreateShell(IServiceProvider serviceProvider) =>
@@ -55,108 +69,56 @@ public partial class App : CrystalApplication
 }
 ```
 
-## MainWindow.axaml (shell only)
+When a tab is selected, `DockRegion` calls `FindDataTemplate(tab)`; Crystal's ViewLocator returns the registered view for that ViewModel type.
 
-```xml
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
-        xmlns:views="using:GOZA.Dock.Demo.Views"
-        x:Class="GOZA.Dock.Demo.Views.MainWindow"
-        ViewModelLocator.AutoWireViewModel="True"
-        x:DataType="vm:MainWindowViewModel"
-        Width="1100" Height="720"
-        Title="GOZA.Dock Demo">
-  <views:MainView />
-</Window>
-```
-
-## MainView.axaml (dock layout lives here)
-
-```xml
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
-             x:Class="GOZA.Dock.Demo.Views.MainView"
-             x:DataType="vm:MainViewModel"
-             ViewModelLocator.AutoWireViewModel="True"
-             MinWidth="320"
-             MinHeight="240">
-  <DockPanel>
-    <Border DockPanel.Dock="Top"
-            Padding="12,8"
-            BorderBrush="LightGray"
-            BorderThickness="0,0,0,1">
-      <StackPanel Spacing="8">
-        <TextBlock Opacity="0.8"
-                   Text="Grid + DockRegion + DockSplitter · Crystal DI · modular tabs · JSON layout · Release AOT" />
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="Save layout" Command="{Binding SaveLayoutCommand}" />
-          <Button Content="Load layout" Command="{Binding LoadLayoutCommand}" />
-          <Button Content="Reset default" Command="{Binding ResetLayoutCommand}" />
-          <TextBlock VerticalAlignment="Center"
-                     Opacity="0.75"
-                     Text="{Binding LayoutStatus}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-
-    <DockShell EnableParkingLot="True">
-      <Grid ColumnDefinitions="*,8,*,8,*">
-        <DockRegion Grid.Column="0"
-                    TabStripPlacement="Left"
-                    ItemsSource="{Binding LeftTabs}"
-                    SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
-
-        <DockSplitter Grid.Column="1" ShowsPreview="True" />
-
-        <Grid Grid.Column="2" RowDefinitions="*,8,*">
-          <DockRegion Grid.Row="0"
-                      ItemsSource="{Binding CenterTopTabs}"
-                      SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
-
-          <DockSplitter Grid.Row="1" ShowsPreview="True" />
-
-          <DockRegion Grid.Row="2"
-                      TabStripPlacement="Bottom"
-                      ItemsSource="{Binding CenterBottomTabs}"
-                      SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
-        </Grid>
-
-        <DockSplitter Grid.Column="3" ShowsPreview="True" />
-
-        <DockRegion Grid.Column="4"
-                    TabStripPlacement="Right"
-                    ItemsSource="{Binding RightTabs}"
-                    SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
-      </Grid>
-    </DockShell>
-  </DockPanel>
-</UserControl>
-```
-
-## MainViewModel (exposed bindable properties)
+## Tab ViewModels
 
 ```csharp
-public partial class MainViewModel : ObservableObject, IDockContentFactoryProvider
+public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
-    public ObservableCollection<DockTabModel> LeftTabs { get; } = new();
-    public ObservableCollection<DockTabModel> CenterTopTabs { get; } = new();
-    public ObservableCollection<DockTabModel> CenterBottomTabs { get; } = new();
-    public ObservableCollection<DockTabModel> RightTabs { get; } = new();
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool ReuseSurface => false;
+}
 
-    [ObservableProperty] private DockTabModel? _leftSelected;
-    [ObservableProperty] private DockTabModel? _centerTopSelected;
-    [ObservableProperty] private DockTabModel? _centerBottomSelected;
-    [ObservableProperty] private DockTabModel? _rightSelected;
+public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
+{
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool ReuseSurface => true;   // parking lot caches the BrowserPanel + WebView
+}
+```
+
+## MainViewModel
+
+```csharp
+public partial class MainViewModel : ObservableObject
+{
+    private readonly IReadOnlyList<IDockModule> _modules;
+
+    public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> CenterTopTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> CenterBottomTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> RightTabs { get; } = new();
+
+    [ObservableProperty] private IDockTabItem? _leftSelected;
+    [ObservableProperty] private IDockTabItem? _centerTopSelected;
+    [ObservableProperty] private IDockTabItem? _centerBottomSelected;
+    [ObservableProperty] private IDockTabItem? _rightSelected;
     [ObservableProperty] private string _layoutStatus = string.Empty;
 
-    public Control CreateContent(IDockTabItem tab) =>
-        _modules.TryCreateContent(tab) ?? new PlainPanel { DataContext = tab };
+    public MainViewModel(IEnumerable<IDockModule> modules)
+    {
+        _modules = modules.ToList();
+        ApplyModuleRegistrations();   // or load saved JSON layout
+    }
 
-    [RelayCommand] private void SaveLayout() { /* ... */ }
-    [RelayCommand] private void LoadLayout() { /* ... */ }
-    [RelayCommand] private void ResetLayout() { /* ... */ }
+    private void ApplyModuleRegistrations()
+    {
+        foreach (var module in _modules)
+            foreach (var reg in module.GetRegistrations())
+                AddRegistration(reg);   // adds PlainTabViewModel / BrowserTabViewModel to region collections
+    }
 }
 ```
 
@@ -169,7 +131,27 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
 | `LayoutStatus` | toolbar status text |
 | `SaveLayoutCommand` / `LoadLayoutCommand` / `ResetLayoutCommand` | toolbar buttons |
 
-`IDockContentFactoryProvider` on the same view model: `DockShell` resolves it from `DataContext` for tab content and parking lot.
+## MainView.axaml (excerpt)
+
+```xml
+<DockShell>
+  <Grid ColumnDefinitions="*,8,*,8,*">
+    <DockRegion Grid.Column="0"
+                TabStripPlacement="Left"
+                ItemsSource="{Binding LeftTabs}"
+                SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
+    <!-- ... more regions ... -->
+  </Grid>
+</DockShell>
+```
+
+`EnableParkingLot` defaults to `true` on `DockShell`; omit the attribute unless you need to disable caching.
+
+## WebView tab (Desktop)
+
+`BrowserPanel` embeds `NativeWebView` on Desktop. WASM Demo uses a placeholder (browser host does not support `NativeWebView`).
+
+Desktop projects need `app.manifest` with Windows 10+ `supportedOS` for native control host — see [AOT](aot-compatibility.md).
 
 ## Run
 
@@ -178,3 +160,5 @@ dotnet run --project samples/GOZA.Dock.Demo.Desktop
 ```
 
 AOT: [AOT compatibility](aot-compatibility.md)
+
+Native Avalonia (no Crystal): `samples/GOZA.Dock.Minimal/` — [Quick Start](getting-started.md)

@@ -271,24 +271,22 @@ public partial class DockRegion : UserControl, IDockRegionSession
             return;
 
         var viewHost = ResolveViewHost();
-        var factory = ResolveContentFactory();
 
         if (oldItem is IDockTabItem oldTab && viewHost is not null && oldTab.ReuseSurface)
             viewHost.Release(oldTab, ContentHostControl);
 
         if (newItem is IDockTabItem newTab)
         {
+            var surface = DockTabContentBuilder.Build(this, newTab);
+
             if (viewHost is not null && newTab.ReuseSurface)
             {
-                var surface = factory?.Invoke(newTab)
-                    ?? throw new InvalidOperationException(
-                        $"Tab '{newTab.Id}' requires ReuseSurface; implement {nameof(IDockContentFactoryProvider)}.");
                 ActiveContent = viewHost.Activate(newTab, ContentHostControl, surface);
                 _previousSelected = newItem;
                 return;
             }
 
-            ActiveContent = factory?.Invoke(newTab) ?? CreateDefaultContent(newTab);
+            ActiveContent = surface;
         }
         else
         {
@@ -312,19 +310,5 @@ public partial class DockRegion : UserControl, IDockRegionSession
     {
         var shell = this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
         return shell?.ViewHost;
-    }
-
-    private Func<IDockTabItem, Control>? ResolveContentFactory()
-    {
-        var current = this as Control;
-        while (current is not null)
-        {
-            if (current.DataContext is IDockContentFactoryProvider provider)
-                return provider.CreateContent;
-
-            current = current.GetVisualParent() as Control;
-        }
-
-        return null;
     }
 }

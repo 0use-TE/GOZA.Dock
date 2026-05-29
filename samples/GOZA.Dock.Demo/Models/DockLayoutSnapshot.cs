@@ -21,6 +21,6 @@ public sealed class TabSnapshot
 
     public required string Header { get; set; }
 
-    /// <summary><see cref="TabKind.Plain"/> or <see cref="TabKind.Reusable"/>.</summary>
-    public string Kind { get; set; } = nameof(TabKind.Plain);
+    /// <summary>"Plain" or "Reusable".</summary>
+    public string Kind { get; set; } = "Plain";
 }

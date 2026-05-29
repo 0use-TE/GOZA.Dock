@@ -1,6 +1,4 @@
-using Avalonia.Controls;
-using GOZA.Dock;
-using GOZA.Dock.Demo.Models;
+using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Services;
 
 namespace GOZA.Dock.Demo.Modules;
@@ -12,8 +10,6 @@ public sealed class ToolsDockModule : IDockModule
 
     public IEnumerable<DockTabRegistration> GetRegistrations()
     {
-        yield return new(DockRegionIds.Right, new DockTabModel("right-tools", "Tools", TabKind.Plain), Select: true);
+        yield return new(DockRegionIds.Right, new PlainTabViewModel("right-tools", "Tools"), Select: true);
     }
-
-    public Control? TryCreateContent(IDockTabItem tab) => null;
 }

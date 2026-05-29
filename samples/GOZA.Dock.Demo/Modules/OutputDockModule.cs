@@ -1,8 +1,5 @@
-using Avalonia.Controls;
-using GOZA.Dock;
-using GOZA.Dock.Demo.Models;
+using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Services;
-using GOZA.Dock.Demo.Views;
 
 namespace GOZA.Dock.Demo.Modules;
 
@@ -13,10 +10,7 @@ public sealed class OutputDockModule : IDockModule
 
     public IEnumerable<DockTabRegistration> GetRegistrations()
     {
-        yield return new(DockRegionIds.CenterBottom, new DockTabModel("cb-log", "Log", TabKind.Plain), Select: true);
-        yield return new(DockRegionIds.CenterBottom, new DockTabModel("cb-browser", "Browser", TabKind.Reusable));
+        yield return new(DockRegionIds.CenterBottom, new PlainTabViewModel("cb-log", "Log"), Select: true);
+        yield return new(DockRegionIds.CenterBottom, new BrowserTabViewModel("cb-browser", "Browser"));
     }
-
-    public Control? TryCreateContent(IDockTabItem tab) =>
-        tab.Id == "cb-browser" ? new BrowserPanel { DataContext = (DockTabModel)tab } : null;
 }

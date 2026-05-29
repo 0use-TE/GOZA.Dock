@@ -5,60 +5,42 @@ using GOZA.Dock;
 using GOZA.Dock.Demo.Models;
 using GOZA.Dock.Demo.Modules;
 using GOZA.Dock.Demo.Services;
-using GOZA.Dock.Demo.Views;
 using System.Collections.ObjectModel;
 
 namespace GOZA.Dock.Demo.ViewModels;
 
-public partial class MainViewModel : ObservableObject, IDockContentFactoryProvider
+public partial class MainViewModel : ObservableObject
 {
-    private readonly IReadOnlyList<IDockModule> _modules =
-    [
-        new HomeDockModule(),
-        new AnalyticsDockModule(),
-        new OutputDockModule(),
-        new ToolsDockModule(),
-    ];
+    private readonly IReadOnlyList<IDockModule> _modules;
 
-    public ObservableCollection<DockTabModel> LeftTabs { get; } = new();
-    public ObservableCollection<DockTabModel> CenterTopTabs { get; } = new();
-    public ObservableCollection<DockTabModel> CenterBottomTabs { get; } = new();
-    public ObservableCollection<DockTabModel> RightTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> CenterTopTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> CenterBottomTabs { get; } = new();
+    public ObservableCollection<IDockTabItem> RightTabs { get; } = new();
 
     [ObservableProperty]
-    private DockTabModel? _leftSelected;
+    private IDockTabItem? _leftSelected;
 
     [ObservableProperty]
-    private DockTabModel? _centerTopSelected;
+    private IDockTabItem? _centerTopSelected;
 
     [ObservableProperty]
-    private DockTabModel? _centerBottomSelected;
+    private IDockTabItem? _centerBottomSelected;
 
     [ObservableProperty]
-    private DockTabModel? _rightSelected;
+    private IDockTabItem? _rightSelected;
 
     [ObservableProperty]
     private string _layoutStatus = "Default layout (modular modules)";
 
-    public MainViewModel()
+    public MainViewModel(IEnumerable<IDockModule> modules)
     {
+        _modules = modules.ToList();
+
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
             ApplySnapshot(saved);
         else
             ApplyModuleRegistrations();
-    }
-
-    /// <summary>Chains module factories; plain tabs use <see cref="PlainPanel"/>.</summary>
-    public Control CreateContent(IDockTabItem tab)
-    {
-        foreach (var module in _modules)
-        {
-            var control = module.TryCreateContent(tab);
-            if (control is not null)
-                return control;
-        }
-
-        return new PlainPanel { DataContext = tab };
     }
 
     [RelayCommand]
@@ -124,7 +106,7 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
             SetSelected(reg.RegionId, reg.Tab);
     }
 
-    private ObservableCollection<DockTabModel>? GetCollection(string regionId) =>
+    private ObservableCollection<IDockTabItem>? GetCollection(string regionId) =>
         regionId switch
         {
             DockRegionIds.Left => LeftTabs,
@@ -134,7 +116,7 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
             _ => null,
         };
 
-    private void SetSelected(string regionId, DockTabModel? tab)
+    private void SetSelected(string regionId, IDockTabItem? tab)
     {
         switch (regionId)
         {
@@ -145,7 +127,7 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
         }
     }
 
-    private Dictionary<string, ObservableCollection<DockTabModel>> GetRegionMap() =>
+    private Dictionary<string, ObservableCollection<IDockTabItem>> GetRegionMap() =>
         new()
         {
             [DockRegionIds.Left] = LeftTabs,
@@ -154,7 +136,7 @@ public partial class MainViewModel : ObservableObject, IDockContentFactoryProvid
             [DockRegionIds.Right] = RightTabs,
         };
 
-    private Dictionary<string, DockTabModel?> GetSelectedMap() =>
+    private Dictionary<string, IDockTabItem?> GetSelectedMap() =>
         new()
         {
             [DockRegionIds.Left] = LeftSelected,

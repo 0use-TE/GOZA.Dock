@@ -1,6 +1,4 @@
-using Avalonia.Controls;
-using GOZA.Dock;
-using GOZA.Dock.Demo.Models;
+using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Services;
 
 namespace GOZA.Dock.Demo.Modules;
@@ -12,9 +10,7 @@ public sealed class HomeDockModule : IDockModule
 
     public IEnumerable<DockTabRegistration> GetRegistrations()
     {
-        yield return new(DockRegionIds.Left, new DockTabModel("left-home", "Home", TabKind.Plain), Select: true);
-        yield return new(DockRegionIds.Left, new DockTabModel("left-info", "Info", TabKind.Plain));
+        yield return new(DockRegionIds.Left, new PlainTabViewModel("left-home", "Home"), Select: true);
+        yield return new(DockRegionIds.Left, new PlainTabViewModel("left-info", "Info"));
     }
-
-    public Control? TryCreateContent(IDockTabItem tab) => null;
 }

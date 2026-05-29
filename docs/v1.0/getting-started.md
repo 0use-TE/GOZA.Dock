@@ -30,9 +30,16 @@ dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
 ```xml
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="MyApp.App"
              xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:MyApp.ViewModels"
+             xmlns:views="using:MyApp.Views"
+             x:Class="MyApp.App"
              RequestedThemeVariant="Default">
+  <Application.DataTemplates>
+    <DataTemplate DataType="vm:PlainTabViewModel">
+      <views:PlainPanel />
+    </DataTemplate>
+  </Application.DataTemplates>
   <Application.Styles>
     <semi:SemiTheme />
     <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
@@ -42,17 +49,18 @@ dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
 
 > AOT: `StyleInclude` required. See [AOT](aot-compatibility.md).
 
-### DockTabItem.cs
+### PlainTabViewModel.cs
 
 ```csharp
 using GOZA.Dock;
 
-namespace MyApp;
+namespace MyApp.ViewModels;
 
-public sealed class DockTabItem(string id, string header) : IDockTabItem
+public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
     public string Id { get; } = id;
     public string Header { get; } = header;
+    public bool ReuseSurface => false;
 }
 ```
 
@@ -60,7 +68,11 @@ public sealed class DockTabItem(string id, string header) : IDockTabItem
 |----------------|------------|
 | `Id` | Stable key; required when `ReuseSurface` is true |
 | `Header` | Tab title text |
-| `ReuseSurface` | Default `false`; set `true` + `EnableParkingLot` to cache control |
+| `ReuseSurface` | Default `false`; set `true` to cache the **view** in the parking lot |
+
+Each tab type is a ViewModel class. Map it to a view with `Application.DataTemplates` (native Avalonia) or Crystal `AddMvvmTransient` — see [Crystal.Avalonia](crystal-avalonia.md).
+
+Reference: `samples/GOZA.Dock.Minimal/` (native DataTemplates + optional `BrowserTabViewModel` with `NativeWebView`).
 
 ### MainViewModel.cs
 
@@ -73,24 +85,24 @@ namespace MyApp;
 public partial class MainViewModel : ObservableObject
 {
     /// <summary>Left region tab list → DockRegion ItemsSource.</summary>
-    public ObservableCollection<DockTabItem> LeftTabs { get; } = new();
+    public ObservableCollection<PlainTabViewModel> LeftTabs { get; } = new();
 
     /// <summary>Right region tab list → DockRegion ItemsSource.</summary>
-    public ObservableCollection<DockTabItem> RightTabs { get; } = new();
+    public ObservableCollection<PlainTabViewModel> RightTabs { get; } = new();
 
     [ObservableProperty]
-    private DockTabItem? _leftSelected;
+    private PlainTabViewModel? _leftSelected;
 
     [ObservableProperty]
-    private DockTabItem? _rightSelected;
+    private PlainTabViewModel? _rightSelected;
 
     public MainViewModel()
     {
-        LeftTabs.Add(new DockTabItem("home", "Home"));
-        LeftTabs.Add(new DockTabItem("info", "Info"));
+        LeftTabs.Add(new PlainTabViewModel("home", "Home"));
+        LeftTabs.Add(new PlainTabViewModel("info", "Info"));
         LeftSelected = LeftTabs[0];
 
-        RightTabs.Add(new DockTabItem("tools", "Tools"));
+        RightTabs.Add(new PlainTabViewModel("tools", "Tools"));
         RightSelected = RightTabs[0];
     }
 }
@@ -194,7 +206,7 @@ internal sealed class Program
 
 | Member | Type | Notes |
 |--------|------|-------|
-| `EnableParkingLot` | `bool` | Attach parking lot for `ReuseSurface` tabs |
+| `EnableParkingLot` | `bool` | Default `true`; parking lot for `ReuseSurface` tabs |
 | `IsLayoutExpanded` | `bool` | Read-only; any region maximized |
 | `Content` | `object?` | Your `Grid` with regions |
 | `ToggleLayoutExpansion(DockRegion)` | method | Same as double-click tab strip |
@@ -217,9 +229,10 @@ Inherits `GridSplitter`. Sets `ResizeDirection` from gutter column/row (fixed px
 
 | Interface | Purpose |
 |-----------|---------|
-| `IDockContentFactoryProvider` | `CreateContent(IDockTabItem)` for custom tab panels |
 | `ILayoutExpansionHost` | Implemented by `DockShell` |
 | `IDockRegionSession` | Internal drag hooks on `DockRegion` |
+
+Tab views: register `DataTemplate` per tab ViewModel type (native) or `AddMvvmTransient<View, ViewModel>` (Crystal). No content-factory interface on the library.
 
 Full tree: [Architecture](architecture.md).
 

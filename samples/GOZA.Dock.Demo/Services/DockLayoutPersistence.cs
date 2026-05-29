@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using GOZA.Dock;
 using GOZA.Dock.Demo.Models;
+using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Serialization;
 
 namespace GOZA.Dock.Demo.Services;
@@ -35,8 +37,8 @@ public static class DockLayoutPersistence
     }
 
     public static DockLayoutSnapshot Capture(
-        IReadOnlyDictionary<string, ObservableCollection<DockTabModel>> regions,
-        IReadOnlyDictionary<string, DockTabModel?> selected)
+        IReadOnlyDictionary<string, ObservableCollection<IDockTabItem>> regions,
+        IReadOnlyDictionary<string, IDockTabItem?> selected)
     {
         var snapshot = new DockLayoutSnapshot();
         foreach (var (regionId, tabs) in regions)
@@ -48,7 +50,7 @@ public static class DockLayoutPersistence
                 {
                     Id = tab.Id,
                     Header = tab.Header,
-                    Kind = tab.Kind.ToString(),
+                    Kind = tab.ReuseSurface ? "Reusable" : "Plain",
                 });
             }
 
@@ -63,8 +65,8 @@ public static class DockLayoutPersistence
 
     public static void Apply(
         DockLayoutSnapshot snapshot,
-        IReadOnlyDictionary<string, ObservableCollection<DockTabModel>> regions,
-        Action<string, DockTabModel?> setSelected)
+        IReadOnlyDictionary<string, ObservableCollection<IDockTabItem>> regions,
+        Action<string, IDockTabItem?> setSelected)
     {
         foreach (var region in snapshot.Regions)
         {
@@ -73,12 +75,9 @@ public static class DockLayoutPersistence
 
             collection.Clear();
             foreach (var tab in region.Tabs)
-            {
-                var kind = Enum.TryParse<TabKind>(tab.Kind, out var parsed) ? parsed : TabKind.Plain;
-                collection.Add(new DockTabModel(tab.Id, tab.Header, kind));
-            }
+                collection.Add(CreateTab(tab));
 
-            DockTabModel? selected = null;
+            IDockTabItem? selected = null;
             if (region.SelectedTabId is not null)
                 selected = collection.FirstOrDefault(t => t.Id == region.SelectedTabId);
 
@@ -86,4 +85,9 @@ public static class DockLayoutPersistence
             setSelected(region.RegionId, selected);
         }
     }
+
+    private static IDockTabItem CreateTab(TabSnapshot tab) =>
+        tab.Kind == "Reusable"
+            ? new BrowserTabViewModel(tab.Id, tab.Header)
+            : new PlainTabViewModel(tab.Id, tab.Header);
 }

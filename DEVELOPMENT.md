@@ -42,11 +42,11 @@ GOZA.Dock/
 │       │   └── DockShellStyles.axaml
 │       ├── TabContainerDragController.cs
 │       ├── DockRegionDragCoordinator.cs
+│       ├── DockTabContentBuilder.cs
 │       ├── DockViewHost.cs
 │       ├── DockDragInteractionGuard.cs
 │       ├── LayoutExpansionHostLocator.cs
 │       ├── IDockTabItem.cs
-│       ├── IDockContentFactoryProvider.cs
 │       ├── IDockRegionSession.cs
 │       ├── ILayoutExpansionHost.cs
 │       └── Properties/AssemblyInfo.cs   # XmlnsDefinition
@@ -195,7 +195,7 @@ dotnet run --project samples/GOZA.Dock.Demo.Browser
 | `AutoManageContent` | 默认 `true`；`false` 时自行管理 `ActiveContent` |
 | `TabStripPlacement` | Tab 条相对内容区位置：`Top`（默认）、`Bottom`、`Left`、`Right`（`DockTabStripPlacement`） |
 
-**默认内容：** 未提供 `IDockContentFactoryProvider` 时，选中 Tab 后在内容区居中显示 `Header` 文本。
+**默认内容：** 未注册 Tab ViewModel 的 `DataTemplate`（或 Crystal ViewLocator 映射）时，选中 Tab 后在内容区居中显示 `Header` 文本。
 
 #### Tab 条位置
 
@@ -265,45 +265,64 @@ public DockTabStripPlacement LeftTabPlacement { get; set; } = DockTabStripPlacem
 
 ## 7. ViewModel 集成
 
-### 7.1 Tab 模型
+### 7.1 Tab ViewModel
 
-实现 `IDockTabItem`：
+实现 `IDockTabItem`（每种 Tab 一个 ViewModel 类型）：
 
 ```csharp
-public sealed class DockTabModel : IDockTabItem
+public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
-    public string Id { get; init; }
-    public string Header { get; init; }
-    public bool ReuseSurface => Kind == TabKind.Reusable;
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool ReuseSurface => false;
+}
+
+public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
+{
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool ReuseSurface => true;
 }
 ```
 
-每个 Tab 需要 **稳定唯一** 的 `Id`（Parking Lot 缓存键）。
+每个 Tab 需要 **稳定唯一** 的 `Id`（Parking Lot 缓存键）。`ReuseSurface` 缓存的是 **View（Control）**，ViewModel 始终在 `ItemsSource` 集合中。
 
 ### 7.2 每个 DockRegion 一组集合
 
 ```csharp
-public ObservableCollection<DockTabModel> LeftTabs { get; } = new();
-public DockTabModel? LeftSelected { get; set; }  // INotifyPropertyChanged
+public ObservableCollection<PlainTabViewModel> LeftTabs { get; } = new();
+public PlainTabViewModel? LeftSelected { get; set; }  // INotifyPropertyChanged
 ```
 
 XAML 中每个 `DockRegion` 绑定各自的 `ItemsSource` / `SelectedItem`。
 
-### 7.3 自定义内容（可选）
+### 7.3 自定义 Tab 视图
 
-ViewModel（或任意上层 `DataContext`）实现 `IDockContentFactoryProvider`：
+库通过 Avalonia `FindDataTemplate(tab)` 解析 View，**无**内容工厂接口。
 
-```csharp
-public Control CreateContent(IDockTabItem tab) =>
-    new BrowserPanel { DataContext = tab };
+**原生 Avalonia（Minimal 示例）：** `App.axaml` 注册 `Application.DataTemplates`：
+
+```xml
+<DataTemplate DataType="vm:PlainTabViewModel">
+  <views:PlainPanel />
+</DataTemplate>
+<DataTemplate DataType="vm:BrowserTabViewModel">
+  <views:BrowserPanel />
+</DataTemplate>
 ```
 
-查找顺序：从 `DockRegion` 向上遍历视觉树 / 逻辑树的 `DataContext`。
+**Crystal（Demo 示例）：** DI 注册 View ↔ ViewModel：
+
+```csharp
+services.AddMvvmTransient<PlainPanel, PlainTabViewModel>();
+services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
+```
 
 | Tab 类型 | 行为 |
 |----------|------|
-| 普通 Tab | 工厂可不被调用；默认显示 Header |
-| `ReuseSurface == true` | **必须**实现工厂；且 `DockShell.EnableParkingLot="True"` |
+| 有 DataTemplate / ViewLocator | 构建对应 `Control`，`DataContext = tab` |
+| 无模板 | 居中显示 `Header` |
+| `ReuseSurface == true` | 需有 View；`DockShell.EnableParkingLot` 默认已开，按 `Id` 缓存 Control |
 
 ---
 
@@ -343,9 +362,10 @@ Tab 切走  → DockViewHost.Release   → 从 ContentHost 摘下，放入隐藏
 Tab 再选中 → 复用同一实例
 ```
 
-启用条件：
+启用：`DockShell.EnableParkingLot` 默认为 `true`；设为 `false` 可关闭缓存。
 
 ```xml
+<!-- 可省略，默认已启用 -->
 <DockShell EnableParkingLot="True">
 ```
 
@@ -423,7 +443,8 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 | 灰色 DropHint 不显示 | 仍在 Header 内拖拽；或坐标转换方向错误 | 向下拖出 Tab 条再试 |
 | 分隔条不可见 / 无 Preview | 旧版自定义 Template 覆盖了 GridSplitter | 使用当前 `OnRender` + 默认 Template 方案 |
 | 全屏只占中间一列 | 旧版只对直接父 Grid 展开 | 确认已用根 Grid 路径版 `DockLayoutExpansion` |
-| ReuseSurface Tab 报错 | 未开 Parking Lot 或未实现工厂 | `EnableParkingLot="True"` + `IDockContentFactoryProvider` |
+| ReuseSurface Tab 空白 / 不缓存 | 无 DataTemplate 或 `EnableParkingLot=false` | 注册 View 映射；保持默认 Parking Lot |
+| WebView 报错 native control host | Desktop 缺少 `app.manifest` supportedOS | 见 `samples/*.Desktop/app.manifest` |
 | 样式未生效 | 未 Include 主题或顺序不对 | `App.axaml` 中 SemiTheme 后再 Include 库样式 |
 
 ---
@@ -466,9 +487,11 @@ dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release
 - 根 Grid 五列：`*,8,*,8,*`
 - 第 3 列为嵌套 Grid 三行：`*,8,*`
 - 四个 `DockRegion` + 三个 `DockSplitter`
-- `DockShell EnableParkingLot="True"`
+- `DockShell`（Parking Lot 默认开启）
 
-ViewModel 见 `MainViewModel.cs`：`IDockContentFactoryProvider` 仅为 `ReuseSurface` Tab 创建 `BrowserPanel`。
+ViewModel 见 `MainViewModel.cs`：构造函数注入 `IEnumerable<IDockModule>`，Crystal `AddMvvmTransient` 映射 Tab View ↔ ViewModel；`BrowserTabViewModel` + `NativeWebView` 演示表面复用。
+
+Minimal 对照：`samples/GOZA.Dock.Minimal/` — 原生 `Application.DataTemplates`，无 Crystal。
 
 ---
 

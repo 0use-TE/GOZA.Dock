@@ -1,6 +1,4 @@
-using Avalonia.Controls;
-using GOZA.Dock;
-using GOZA.Dock.Demo.Models;
+using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Services;
 
 namespace GOZA.Dock.Demo.Modules;
@@ -12,8 +10,6 @@ public sealed class AnalyticsDockModule : IDockModule
 
     public IEnumerable<DockTabRegistration> GetRegistrations()
     {
-        yield return new(DockRegionIds.CenterTop, new DockTabModel("ct-chart", "Chart", TabKind.Plain), Select: true);
+        yield return new(DockRegionIds.CenterTop, new PlainTabViewModel("ct-chart", "Chart"), Select: true);
     }
-
-    public Control? TryCreateContent(IDockTabItem tab) => null;
 }
