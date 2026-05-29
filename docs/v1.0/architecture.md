@@ -1,51 +1,70 @@
-# Architecture (v1.0)
+# Architecture
+
+English · [简体中文](zh-CN/architecture.md)
 
 ## Visual tree
 
 ```
-DockShell (ContentControl, ILayoutExpansionHost)
-├── Content: user Grid (DockRegion + DockSplitter)
-├── DockLayoutExpansion (double-click fullscreen)
-├── DockViewHost? (when EnableParkingLot)
-└── DockShellStyles.axaml (auto-included)
-```
+DockShell
+├── Content: Grid (DockRegion + DockSplitter)
+├── DockLayoutExpansion
+├── DockViewHost? (EnableParkingLot)
+└── styles: App.axaml StyleInclude (or runtime inject when not AOT)
 
-Each `DockRegion`:
-
-```
 DockRegion
-├── LayoutGrid
-│   ├── TabControl (TabStrip) — headers only; content in ContentHost
-│   └── ContentPane
-│       ├── ContentHost (ActiveContent)
-│       └── DropHint (drag target preview)
+├── TabControl (TabStrip) — headers only
+└── ContentPane
+    ├── ContentHost ← ActiveContent
+    └── DropHint
 ```
 
-## Coordinators
+## Public surface
+
+### Controls
+
+| Type | Key members |
+|------|-------------|
+| `DockShell` | `EnableParkingLot`, `IsLayoutExpanded`, `Content`, `ToggleLayoutExpansion` |
+| `DockRegion` | `ItemsSource`, `SelectedItem`, `ActiveContent`, `AutoManageContent`, `TabStripPlacement` |
+| `DockSplitter` | `GridSplitter` + auto orientation from gutter px |
+
+### Models / enums
+
+| Type | Members |
+|------|---------|
+| `IDockTabItem` | `Id`, `Header`, `ReuseSurface` |
+| `DockTabStripPlacement` | `Top`, `Bottom`, `Left`, `Right` |
+
+### Optional app hooks
+
+| Interface | Role |
+|-----------|------|
+| `IDockContentFactoryProvider` | Custom `Control` per tab |
+| `ILayoutExpansionHost` | On `DockShell`; double-click expand |
+| `IDockRegionSession` | Drag away/received callbacks on `DockRegion` |
+
+## Coordinators (internal)
 
 | Type | Role |
 |------|------|
-| `DockRegionDragCoordinator` | Registers regions, drop hints, hit-testing, cross-region insert index |
-| `TabContainerDragController` | Pointer: click, long-press drag, reorder, cross-drop, double-click expand |
-| `DockDragInteractionGuard` | Brief mutex between collapse gesture and cross-region drop |
-| `LayoutExpansionHostLocator` | Finds parent `DockShell` from a region |
+| `DockRegionDragCoordinator` | Drop hints, hit-test, cross-region insert |
+| `TabContainerDragController` | Pointer drag, reorder, capture-lost recovery |
+| `DockDragInteractionGuard` | Block cross-drop after collapse |
+| `DockViewHost` | Parking lot activate/release |
 
-## Content lifecycle
+## Content flow
 
-When `AutoManageContent` is true (default), `DockRegion` updates `ActiveContent` on `SelectedItem` change:
+`AutoManageContent == true` (default):
 
-1. Plain tabs: default centered header text, or `IDockContentFactoryProvider.CreateContent`.
-2. `ReuseSurface` tabs: `DockViewHost.Activate` / `Release` with a hidden parking lot panel under the shell content root.
+1. `SelectedItem` changes
+2. If `ReuseSurface` + parking lot → `DockViewHost.Activate`
+3. Else if `IDockContentFactoryProvider` → `CreateContent`
+4. Else default header text in `ContentHost`
 
 ## Layout expansion
 
-`DockLayoutExpansion` walks from the target `DockRegion` up to the **root Grid** under `DockShell.Content`, saving and restoring row/column definitions and sibling visibility. Expanding only the immediate parent grid would leave outer columns visible.
+Double-click tab strip → `DockLayoutExpansion` walks to root `Grid` under `DockShell.Content`, saves row/column lengths and sibling visibility, expands target region.
 
-## Tab strip vs TabControl content
+## Tab strip vs content
 
-`DockRegion` uses `TabControl` for the strip only. Real document content lives in `ContentHost`. Styles hide `PART_SelectedContentHost` so the strip row stays `Auto` sized.
-
-## Further reading
-
-- [Tab drag and drop](guides/tab-drag-drop.md)
-- [Layout expansion](guides/layout-expansion.md)
+`TabControl` is header-only. Real document UI is in `ContentHost`. Styles hide `PART_SelectedContentHost`.

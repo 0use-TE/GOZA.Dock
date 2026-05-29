@@ -4,8 +4,8 @@
   <Style Selector=":is(GridSplitter)">
     <Setter Property="ShowsPreview" Value="True" />
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="MinWidth" Value="8" />
-    <Setter Property="MinHeight" Value="8" />
+    <Setter Property="MinWidth" Value="10" />
+    <Setter Property="MinHeight" Value="10" />
   </Style>
 
   <!-- DockRegion: TabControl is header-only; real content lives in ContentHost -->

@@ -1,8 +1,8 @@
-# Quick Start
+# 快速开始
 
-English · [简体中文](zh-CN/getting-started.md)
+[English](../getting-started.md) · 简体中文
 
-## 1. Run the sample
+## 1. 运行示例
 
 ```bash
 git clone https://github.com/GOZA/GOZA.Dock.git
@@ -10,22 +10,22 @@ cd GOZA.Dock
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
 
-## 2. Packages
+## 2. 包
 
 ```bash
 dotnet add package GOZA.Dock
 dotnet add package Semi.Avalonia
-dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
+dotnet add package CommunityToolkit.Mvvm   # 可选 — 见下方 MVVM 说明
 ```
 
-> **MVVM is your choice.** GOZA.Dock only needs `ObservableCollection` + properties for `ItemsSource` / `SelectedItem`. This page uses **CommunityToolkit.Mvvm**; alternatives:
-> - Plain `INotifyPropertyChanged` → `samples/GOZA.Dock.Minimal/`
+> **MVVM 自选。** GOZA.Dock 只需 `ObservableCollection` + 可绑定属性。本文用 **CommunityToolkit.Mvvm**；也可：
+> - 手写 `INotifyPropertyChanged` → `samples/GOZA.Dock.Minimal/`
 > - **Crystal.Avalonia** DI → [Crystal.Avalonia](crystal-avalonia.md)
-> - ReactiveUI / other toolkits — same bindings, swap the view model base.
+> - ReactiveUI 等 — 绑定相同，换 ViewModel 基类即可。
 
-> **Layout persistence is your choice.** The library does not save/load dock state. Demo uses **System.Text.Json** + source generator (AOT-safe). You can use XML, SQLite, or anything else — you own tab collections and grid topology. See [Recipes — JSON](recipes.md#json-layout-saveload).
+> **布局持久化自选。** 库不内置存盘。Demo 用 **System.Text.Json** + Source Generator（AOT 安全）。也可用 XML、SQLite 等 — Tab 集合与 Grid 拓扑由应用负责。见 [进阶 — JSON](recipes.md#json-layout-saveload)。
 
-## 3. Files (left + right regions, CommunityToolkit.Mvvm)
+## 3. 文件（左右两区域，CommunityToolkit.Mvvm）
 
 ### App.axaml
 
@@ -42,7 +42,7 @@ dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
 </Application>
 ```
 
-> AOT: `StyleInclude` required. See [AOT](aot-compatibility.md).
+> AOT：`StyleInclude` 必须。见 [AOT](aot-compatibility.md)。
 
 ### DockTabItem.cs
 
@@ -58,11 +58,11 @@ public sealed class DockTabItem(string id, string header) : IDockTabItem
 }
 ```
 
-| `IDockTabItem` | Bind / use |
-|----------------|------------|
-| `Id` | Stable key; required when `ReuseSurface` is true |
-| `Header` | Tab title text |
-| `ReuseSurface` | Default `false`; set `true` + `EnableParkingLot` to cache control |
+| `IDockTabItem` | 用途 |
+|----------------|------|
+| `Id` | 稳定键；`ReuseSurface` 时必填 |
+| `Header` | Tab 标题 |
+| `ReuseSurface` | 默认 `false`；配合 `EnableParkingLot` 缓存控件 |
 
 ### MainViewModel.cs
 
@@ -74,10 +74,10 @@ namespace MyApp;
 
 public partial class MainViewModel : ObservableObject
 {
-    /// <summary>Left region tab list → DockRegion ItemsSource.</summary>
+    /// <summary>左区域 Tab 列表 → DockRegion ItemsSource。</summary>
     public ObservableCollection<DockTabItem> LeftTabs { get; } = new();
 
-    /// <summary>Right region tab list → DockRegion ItemsSource.</summary>
+    /// <summary>右区域 Tab 列表 → DockRegion ItemsSource。</summary>
     public ObservableCollection<DockTabItem> RightTabs { get; } = new();
 
     [ObservableProperty]
@@ -98,7 +98,7 @@ public partial class MainViewModel : ObservableObject
 }
 ```
 
-`[ObservableProperty]` generates `LeftSelected` / `RightSelected` with `INotifyPropertyChanged` for two-way binding.
+`[ObservableProperty]` 自动生成 `LeftSelected` / `RightSelected` 及变更通知，供双向绑定。
 
 ### MainWindow.axaml
 
@@ -181,52 +181,52 @@ internal sealed class Program
 }
 ```
 
-## 4. Bindings in this layout
+## 4. 本布局绑定关系
 
-| ViewModel property | Control property | Region |
-|--------------------|------------------|--------|
-| `LeftTabs` | `DockRegion.ItemsSource` | left |
-| `LeftSelected` | `DockRegion.SelectedItem` | left (TwoWay) |
-| `RightTabs` | `DockRegion.ItemsSource` | right |
-| `RightSelected` | `DockRegion.SelectedItem` | right (TwoWay) |
+| ViewModel 属性 | 控件属性 | 区域 |
+|----------------|----------|------|
+| `LeftTabs` | `DockRegion.ItemsSource` | 左 |
+| `LeftSelected` | `DockRegion.SelectedItem` | 左（TwoWay） |
+| `RightTabs` | `DockRegion.ItemsSource` | 右 |
+| `RightSelected` | `DockRegion.SelectedItem` | 右（TwoWay） |
 
-## 5. All public API (library)
+## 5. 库公开 API
 
 ### DockShell
 
-| Member | Type | Notes |
-|--------|------|-------|
-| `EnableParkingLot` | `bool` | Attach parking lot for `ReuseSurface` tabs |
-| `IsLayoutExpanded` | `bool` | Read-only; any region maximized |
-| `Content` | `object?` | Your `Grid` with regions |
-| `ToggleLayoutExpansion(DockRegion)` | method | Same as double-click tab strip |
+| 成员 | 类型 | 说明 |
+|------|------|------|
+| `EnableParkingLot` | `bool` | 启用 Parking Lot |
+| `IsLayoutExpanded` | `bool` | 只读；是否有区域最大化 |
+| `Content` | `object?` | 放置 `Grid` |
+| `ToggleLayoutExpansion` | 方法 | 同双击 Tab 条 |
 
 ### DockRegion
 
-| Property | Type | Default | Notes |
-|----------|------|---------|-------|
-| `ItemsSource` | `IEnumerable?` | — | Tab collection (`IDockTabItem`) |
-| `SelectedItem` | `object?` | — | Current tab; bind TwoWay |
-| `ActiveContent` | `object?` | — | Content host; auto-set when `AutoManageContent` |
-| `AutoManageContent` | `bool` | `true` | Sync content from `SelectedItem` |
-| `TabStripPlacement` | `DockTabStripPlacement` | `Top` | `Top` / `Bottom` / `Left` / `Right` |
+| 属性 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| `ItemsSource` | `IEnumerable?` | — | Tab 集合 |
+| `SelectedItem` | `object?` | — | 当前 Tab；TwoWay 绑定 |
+| `ActiveContent` | `object?` | — | 内容区；`AutoManageContent` 时自动更新 |
+| `AutoManageContent` | `bool` | `true` | 随选中 Tab 更新内容 |
+| `TabStripPlacement` | `DockTabStripPlacement` | `Top` | 上/下/左/右 |
 
 ### DockSplitter
 
-Inherits `GridSplitter`. Sets `ResizeDirection` from gutter column/row (fixed px ≤ 32). Default `ShowsPreview="True"`.
+继承 `GridSplitter`，根据分割条列/行（固定 px ≤ 32）自动设置方向。
 
-### Optional interfaces
+### 可选接口
 
-| Interface | Purpose |
-|-----------|---------|
-| `IDockContentFactoryProvider` | `CreateContent(IDockTabItem)` for custom tab panels |
-| `ILayoutExpansionHost` | Implemented by `DockShell` |
-| `IDockRegionSession` | Internal drag hooks on `DockRegion` |
+| 接口 | 作用 |
+|------|------|
+| `IDockContentFactoryProvider` | 自定义 Tab 内容 |
+| `ILayoutExpansionHost` | `DockShell` 布局展开 |
+| `IDockRegionSession` | 拖拽回调 |
 
-Full tree: [Architecture](architecture.md).
+详见 [架构](architecture.md)。
 
-## Next
+## 下一步
 
-Five-region layout → copy `samples/GOZA.Dock.Minimal/MainWindow.axaml`  
+五区域布局 → 复制 `samples/GOZA.Dock.Minimal/MainWindow.axaml`  
 Crystal DI → [Crystal.Avalonia](crystal-avalonia.md)  
-Optional patterns → [Recipes](recipes.md)
+可选模式 → [进阶](recipes.md)

@@ -3,6 +3,8 @@
     <Project Path="src/GOZA.Dock/GOZA.Dock.csproj" />
   </Folder>
   <Folder Name="/samples/">
+    <Project Path="samples/GOZA.Dock.Minimal/GOZA.Dock.Minimal.csproj" />
+    <Project Path="samples/GOZA.Dock.Minimal.Desktop/GOZA.Dock.Minimal.Desktop.csproj" />
     <Project Path="samples/GOZA.Dock.Demo/GOZA.Dock.Demo.csproj" />
     <Project Path="samples/GOZA.Dock.Demo.Desktop/GOZA.Dock.Demo.Desktop.csproj" />
     <Project Path="samples/GOZA.Dock.Demo.Browser/GOZA.Dock.Demo.Browser.csproj" />

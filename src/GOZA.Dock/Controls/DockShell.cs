@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -15,6 +18,8 @@ namespace GOZA.Dock.Controls;
 /// </summary>
 public class DockShell : ContentControl, ILayoutExpansionHost
 {
+    private const string DockShellStylesFileName = "DockShellStyles.axaml";
+
     private static bool _stylesLoaded;
 
     private readonly DockLayoutExpansion _expansion = new();
@@ -61,18 +66,51 @@ public class DockShell : ContentControl, ILayoutExpansionHost
         TrySetupParkingLot();
     }
 
-    /// <summary>Loads <c>DockShellStyles.axaml</c> once into <see cref="Application.Current"/> styles.</summary>
+    /// <summary>
+    /// Loads <c>DockShellStyles.axaml</c> when the app did not include it in XAML.
+    /// For Native AOT, prefer <c>&lt;StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" /&gt;</c> in App.axaml.
+    /// </summary>
+    [UnconditionalSuppressMessage(
+        "Trimming",
+        "IL2026",
+        Justification = "Fallback for non-AOT apps; AOT hosts should include DockShellStyles via XAML StyleInclude (compile-time safe per Avalonia).")]
     private static void EnsureStyles()
     {
-        if (_stylesLoaded || Application.Current?.Styles is not { } styles)
+        if (_stylesLoaded || Application.Current?.Styles is not IList styles)
+            return;
+
+        if (ContainsDockShellStyles(styles))
+        {
+            _stylesLoaded = true;
+            return;
+        }
+
+        // Runtime StyleInclude uses AvaloniaXamlLoader.Load and has no precompiled XAML under Native AOT.
+        if (!RuntimeFeature.IsDynamicCodeSupported)
             return;
 
         var baseUri = new Uri("avares://GOZA.Dock/Themes/");
         styles.Add(new StyleInclude(baseUri)
         {
-            Source = new Uri("DockShellStyles.axaml", UriKind.Relative),
+            Source = new Uri(DockShellStylesFileName, UriKind.Relative),
         });
         _stylesLoaded = true;
+    }
+
+    private static bool ContainsDockShellStyles(IList styles)
+    {
+        foreach (var item in styles)
+        {
+            if (item is not StyleInclude include)
+                continue;
+
+            var source = include.Source?.ToString();
+            if (source is not null &&
+                source.Contains(DockShellStylesFileName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Creates <see cref="DockViewHost"/> and attaches parking lot to the content root panel.</summary>

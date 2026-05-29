@@ -6,60 +6,60 @@
              ViewModelLocator.AutoWireViewModel="True"
              MinWidth="320"
              MinHeight="240">
-  <DockPanel>
-    <Border DockPanel.Dock="Top"
-            Padding="12,8"
-            BorderBrush="LightGray"
-            BorderThickness="0,0,0,1">
-      <StackPanel Spacing="8">
-        <TextBlock Opacity="0.8"
-                   Text="Grid + DockRegion + DockSplitter · Crystal DI · modular tabs · JSON layout · Release AOT" />
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="Save layout"
-                  Command="{Binding SaveLayoutCommand}" />
-          <Button Content="Load layout"
-                  Command="{Binding LoadLayoutCommand}" />
-          <Button Content="Reset default"
-                  Command="{Binding ResetLayoutCommand}" />
-          <TextBlock VerticalAlignment="Center"
-                    Opacity="0.75"
-                    Text="{Binding LayoutStatus}" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
+    <DockPanel>
+        <Border DockPanel.Dock="Top"
+                Padding="12,8"
+                BorderBrush="LightGray"
+                BorderThickness="0,0,0,1">
+            <StackPanel Spacing="8">
+                <TextBlock Opacity="0.8"
+                           Text="Grid + DockRegion + DockSplitter · Crystal DI · modular tabs · JSON layout · Release AOT" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Save layout"
+                            Command="{Binding SaveLayoutCommand}" />
+                    <Button Content="Load layout"
+                            Command="{Binding LoadLayoutCommand}" />
+                    <Button Content="Reset default"
+                            Command="{Binding ResetLayoutCommand}" />
+                    <TextBlock VerticalAlignment="Center"
+                               Opacity="0.75"
+                               Text="{Binding LayoutStatus}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-    <DockShell EnableParkingLot="True">
-      <Grid ColumnDefinitions="*,8,*,8,*">
-        <DockRegion Grid.Column="0"
-                    TabStripPlacement="Left"
-                    ItemsSource="{Binding LeftTabs}"
-                    SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
+        <DockShell EnableParkingLot="True">
+            <Grid ColumnDefinitions="*,8,*,8,*">
+                <DockRegion Grid.Column="0"
+                            TabStripPlacement="Left"
+                            ItemsSource="{Binding LeftTabs}"
+                            SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
 
-        <DockSplitter Grid.Column="1"
-                      ShowsPreview="True" />
+                <DockSplitter Grid.Column="1"
+                              ShowsPreview="True" />
 
-        <Grid Grid.Column="2" RowDefinitions="*,8,*">
-          <DockRegion Grid.Row="0"
-                      ItemsSource="{Binding CenterTopTabs}"
-                      SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
+                <Grid Grid.Column="2" RowDefinitions="*,8,*">
+                    <DockRegion Grid.Row="0"
+                                ItemsSource="{Binding CenterTopTabs}"
+                                SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
 
-          <DockSplitter Grid.Row="1"
-                        ShowsPreview="True" />
+                    <DockSplitter Grid.Row="1"
+                                  ShowsPreview="True" />
 
-          <DockRegion Grid.Row="2"
-                      TabStripPlacement="Bottom"
-                      ItemsSource="{Binding CenterBottomTabs}"
-                      SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
-        </Grid>
+                    <DockRegion Grid.Row="2"
+                                TabStripPlacement="Bottom"
+                                ItemsSource="{Binding CenterBottomTabs}"
+                                SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
+                </Grid>
 
-        <DockSplitter Grid.Column="3"
-                      ShowsPreview="True" />
+                <DockSplitter Grid.Column="3"
+                              ShowsPreview="True" />
 
-        <DockRegion Grid.Column="4"
-                    TabStripPlacement="Right"
-                    ItemsSource="{Binding RightTabs}"
-                    SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
-      </Grid>
-    </DockShell>
-  </DockPanel>
+                <DockRegion Grid.Column="4"
+                            TabStripPlacement="Right"
+                            ItemsSource="{Binding RightTabs}"
+                            SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
+            </Grid>
+        </DockShell>
+    </DockPanel>
 </UserControl>

@@ -1,21 +1,21 @@
-English | [简体中文](README.zh-CN.md)
+[English](README.md) | 简体中文
 
 # GOZA.Dock
 
-Avalonia docking: `Grid` + `DockRegion` + `DockSplitter`.
+Avalonia 停靠布局：`Grid` + `DockRegion` + `DockSplitter`。
 
 ```bash
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 dotnet add package GOZA.Dock
 ```
 
-| Docs | |
+| 文档 | |
 |------|--|
 | EN | [Quick Start](docs/v1.0/getting-started.md) |
 | 中文 | [快速开始](docs/v1.0/zh-CN/getting-started.md) |
 
-Local docs: `docfx docfx.json && docfx serve _site --port 8080`
+本地文档：`docfx docfx.json && docfx serve _site --port 8080`
 
-## License
+## 许可证
 
 MIT

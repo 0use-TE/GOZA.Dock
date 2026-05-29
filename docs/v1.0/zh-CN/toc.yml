@@ -1,10 +1,10 @@
-- name: Quick Start
+- name: 快速开始
   href: getting-started.md
 - name: Crystal.Avalonia
   href: crystal-avalonia.md
-- name: Architecture
+- name: 架构
   href: architecture.md
 - name: AOT
   href: aot-compatibility.md
-- name: Recipes
+- name: 进阶
   href: recipes.md

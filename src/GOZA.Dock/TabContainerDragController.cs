@@ -45,6 +45,7 @@ public sealed class TabContainerDragController : IDisposable
     private bool _visualDragActive;
     private bool _attached;
     private long _lastReleaseTick;
+    private TopLevel? _subscribedTopLevel;
 
     private const double DragStartThreshold = 6.0;
     private const int LongPressMs = 450;
@@ -78,6 +79,7 @@ public sealed class TabContainerDragController : IDisposable
         _host.AddHandler(InputElement.PointerPressedEvent, OnPressed, RoutingStrategies.Tunnel);
         _host.AddHandler(InputElement.PointerMovedEvent, OnMoved, RoutingStrategies.Tunnel);
         _host.AddHandler(InputElement.PointerReleasedEvent, OnReleased, RoutingStrategies.Tunnel);
+        _host.AddHandler(InputElement.PointerCaptureLostEvent, OnCaptureLost, RoutingStrategies.Tunnel);
         _attached = true;
     }
 
@@ -89,6 +91,7 @@ public sealed class TabContainerDragController : IDisposable
         _host.RemoveHandler(InputElement.PointerPressedEvent, OnPressed);
         _host.RemoveHandler(InputElement.PointerMovedEvent, OnMoved);
         _host.RemoveHandler(InputElement.PointerReleasedEvent, OnReleased);
+        _host.RemoveHandler(InputElement.PointerCaptureLostEvent, OnCaptureLost);
 
         if (ReferenceEquals(_activeController, this))
             _activeController = null;
@@ -99,12 +102,67 @@ public sealed class TabContainerDragController : IDisposable
 
     private void AbortInteraction()
     {
+        var needsCleanup = _pressPending
+                           || _visualDragActive
+                           || _draggedContainer is not null
+                           || _dragGhost is not null;
+
         CancelLongPressTimer();
         _pressPending = false;
         _visualDragActive = false;
-        _capturedPointer?.Capture(null);
-        _capturedPointer = null;
-        CleanupVisuals();
+
+        if (_capturedPointer is not null)
+        {
+            var pointer = _capturedPointer;
+            _capturedPointer = null;
+            pointer.Capture(null);
+        }
+
+        if (ReferenceEquals(_activeController, this))
+            _activeController = null;
+
+        DetachTopLevelHandlers();
+
+        if (needsCleanup)
+            CleanupVisuals();
+    }
+
+    private void OnCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+    {
+        if (!ReferenceEquals(_activeController, this))
+            return;
+
+        if (_capturedPointer is not null && !ReferenceEquals(e.Pointer, _capturedPointer))
+            return;
+
+        AbortInteraction();
+    }
+
+    private void AttachTopLevelHandlers()
+    {
+        if (_subscribedTopLevel is not null)
+            return;
+
+        _subscribedTopLevel = TopLevel.GetTopLevel(_host);
+        if (_subscribedTopLevel is Window window)
+            window.Deactivated += OnTopLevelDeactivated;
+    }
+
+    private void DetachTopLevelHandlers()
+    {
+        if (_subscribedTopLevel is Window window)
+            window.Deactivated -= OnTopLevelDeactivated;
+
+        _subscribedTopLevel = null;
+    }
+
+    private void OnTopLevelDeactivated(object? sender, EventArgs e)
+    {
+        if (!ReferenceEquals(_activeController, this))
+            return;
+
+        if (_pressPending || _visualDragActive)
+            AbortInteraction();
     }
 
     private void OnPressed(object? sender, PointerPressedEventArgs e)
@@ -149,6 +207,7 @@ public sealed class TabContainerDragController : IDisposable
         _ghostStartPos = absolutePos ?? new Point(0, 0);
 
         _capturedPointer = e.Pointer;
+        AttachTopLevelHandlers();
         StartLongPressTimer();
     }
 
@@ -379,6 +438,8 @@ public sealed class TabContainerDragController : IDisposable
         if (ReferenceEquals(_activeController, this))
             _activeController = null;
 
+        DetachTopLevelHandlers();
+
         _capturedPointer?.Capture(null);
         _capturedPointer = null;
 
@@ -573,7 +634,10 @@ public sealed class TabContainerDragController : IDisposable
             _draggedContainer.Opacity = 1;
 
         foreach (var child in _tabSelector.GetRealizedContainers().Cast<Control>())
+        {
+            child.Opacity = 1;
             child.RenderTransform = null;
+        }
 
         _dragGhost = null;
         _draggedContainer = null;

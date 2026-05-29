@@ -4,11 +4,10 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<PublishAot>true</PublishAot>
-
 	</PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<PublishAot>true</PublishAot>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,8 +15,9 @@
 		<PackageReference Include="Avalonia.Fonts.Inter" />
 	</ItemGroup>
 
+
 	<ItemGroup>
-		<ProjectReference Include="..\GOZA.Dock.Demo\GOZA.Dock.Demo.csproj" />
+		<ProjectReference Include="..\GOZA.Dock.Minimal\GOZA.Dock.Minimal.csproj" />
 	</ItemGroup>
 
 </Project>
