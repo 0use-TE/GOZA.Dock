@@ -31,6 +31,8 @@ public sealed class DockViewHost
             ? GetOrCreateCached(tab, surface)
             : surface;
 
+        control.DataContext = tab;
+
         Detach(control);
         host.Content = control;
         return control;
@@ -42,7 +44,7 @@ public sealed class DockViewHost
         if (host.Content is not Control surface)
             return;
 
-        if (surface.DataContext != tab && surface is not { DataContext: null })
+        if (!IsSurfaceForTab(surface, tab))
             return;
 
         host.Content = null;
@@ -50,6 +52,15 @@ public sealed class DockViewHost
         if (tab.ReuseSurface)
             Park(surface);
     }
+
+    /// <summary>Cache is keyed by <see cref="IDockTabItem.Id"/>; VM instance may change between layout restore and selection.</summary>
+    private static bool IsSurfaceForTab(Control surface, IDockTabItem tab) =>
+        surface.DataContext switch
+        {
+            IDockTabItem ctx => string.Equals(ctx.Id, tab.Id, StringComparison.Ordinal),
+            null => true,
+            _ => ReferenceEquals(surface.DataContext, tab),
+        };
 
     private Control GetOrCreateCached(IDockTabItem tab, Control surface)
     {

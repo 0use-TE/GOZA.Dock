@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Input;
 using GOZA.Dock;
 using GOZA.Dock.Demo.Models;
 using GOZA.Dock.Demo.Services;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 
 namespace GOZA.Dock.Demo.ViewModels;
@@ -13,8 +12,6 @@ namespace GOZA.Dock.Demo.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly IReadOnlyList<IDockTabViewModel> _tabs;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IReadOnlyDictionary<string, Type> _tabTypeById;
 
     public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
     public ObservableCollection<IDockTabItem> CenterTopTabs { get; } = new();
@@ -45,10 +42,8 @@ public partial class MainViewModel : ObservableObject
         ChartTabViewModel chart,
         LogTabViewModel log,
         ToolsTabViewModel tools,
-        BrowserTabViewModel browser,
-        IServiceProvider serviceProvider)
+        BrowserTabViewModel browser)
     {
-        _serviceProvider = serviceProvider;
         _tabs =
         [
             home,
@@ -58,7 +53,6 @@ public partial class MainViewModel : ObservableObject
             tools,
             browser,
         ];
-        _tabTypeById = _tabs.ToDictionary(t => t.Id, t => t.GetType());
         ThemeToggleLabel = GetThemeToggleLabel();
 
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
@@ -124,18 +118,25 @@ public partial class MainViewModel : ObservableObject
 
     private IDockTabViewModel CreateTabFromSnapshot(TabSnapshot snapshot)
     {
-        if (_tabTypeById.TryGetValue(snapshot.Id, out var type))
-            return (IDockTabViewModel)_serviceProvider.GetRequiredService(type);
+        var existing = _tabs.FirstOrDefault(t => t.Id == snapshot.Id);
+        if (existing is not null)
+            return existing;
 
         // Legacy layout files used cb-browser in center-bottom.
         if (snapshot.Id is "cb-browser" or "ct-browser" || snapshot.Kind == "Reusable")
-            return _serviceProvider.GetRequiredService<BrowserTabViewModel>();
+            return _tabs.OfType<BrowserTabViewModel>().First();
 
         throw new InvalidOperationException($"Unknown tab id '{snapshot.Id}' in saved layout.");
     }
 
     private void ClearAllRegions()
     {
+        // Clear selection first so DockRegion runs Release (parking lot) before ItemsSource is emptied.
+        LeftSelected = null;
+        CenterTopSelected = null;
+        CenterBottomSelected = null;
+        RightSelected = null;
+
         LeftTabs.Clear();
         CenterTopTabs.Clear();
         CenterBottomTabs.Clear();
