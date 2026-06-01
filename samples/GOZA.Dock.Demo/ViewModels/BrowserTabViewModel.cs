@@ -1,19 +1,22 @@
-using GOZA.Dock;
+using GOZA.Dock.Demo.Services;
 
 namespace GOZA.Dock.Demo.ViewModels;
 
-/// <summary>Reusable dock tab (e.g. WebView); surface cached in the parking lot.</summary>
-public sealed class BrowserTabViewModel : IDockTabItem
+/// <summary>Reusable dock tab (WebView); surface cached in the parking lot.</summary>
+public sealed class BrowserTabViewModel : DockTabViewModelBase
 {
-    public BrowserTabViewModel(string id, string header)
+    public const string DefaultUrl = "https://0use.net";
+
+    public static Uri DefaultUri { get; } = new(DefaultUrl);
+
+    public BrowserTabViewModel()
+        : base("ct-browser", "Browser", DockRegionIds.CenterTop, selectOnStartup: true)
     {
-        Id = id;
-        Header = header;
     }
 
-    public string Id { get; }
+    public override bool ReuseSurface => true;
 
-    public string Header { get; }
+    public bool ShowEmbeddedWebView => !OperatingSystem.IsBrowser();
 
-    public bool ReuseSurface => true;
+    public bool ShowBrowserPlaceholder => OperatingSystem.IsBrowser();
 }

@@ -1,6 +1,6 @@
 namespace GOZA.Dock.Demo.Services;
 
-/// <summary>Region keys used by modular registration and layout persistence.</summary>
+/// <summary>Region keys used by tab view models and layout persistence.</summary>
 public static class DockRegionIds
 {
     public const string Left = "left";

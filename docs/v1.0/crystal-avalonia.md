@@ -1,157 +1,129 @@
 # Crystal.Avalonia
 
-GOZA.Dock has **no** Crystal reference. This page wires Crystal shell + MVVM DI + `DockShell`.
+GOZA.Dock does not reference Crystal. This page describes how the Demo wires **Crystal DI + one View per tab + `DockShell`**.
 
-Demo: `samples/GOZA.Dock.Demo/`
+Sample: `samples/GOZA.Dock.Demo/`
 
 ## Packages
 
 ```bash
 dotnet add package GOZA.Dock
 dotnet add package Crystal.Avalonia
-dotnet add package Semi.Avalonia
-dotnet add package Avalonia.Controls.WebView   # optional — Desktop WebView tab
+dotnet add package CommunityToolkit.Mvvm          # Demo ViewModels
+dotnet add package Avalonia.Controls.WebView    # optional — Desktop Browser tab
 ```
 
-## App.axaml
+Demo also uses Semi.Avalonia for chrome only — **not required** for GOZA.Dock or Crystal.
+
+## App.axaml (library styles only)
 
 ```xml
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:semi="https://irihi.tech/semi"
              x:Class="GOZA.Dock.Demo.App"
              RequestedThemeVariant="Default">
   <Application.Styles>
-    <semi:SemiTheme />
     <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
   </Application.Styles>
 </Application>
 ```
 
-No `Application.DataTemplates` in Demo — Crystal ViewLocator resolves views from DI.
+No `Application.DataTemplates` — Crystal ViewLocator resolves tab views from DI.
+
+## Tab contract
+
+Each tab is a **dedicated View + ViewModel pair**. ViewModels implement `IDockTabItem` via a small app interface:
+
+```csharp
+public interface IDockTabViewModel : IDockTabItem
+{
+    string RegionId { get; }      // e.g. DockRegionIds.CenterTop
+    bool SelectOnStartup { get; }
+}
+
+public abstract class DockTabViewModelBase : ObservableObject, IDockTabViewModel
+{
+    protected DockTabViewModelBase(string id, string header, string regionId, bool selectOnStartup = false) { ... }
+    public virtual bool ReuseSurface => false;
+}
+```
+
+Example — browser tab in **center-top**, selected by default:
+
+```csharp
+public sealed class BrowserTabViewModel : DockTabViewModelBase
+{
+    public BrowserTabViewModel()
+        : base("ct-browser", "Browser", DockRegionIds.CenterTop, selectOnStartup: true) { }
+
+    public override bool ReuseSurface => true;
+}
+```
 
 ## App.axaml.cs
 
 ```csharp
-using Avalonia.Markup.Xaml;
-using Crystal.Avalonia;
-using GOZA.Dock.Demo.Modules;
-using GOZA.Dock.Demo.ViewModels;
-using GOZA.Dock.Demo.Views;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace GOZA.Dock.Demo;
-
-public partial class App : CrystalApplication
+public override void RegisterServices(IServiceCollection services)
 {
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    services.AddSingleton<MainWindow>();
+    services.AddSingleton<MainView>();
+    services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
+    services.AddMvvmSingleton<MainView, MainViewModel>();
 
-    public override void RegisterServices(IServiceCollection services)
-    {
-        services.AddSingleton<MainWindow>();
-        services.AddSingleton<MainView>();
-        services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
-        services.AddMvvmSingleton<MainView, MainViewModel>();
-
-        // Tab View ↔ ViewModel (ViewLocator → DataTemplate at runtime)
-        services.AddMvvmTransient<PlainPanel, PlainTabViewModel>();
-        services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
-
-        // Feature modules → injected into MainViewModel
-        services.AddSingleton<IDockModule, HomeDockModule>();
-        services.AddSingleton<IDockModule, AnalyticsDockModule>();
-        services.AddSingleton<IDockModule, OutputDockModule>();
-        services.AddSingleton<IDockModule, ToolsDockModule>();
-    }
-
-    public override void CreateShell(IServiceProvider serviceProvider) =>
-        CreateShellFromDi<MainWindow, MainView>(serviceProvider);
+    services.AddMvvmTransient<HomeTabView, HomeTabViewModel>();
+    services.AddMvvmTransient<LeftInfoTabView, LeftInfoTabViewModel>();
+    services.AddMvvmTransient<ChartTabView, ChartTabViewModel>();
+    services.AddMvvmTransient<LogTabView, LogTabViewModel>();
+    services.AddMvvmTransient<ToolsTabView, ToolsTabViewModel>();
+    services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
 }
 ```
 
-When a tab is selected, `DockRegion` calls `FindDataTemplate(tab)`; Crystal's ViewLocator returns the registered view for that ViewModel type.
+`AddMvvmTransient` registers the concrete ViewModel; `MainViewModel` receives each tab VM in its constructor and places them by `RegionId`.
 
-## Tab ViewModels
+## MainViewModel (excerpt)
 
 ```csharp
-public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
+public MainViewModel(
+    HomeTabViewModel home,
+    LeftInfoTabViewModel leftInfo,
+    ChartTabViewModel chart,
+    LogTabViewModel log,
+    ToolsTabViewModel tools,
+    BrowserTabViewModel browser,
+    IServiceProvider serviceProvider)
 {
-    public string Id { get; } = id;
-    public string Header { get; } = header;
-    public bool ReuseSurface => false;
-}
-
-public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
-{
-    public string Id { get; } = id;
-    public string Header { get; } = header;
-    public bool ReuseSurface => true;   // parking lot caches the BrowserPanel + WebView
-}
-```
-
-## MainViewModel
-
-```csharp
-public partial class MainViewModel : ObservableObject
-{
-    private readonly IReadOnlyList<IDockModule> _modules;
-
-    public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
-    public ObservableCollection<IDockTabItem> CenterTopTabs { get; } = new();
-    public ObservableCollection<IDockTabItem> CenterBottomTabs { get; } = new();
-    public ObservableCollection<IDockTabItem> RightTabs { get; } = new();
-
-    [ObservableProperty] private IDockTabItem? _leftSelected;
-    [ObservableProperty] private IDockTabItem? _centerTopSelected;
-    [ObservableProperty] private IDockTabItem? _centerBottomSelected;
-    [ObservableProperty] private IDockTabItem? _rightSelected;
-    [ObservableProperty] private string _layoutStatus = string.Empty;
-
-    public MainViewModel(IEnumerable<IDockModule> modules)
-    {
-        _modules = modules.ToList();
-        ApplyModuleRegistrations();   // or load saved JSON layout
-    }
-
-    private void ApplyModuleRegistrations()
-    {
-        foreach (var module in _modules)
-            foreach (var reg in module.GetRegistrations())
-                AddRegistration(reg);   // adds PlainTabViewModel / BrowserTabViewModel to region collections
-    }
+    _tabs = [home, leftInfo, chart, log, tools, browser];
+    // ApplyDefaultLayout: add each tab to collection for tab.RegionId
+    // SaveLayoutCommand / LoadLayoutCommand — JSON via DockLayoutPersistence
 }
 ```
 
-| Property | Binds to |
-|----------|----------|
-| `LeftTabs` / `LeftSelected` | left `DockRegion` |
-| `CenterTopTabs` / `CenterTopSelected` | center-top region |
-| `CenterBottomTabs` / `CenterBottomSelected` | center-bottom region |
-| `RightTabs` / `RightSelected` | right region |
-| `LayoutStatus` | toolbar status text |
-| `SaveLayoutCommand` / `LoadLayoutCommand` / `ResetLayoutCommand` | toolbar buttons |
+| Region collection | Typical tabs (default layout) |
+|-------------------|-------------------------------|
+| `LeftTabs` | Home, Info |
+| `CenterTopTabs` | Browser, Chart |
+| `CenterBottomTabs` | Log |
+| `RightTabs` | Tools |
+
+Toolbar: **Save layout**, Load layout, Reset default — persistence is app code, not the library. See [Recipes](recipes.md).
 
 ## MainView.axaml (excerpt)
 
 ```xml
 <DockShell>
   <Grid ColumnDefinitions="*,8,*,8,*">
-    <DockRegion Grid.Column="0"
-                TabStripPlacement="Left"
+    <DockRegion Grid.Column="0" TabStripPlacement="Left"
                 ItemsSource="{Binding LeftTabs}"
                 SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
-    <!-- ... more regions ... -->
+    <!-- center column: nested Grid with CenterTop / CenterBottom regions -->
   </Grid>
 </DockShell>
 ```
 
-`EnableParkingLot` defaults to `true` on `DockShell`; omit the attribute unless you need to disable caching.
+## WebView tab
 
-## WebView tab (Desktop)
-
-`BrowserPanel` embeds `NativeWebView` on Desktop. WASM Demo uses a placeholder (browser host does not support `NativeWebView`).
-
-Desktop projects need `app.manifest` with Windows 10+ `supportedOS` for native control host — see [AOT](aot-compatibility.md).
+`BrowserTabView.axaml` hosts `NativeWebView` on Desktop; WASM Demo shows a placeholder. Desktop head project needs `app.manifest` `supportedOS` — [AOT](aot-compatibility.md).
 
 ## Run
 
@@ -159,6 +131,4 @@ Desktop projects need `app.manifest` with Windows 10+ `supportedOS` for native c
 dotnet run --project samples/GOZA.Dock.Demo.Desktop
 ```
 
-AOT: [AOT compatibility](aot-compatibility.md)
-
-Native Avalonia (no Crystal): `samples/GOZA.Dock.Minimal/` — [Quick Start](getting-started.md)
+Native Avalonia (no Crystal): [Quick Start](getting-started.md) + `samples/GOZA.Dock.Minimal/`.

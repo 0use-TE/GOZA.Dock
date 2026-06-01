@@ -90,7 +90,7 @@ your-org/GOZA.Dock/
 
 - 为 `GOZA.Dock` 补充 `.gitignore`、`LICENSE`、GitHub Actions CI（`dotnet build` + `dotnet test`）
 - 若发布 NuGet：在 `GOZA.Dock.csproj` 补充 `Version`、`Authors`、`RepositoryUrl`
-- Demo 中 `PlainPanel.cs` 若未使用可删除
+- Demo 每 Tab 独立 `*TabView.axaml`；Minimal 仍用共享 `PlainPanel`
 
 ---
 
@@ -311,11 +311,12 @@ XAML 中每个 `DockRegion` 绑定各自的 `ItemsSource` / `SelectedItem`。
 </DataTemplate>
 ```
 
-**Crystal（Demo 示例）：** DI 注册 View ↔ ViewModel：
+**Crystal（Demo 示例）：** 每 Tab 独立 View + `AddMvvmTransient`：
 
 ```csharp
-services.AddMvvmTransient<PlainPanel, PlainTabViewModel>();
-services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
+services.AddMvvmTransient<HomeTabView, HomeTabViewModel>();
+services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
+// MainViewModel 构造函数注入各 Tab VM，按 IDockTabViewModel.RegionId 分区
 ```
 
 | Tab 类型 | 行为 |
@@ -381,7 +382,7 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 
 `DockSplitter` 的分隔线 **不在主题 Template 里**，而在控件 `OnRender` 中绘制，避免自定义 Template 破坏 `ShowsPreview`。
 
-消费方使用 Semi / Fluent 等主题时，建议在主题之后 Include 库样式（见 Demo `App.axaml`）。
+消费方在 `Application.Styles` 中 Include `DockShellStyles.axaml`（与 Semi / Fluent 等主题无关，顺序建议在自有主题之后）。
 
 ---
 
@@ -445,7 +446,7 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 | 全屏只占中间一列 | 旧版只对直接父 Grid 展开 | 确认已用根 Grid 路径版 `DockLayoutExpansion` |
 | ReuseSurface Tab 空白 / 不缓存 | 无 DataTemplate 或 `EnableParkingLot=false` | 注册 View 映射；保持默认 Parking Lot |
 | WebView 报错 native control host | Desktop 缺少 `app.manifest` supportedOS | 见 `samples/*.Desktop/app.manifest` |
-| 样式未生效 | 未 Include 主题或顺序不对 | `App.axaml` 中 SemiTheme 后再 Include 库样式 |
+| 样式未生效 | 未 Include 库样式 | `App.axaml` 中加入 `avares://GOZA.Dock/Themes/DockShellStyles.axaml` |
 | 拖拽在暗色/亮色下样式不对 | 覆盖了 `DockThemeResources` 键或主题切换时仍在拖拽 | 见 [进阶](recipes.md) 拖拽主题资源；切换主题会自动取消拖拽 |
 
 ---
@@ -490,7 +491,7 @@ dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release
 - 四个 `DockRegion` + 三个 `DockSplitter`
 - `DockShell`（Parking Lot 默认开启）
 
-ViewModel 见 `MainViewModel.cs`：构造函数注入 `IEnumerable<IDockModule>`，Crystal `AddMvvmTransient` 映射 Tab View ↔ ViewModel；`BrowserTabViewModel` + `NativeWebView` 演示表面复用。
+ViewModel 见 `MainViewModel.cs`：构造函数注入各 `IDockTabViewModel`，按 `RegionId` 分区；工具栏保存/加载 JSON 布局（`DockLayoutPersistence`）。`BrowserTabView` + `ReuseSurface` 演示中上 WebView 表面复用。
 
 Minimal 对照：`samples/GOZA.Dock.Minimal/` — 原生 `Application.DataTemplates`，无 Crystal。
 

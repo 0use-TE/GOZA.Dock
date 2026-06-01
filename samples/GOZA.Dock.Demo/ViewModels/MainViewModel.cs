@@ -4,15 +4,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GOZA.Dock;
 using GOZA.Dock.Demo.Models;
-using GOZA.Dock.Demo.Modules;
 using GOZA.Dock.Demo.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 
 namespace GOZA.Dock.Demo.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly IReadOnlyList<IDockModule> _modules;
+    private readonly IReadOnlyList<IDockTabViewModel> _tabs;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IReadOnlyDictionary<string, Type> _tabTypeById;
 
     public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
     public ObservableCollection<IDockTabItem> CenterTopTabs { get; } = new();
@@ -32,20 +34,37 @@ public partial class MainViewModel : ObservableObject
     private IDockTabItem? _rightSelected;
 
     [ObservableProperty]
-    private string _layoutStatus = "Default layout (modular modules)";
+    private string _layoutStatus = "Default layout (MVVM tabs)";
 
     [ObservableProperty]
     private string _themeToggleLabel = "Dark";
 
-    public MainViewModel(IEnumerable<IDockModule> modules)
+    public MainViewModel(
+        HomeTabViewModel home,
+        LeftInfoTabViewModel leftInfo,
+        ChartTabViewModel chart,
+        LogTabViewModel log,
+        ToolsTabViewModel tools,
+        BrowserTabViewModel browser,
+        IServiceProvider serviceProvider)
     {
-        _modules = modules.ToList();
+        _serviceProvider = serviceProvider;
+        _tabs =
+        [
+            home,
+            leftInfo,
+            chart,
+            log,
+            tools,
+            browser,
+        ];
+        _tabTypeById = _tabs.ToDictionary(t => t.Id, t => t.GetType());
         ThemeToggleLabel = GetThemeToggleLabel();
 
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
             ApplySnapshot(saved);
         else
-            ApplyModuleRegistrations();
+            ApplyDefaultLayout();
     }
 
     [RelayCommand]
@@ -72,8 +91,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ResetLayout()
     {
-        ApplyModuleRegistrations();
-        LayoutStatus = "Reset to default modular layout";
+        ApplyDefaultLayout();
+        LayoutStatus = "Reset to default MVVM layout";
     }
 
     [RelayCommand]
@@ -90,20 +109,29 @@ public partial class MainViewModel : ObservableObject
     private static string GetThemeToggleLabel() =>
         Application.Current?.ActualThemeVariant == ThemeVariant.Dark ? "Light" : "Dark";
 
-    private void ApplyModuleRegistrations()
+    private void ApplyDefaultLayout()
     {
         ClearAllRegions();
-        foreach (var module in _modules)
-        {
-            foreach (var reg in module.GetRegistrations())
-                AddRegistration(reg);
-        }
+        foreach (var tab in _tabs)
+            AddTab(tab, tab.SelectOnStartup);
     }
 
     private void ApplySnapshot(DockLayoutSnapshot snapshot)
     {
         ClearAllRegions();
-        DockLayoutPersistence.Apply(snapshot, GetRegionMap(), SetSelected);
+        DockLayoutPersistence.Apply(snapshot, GetRegionMap(), SetSelected, CreateTabFromSnapshot);
+    }
+
+    private IDockTabViewModel CreateTabFromSnapshot(TabSnapshot snapshot)
+    {
+        if (_tabTypeById.TryGetValue(snapshot.Id, out var type))
+            return (IDockTabViewModel)_serviceProvider.GetRequiredService(type);
+
+        // Legacy layout files used cb-browser in center-bottom.
+        if (snapshot.Id is "cb-browser" or "ct-browser" || snapshot.Kind == "Reusable")
+            return _serviceProvider.GetRequiredService<BrowserTabViewModel>();
+
+        throw new InvalidOperationException($"Unknown tab id '{snapshot.Id}' in saved layout.");
     }
 
     private void ClearAllRegions()
@@ -114,15 +142,15 @@ public partial class MainViewModel : ObservableObject
         RightTabs.Clear();
     }
 
-    private void AddRegistration(DockTabRegistration reg)
+    private void AddTab(IDockTabViewModel tab, bool select)
     {
-        var collection = GetCollection(reg.RegionId);
+        var collection = GetCollection(tab.RegionId);
         if (collection is null)
             return;
 
-        collection.Add(reg.Tab);
-        if (reg.Select)
-            SetSelected(reg.RegionId, reg.Tab);
+        collection.Add(tab);
+        if (select)
+            SetSelected(tab.RegionId, tab);
     }
 
     private ObservableCollection<IDockTabItem>? GetCollection(string regionId) =>

@@ -8,29 +8,23 @@ cd GOZA.Dock
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
 
-## 2. Packages
+Full-featured shell (Crystal DI, layout save/load): `samples/GOZA.Dock.Demo.Desktop`
+
+## 2. Package
 
 ```bash
 dotnet add package GOZA.Dock
-dotnet add package Semi.Avalonia
-dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
 ```
 
-> **MVVM is your choice.** GOZA.Dock only needs `ObservableCollection` + properties for `ItemsSource` / `SelectedItem`. This page uses **CommunityToolkit.Mvvm**; alternatives:
-> - Plain `INotifyPropertyChanged` → `samples/GOZA.Dock.Minimal/`
-> - **Crystal.Avalonia** DI → [Crystal.Avalonia](crystal-avalonia.md)
-> - ReactiveUI / other toolkits — same bindings, swap the view model base.
+Optional: **CommunityToolkit.Mvvm** (this walkthrough), **Crystal.Avalonia** ([integration guide](crystal-avalonia.md)), or plain `INotifyPropertyChanged` — the library only needs bindable collections.
 
-> **Layout persistence is your choice.** The library does not save/load dock state. Demo uses **System.Text.Json** + source generator (AOT-safe). You can use XML, SQLite, or anything else — you own tab collections and grid topology. See [Recipes](recipes.md).
-
-## 3. Files (left + right regions, CommunityToolkit.Mvvm)
+## 3. Minimal app (two regions)
 
 ### App.axaml
 
 ```xml
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:semi="https://irihi.tech/semi"
              xmlns:vm="using:MyApp.ViewModels"
              xmlns:views="using:MyApp.Views"
              x:Class="MyApp.App"
@@ -41,13 +35,12 @@ dotnet add package CommunityToolkit.Mvvm   # optional — see MVVM below
     </DataTemplate>
   </Application.DataTemplates>
   <Application.Styles>
-    <semi:SemiTheme />
     <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
   </Application.Styles>
 </Application>
 ```
 
-> AOT: `StyleInclude` required. See [AOT](aot-compatibility.md).
+> Include `DockShellStyles.axaml` in your app styles (any Avalonia theme). AOT: see [AOT](aot-compatibility.md).
 
 ### PlainTabViewModel.cs
 
@@ -60,19 +53,16 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
     public string Id { get; } = id;
     public string Header { get; } = header;
-    public bool ReuseSurface => false;
 }
 ```
 
-| `IDockTabItem` | Bind / use |
-|----------------|------------|
+| Member | Role |
+|--------|------|
 | `Id` | Stable key; required when `ReuseSurface` is true |
-| `Header` | Tab title text |
-| `ReuseSurface` | Default `false`; set `true` to cache the **view** in the parking lot |
+| `Header` | Tab title |
+| `ReuseSurface` | Default `false`; `true` caches the **view** in the parking lot |
 
-Each tab type is a ViewModel class. Map it to a view with `Application.DataTemplates` (native Avalonia) or Crystal `AddMvvmTransient` — see [Crystal.Avalonia](crystal-avalonia.md).
-
-Reference: `samples/GOZA.Dock.Minimal/` (native DataTemplates + optional `BrowserTabViewModel` with `NativeWebView`).
+Map each tab ViewModel to a view via `DataTemplate` (above) or Crystal `AddMvvmTransient` — see [Crystal.Avalonia](crystal-avalonia.md). Reference: `samples/GOZA.Dock.Minimal/`.
 
 ### MainViewModel.cs
 
@@ -84,17 +74,11 @@ namespace MyApp;
 
 public partial class MainViewModel : ObservableObject
 {
-    /// <summary>Left region tab list → DockRegion ItemsSource.</summary>
     public ObservableCollection<PlainTabViewModel> LeftTabs { get; } = new();
-
-    /// <summary>Right region tab list → DockRegion ItemsSource.</summary>
     public ObservableCollection<PlainTabViewModel> RightTabs { get; } = new();
 
-    [ObservableProperty]
-    private PlainTabViewModel? _leftSelected;
-
-    [ObservableProperty]
-    private PlainTabViewModel? _rightSelected;
+    [ObservableProperty] private PlainTabViewModel? _leftSelected;
+    [ObservableProperty] private PlainTabViewModel? _rightSelected;
 
     public MainViewModel()
     {
@@ -107,8 +91,6 @@ public partial class MainViewModel : ObservableObject
     }
 }
 ```
-
-`[ObservableProperty]` generates `LeftSelected` / `RightSelected` with `INotifyPropertyChanged` for two-way binding.
 
 ### MainWindow.axaml
 
@@ -136,10 +118,6 @@ public partial class MainViewModel : ObservableObject
 ### MainWindow.axaml.cs
 
 ```csharp
-using Avalonia.Controls;
-
-namespace MyApp;
-
 public partial class MainWindow : Window
 {
     public MainWindow()
@@ -150,94 +128,21 @@ public partial class MainWindow : Window
 }
 ```
 
-### App.axaml.cs
+### App.axaml.cs / Program.cs
 
-```csharp
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
+Standard Avalonia desktop bootstrap (`Initialize` + `MainWindow` lifetime). See `samples/GOZA.Dock.Minimal/`.
 
-namespace MyApp;
+## 4. Bindings
 
-public partial class App : Application
-{
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+| ViewModel | `DockRegion` |
+|-----------|--------------|
+| `LeftTabs` / `LeftSelected` | left |
+| `RightTabs` / `RightSelected` | right |
 
-    public override void OnFrameworkInitializationCompleted()
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime d)
-            d.MainWindow = new MainWindow();
-        base.OnFrameworkInitializationCompleted();
-    }
-}
-```
-
-### Program.cs
-
-```csharp
-using Avalonia;
-using System;
-
-namespace MyApp.Desktop;
-
-internal sealed class Program
-{
-    [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
-
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().LogToTrace();
-}
-```
-
-## 4. Bindings in this layout
-
-| ViewModel property | Control property | Region |
-|--------------------|------------------|--------|
-| `LeftTabs` | `DockRegion.ItemsSource` | left |
-| `LeftSelected` | `DockRegion.SelectedItem` | left (TwoWay) |
-| `RightTabs` | `DockRegion.ItemsSource` | right |
-| `RightSelected` | `DockRegion.SelectedItem` | right (TwoWay) |
-
-## 5. All public API (library)
-
-### DockShell
-
-| Member | Type | Notes |
-|--------|------|-------|
-| `EnableParkingLot` | `bool` | Default `true`; parking lot for `ReuseSurface` tabs |
-| `IsLayoutExpanded` | `bool` | Read-only; any region maximized |
-| `Content` | `object?` | Your `Grid` with regions |
-| `ToggleLayoutExpansion(DockRegion)` | method | Same as double-click tab strip |
-
-### DockRegion
-
-| Property | Type | Default | Notes |
-|----------|------|---------|-------|
-| `ItemsSource` | `IEnumerable?` | — | Tab collection (`IDockTabItem`) |
-| `SelectedItem` | `object?` | — | Current tab; bind TwoWay |
-| `ActiveContent` | `object?` | — | Content host; auto-set when `AutoManageContent` |
-| `AutoManageContent` | `bool` | `true` | Sync content from `SelectedItem` |
-| `TabStripPlacement` | `DockTabStripPlacement` | `Top` | `Top` / `Bottom` / `Left` / `Right` |
-
-### DockSplitter
-
-Inherits `GridSplitter`. Sets `ResizeDirection` from gutter column/row (fixed px ≤ 32). Default `ShowsPreview="True"`.
-
-### Optional interfaces
-
-| Interface | Purpose |
-|-----------|---------|
-| `ILayoutExpansionHost` | Implemented by `DockShell` |
-| `IDockRegionSession` | Internal drag hooks on `DockRegion` |
-
-Tab views: register `DataTemplate` per tab ViewModel type (native) or `AddMvvmTransient<View, ViewModel>` (Crystal). No content-factory interface on the library.
-
-Full tree: [Architecture](architecture.md).
+Five-region grid: copy `samples/GOZA.Dock.Minimal/MainWindow.axaml`.
 
 ## Next
 
-Five-region layout → copy `samples/GOZA.Dock.Minimal/MainWindow.axaml`  
-Crystal DI → [Crystal.Avalonia](crystal-avalonia.md)  
-Optional patterns → [Recipes](recipes.md)
+- Public API & internals → [Architecture](architecture.md)
+- Crystal DI shell → [Crystal.Avalonia](crystal-avalonia.md)
+- Drag themes, parking lot, JSON layout → [Recipes](recipes.md)

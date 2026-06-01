@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
+             x:Class="GOZA.Dock.Demo.Views.BrowserTabView"
+             x:DataType="vm:BrowserTabViewModel"
+             HorizontalContentAlignment="Stretch"
+             VerticalContentAlignment="Stretch">
+    <Panel>
+        <NativeWebView HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       IsVisible="{Binding ShowEmbeddedWebView}"
+                       Source="{x:Static vm:BrowserTabViewModel.DefaultUri}" />
+        <StackPanel Margin="16"
+                    Spacing="8"
+                    IsVisible="{Binding ShowBrowserPlaceholder}">
+            <TextBlock FontSize="20"
+                       FontWeight="Bold"
+                       Text="Browser tab (WASM)" />
+            <TextBlock FontSize="16"
+                       TextWrapping="Wrap"
+                       Text="Reusable surface placeholder — NativeWebView is not available in the browser host." />
+            <TextBlock Opacity="0.7"
+                       TextWrapping="Wrap"
+                       Text="Run the Desktop sample for an embedded WebView, or open the URL in a separate tab." />
+        </StackPanel>
+    </Panel>
+</UserControl>

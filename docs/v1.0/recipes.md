@@ -46,7 +46,7 @@ Override after the GOZA.Dock style include:
 
 ```xml
 <Application.Styles>
-  <semi:SemiTheme />
+  <!-- Your Avalonia theme, if any -->
   <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
   <StyleInclude Source="avares://MyApp/DockThemeOverrides.axaml" />
 </Application.Styles>
@@ -100,12 +100,12 @@ Provide a view for that tab type (DataTemplate or Crystal registration). Example
 
 ```xml
 <DataTemplate DataType="vm:BrowserTabViewModel">
-  <views:BrowserPanel />
+  <views:BrowserTabView />
 </DataTemplate>
 ```
 
 ```csharp
-services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
+services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
 ```
 
 Flow: first select → build view → cache by `tab.Id`; deselect → move control to hidden parking lot; reselect → reuse same instance (WebView state preserved).
@@ -142,16 +142,16 @@ Demo: `samples/GOZA.Dock.Demo/Services/DockLayoutPersistence.cs`
 
 Crystal DI shell: [Crystal.Avalonia](crystal-avalonia.md)
 
-## Modular tabs
+## Tab regions (Crystal Demo)
+
+Each tab ViewModel declares its default region; the shell distributes them at startup (or after loading saved layout):
 
 ```csharp
-public interface IDockModule
+public interface IDockTabViewModel : IDockTabItem
 {
-    string Name { get; }
-    IEnumerable<DockTabRegistration> GetRegistrations();
+    string RegionId { get; }
+    bool SelectOnStartup { get; }
 }
 ```
 
-Each registration adds a tab ViewModel instance to a region. Views come from DataTemplate / ViewLocator — not from the module.
-
-Demo: `samples/GOZA.Dock.Demo/Modules/`
+One View per tab + `AddMvvmTransient<View, ViewModel>()`. Demo: `samples/GOZA.Dock.Demo/ViewModels/`, `Views/*TabView.axaml`.

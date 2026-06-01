@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using GOZA.Dock;
 using GOZA.Dock.Demo.Models;
-using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Serialization;
 
 namespace GOZA.Dock.Demo.Services;
@@ -66,7 +65,8 @@ public static class DockLayoutPersistence
     public static void Apply(
         DockLayoutSnapshot snapshot,
         IReadOnlyDictionary<string, ObservableCollection<IDockTabItem>> regions,
-        Action<string, IDockTabItem?> setSelected)
+        Action<string, IDockTabItem?> setSelected,
+        Func<TabSnapshot, IDockTabItem> createTab)
     {
         foreach (var region in snapshot.Regions)
         {
@@ -75,7 +75,7 @@ public static class DockLayoutPersistence
 
             collection.Clear();
             foreach (var tab in region.Tabs)
-                collection.Add(CreateTab(tab));
+                collection.Add(createTab(tab));
 
             IDockTabItem? selected = null;
             if (region.SelectedTabId is not null)
@@ -85,9 +85,4 @@ public static class DockLayoutPersistence
             setSelected(region.RegionId, selected);
         }
     }
-
-    private static IDockTabItem CreateTab(TabSnapshot tab) =>
-        tab.Kind == "Reusable"
-            ? new BrowserTabViewModel(tab.Id, tab.Header)
-            : new PlainTabViewModel(tab.Id, tab.Header);
 }

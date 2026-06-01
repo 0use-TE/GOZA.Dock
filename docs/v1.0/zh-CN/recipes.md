@@ -46,7 +46,7 @@
 
 ```xml
 <Application.Styles>
-  <semi:SemiTheme />
+  <!-- 你的 Avalonia 主题（若有） -->
   <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
   <StyleInclude Source="avares://MyApp/DockThemeOverrides.axaml" />
 </Application.Styles>
@@ -100,12 +100,12 @@ public bool ReuseSurface => true; // IDockTabItem — 缓存的是 Control，不
 
 ```xml
 <DataTemplate DataType="vm:BrowserTabViewModel">
-  <views:BrowserPanel />
+  <views:BrowserTabView />
 </DataTemplate>
 ```
 
 ```csharp
-services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
+services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
 ```
 
 流程：首次选中 → 创建 View → 按 `tab.Id` 缓存；切走 → 控件移入隐藏 Parking Lot；再选中 → 复用同一实例（WebView 状态保留）。
@@ -137,16 +137,16 @@ Demo：`samples/GOZA.Dock.Demo/Services/DockLayoutPersistence.cs`
 
 Crystal DI：[Crystal.Avalonia](crystal-avalonia.md)
 
-## 模块化 Tab
+## Tab 区域（Crystal Demo）
+
+每个 Tab ViewModel 声明默认区域；壳在启动（或加载布局后）按 `RegionId` 分配：
 
 ```csharp
-public interface IDockModule
+public interface IDockTabViewModel : IDockTabItem
 {
-    string Name { get; }
-    IEnumerable<DockTabRegistration> GetRegistrations();
+    string RegionId { get; }
+    bool SelectOnStartup { get; }
 }
 ```
 
-各模块只注册 Tab ViewModel 实例到区域；View 由 DataTemplate / ViewLocator 解析，不由模块创建。
-
-Demo：`samples/GOZA.Dock.Demo/Modules/`
+每 Tab 独立 View + `AddMvvmTransient<View, ViewModel>()`。Demo：`samples/GOZA.Dock.Demo/ViewModels/`、`Views/*TabView.axaml`。

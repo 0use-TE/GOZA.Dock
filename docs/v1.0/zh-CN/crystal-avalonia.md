@@ -1,34 +1,64 @@
 # Crystal.Avalonia
 
-GOZA.Dock **不**依赖 Crystal。本文说明 Crystal 壳 + MVVM DI + `DockShell` 的接法。
+GOZA.Dock **不**依赖 Crystal。本文说明 Demo 如何接 **Crystal DI + 每 Tab 独立 View + `DockShell`**。
 
-Demo：`samples/GOZA.Dock.Demo/`
+示例：`samples/GOZA.Dock.Demo/`
 
 ## 包
 
 ```bash
 dotnet add package GOZA.Dock
 dotnet add package Crystal.Avalonia
-dotnet add package Semi.Avalonia
-dotnet add package Avalonia.Controls.WebView   # 可选 — Desktop WebView Tab
+dotnet add package CommunityToolkit.Mvvm          # Demo ViewModel
+dotnet add package Avalonia.Controls.WebView    # 可选 — Desktop 浏览器 Tab
 ```
 
-## App.axaml
+Demo 另用 Semi.Avalonia 做界面皮肤 — **接 GOZA.Dock / Crystal 不必装**。
+
+## App.axaml（仅库样式）
 
 ```xml
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:semi="https://irihi.tech/semi"
              x:Class="GOZA.Dock.Demo.App"
              RequestedThemeVariant="Default">
   <Application.Styles>
-    <semi:SemiTheme />
     <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
   </Application.Styles>
 </Application>
 ```
 
-Demo 不写 `Application.DataTemplates`，由 Crystal ViewLocator 按 DI 解析 View。
+不写 `Application.DataTemplates`，Tab 视图由 Crystal ViewLocator + DI 解析。
+
+## Tab 约定
+
+每个 Tab 一对 **独立 View + ViewModel**。ViewModel 通过应用层接口实现 `IDockTabItem`：
+
+```csharp
+public interface IDockTabViewModel : IDockTabItem
+{
+    string RegionId { get; }      // 如 DockRegionIds.CenterTop
+    bool SelectOnStartup { get; }
+}
+
+public abstract class DockTabViewModelBase : ObservableObject, IDockTabViewModel
+{
+    protected DockTabViewModelBase(string id, string header, string regionId, bool selectOnStartup = false) { ... }
+    public virtual bool ReuseSurface => false;
+}
+```
+
+示例 — 浏览器 Tab 在 **中上**，默认选中：
+
+```csharp
+public sealed class BrowserTabViewModel : DockTabViewModelBase
+{
+    public BrowserTabViewModel()
+        : base("ct-browser", "Browser", DockRegionIds.CenterTop, selectOnStartup: true) { }
+
+    public override bool ReuseSurface => true;
+}
+```
 
 ## App.axaml.cs
 
@@ -40,70 +70,47 @@ public override void RegisterServices(IServiceCollection services)
     services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
     services.AddMvvmSingleton<MainView, MainViewModel>();
 
-    services.AddMvvmTransient<PlainPanel, PlainTabViewModel>();
-    services.AddMvvmTransient<BrowserPanel, BrowserTabViewModel>();
-
-    services.AddSingleton<IDockModule, HomeDockModule>();
-    services.AddSingleton<IDockModule, AnalyticsDockModule>();
-    services.AddSingleton<IDockModule, OutputDockModule>();
-    services.AddSingleton<IDockModule, ToolsDockModule>();
+    services.AddMvvmTransient<HomeTabView, HomeTabViewModel>();
+    services.AddMvvmTransient<LeftInfoTabView, LeftInfoTabViewModel>();
+    services.AddMvvmTransient<ChartTabView, ChartTabViewModel>();
+    services.AddMvvmTransient<LogTabView, LogTabViewModel>();
+    services.AddMvvmTransient<ToolsTabView, ToolsTabViewModel>();
+    services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
 }
 ```
 
-Tab 选中时 `DockRegion` 调用 `FindDataTemplate(tab)`，Crystal ViewLocator 返回已注册的 View。
+`AddMvvmTransient` 注册具体 ViewModel；`MainViewModel` 构造函数注入各 Tab VM，再按 `RegionId` 放入区域集合。
 
-## Tab ViewModel
+## MainViewModel（摘要）
 
 ```csharp
-public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
+public MainViewModel(
+    HomeTabViewModel home,
+    LeftInfoTabViewModel leftInfo,
+    ChartTabViewModel chart,
+    LogTabViewModel log,
+    ToolsTabViewModel tools,
+    BrowserTabViewModel browser,
+    IServiceProvider serviceProvider)
 {
-    public string Id { get; } = id;
-    public string Header { get; } = header;
-    public bool ReuseSurface => false;
-}
-
-public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
-{
-    public string Id { get; } = id;
-    public string Header { get; } = header;
-    public bool ReuseSurface => true;
-}
-```
-
-## MainViewModel
-
-```csharp
-public partial class MainViewModel : ObservableObject
-{
-    private readonly IReadOnlyList<IDockModule> _modules;
-
-    public ObservableCollection<IDockTabItem> LeftTabs { get; } = new();
-    // CenterTopTabs, CenterBottomTabs, RightTabs ...
-
-    public MainViewModel(IEnumerable<IDockModule> modules)
-    {
-        _modules = modules.ToList();
-        ApplyModuleRegistrations();
-    }
+    _tabs = [home, leftInfo, chart, log, tools, browser];
+    // ApplyDefaultLayout：按 tab.RegionId 加入对应 ObservableCollection
+    // SaveLayoutCommand / LoadLayoutCommand — DockLayoutPersistence JSON
 }
 ```
 
-构造函数注入 `IEnumerable<IDockModule>`，遍历 `GetRegistrations()` 把 Tab ViewModel 分配到各区域集合。
+| 区域集合 | 默认 Tab |
+|----------|----------|
+| `LeftTabs` | Home、Info |
+| `CenterTopTabs` | Browser、Chart |
+| `CenterBottomTabs` | Log |
+| `RightTabs` | Tools |
 
-| 属性 | 绑定 |
-|------|------|
-| `LeftTabs` / `LeftSelected` | 左 `DockRegion` |
-| `CenterTopTabs` / `CenterTopSelected` | 中上区域 |
-| `CenterBottomTabs` / `CenterBottomSelected` | 中下区域 |
-| `RightTabs` / `RightSelected` | 右区域 |
+工具栏：**保存布局**、加载、恢复默认 — 持久化在应用层，非库内置。见 [进阶](recipes.md)。
 
-`DockShell` 的 `EnableParkingLot` 默认为 `true`，无需显式设置。
+## WebView Tab
 
-## WebView Tab（Desktop）
-
-Desktop 上 `BrowserPanel` 嵌入 `NativeWebView`；WASM Demo 为占位（浏览器宿主不支持 `NativeWebView`）。
-
-Desktop 项目需 `app.manifest` 声明 Windows 10+ `supportedOS`，见 [AOT 兼容](aot-compatibility.md)。
+`BrowserTabView.axaml` 在 Desktop 嵌入 `NativeWebView`；WASM 为占位。Desktop 头项目需 `app.manifest` — [AOT](aot-compatibility.md)。
 
 ## 运行
 
@@ -111,4 +118,4 @@ Desktop 项目需 `app.manifest` 声明 Windows 10+ `supportedOS`，见 [AOT 兼
 dotnet run --project samples/GOZA.Dock.Demo.Desktop
 ```
 
-原生 Avalonia（无 Crystal）：`samples/GOZA.Dock.Minimal/` — [快速开始](getting-started.md)
+无 Crystal：[快速开始](getting-started.md) + `samples/GOZA.Dock.Minimal/`。

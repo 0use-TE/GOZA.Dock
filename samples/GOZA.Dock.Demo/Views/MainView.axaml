@@ -13,7 +13,7 @@
                 BorderThickness="0,0,0,1">
             <StackPanel Spacing="8">
                 <TextBlock Opacity="0.8"
-                           Text="Grid + DockRegion + DockSplitter · Crystal DI · modular tabs · JSON layout · Release AOT" />
+                           Text="Grid + DockRegion + DockSplitter · Crystal AddMvvm · JSON layout · Release AOT" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <Button Content="Save layout"
                             Command="{Binding SaveLayoutCommand}" />

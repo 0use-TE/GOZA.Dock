@@ -8,29 +8,23 @@ cd GOZA.Dock
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
 
+完整壳（Crystal DI、布局存盘）：`samples/GOZA.Dock.Demo.Desktop`
+
 ## 2. 包
 
 ```bash
 dotnet add package GOZA.Dock
-dotnet add package Semi.Avalonia
-dotnet add package CommunityToolkit.Mvvm   # 可选 — 见下方 MVVM 说明
 ```
 
-> **MVVM 自选。** GOZA.Dock 只需 `ObservableCollection` + 可绑定属性。本文用 **CommunityToolkit.Mvvm**；也可：
-> - 手写 `INotifyPropertyChanged` → `samples/GOZA.Dock.Minimal/`
-> - **Crystal.Avalonia** DI → [Crystal.Avalonia](crystal-avalonia.md)
-> - ReactiveUI 等 — 绑定相同，换 ViewModel 基类即可。
+可选：**CommunityToolkit.Mvvm**（下文）、**Crystal.Avalonia**（[集成说明](crystal-avalonia.md)），或手写 `INotifyPropertyChanged` — 库只需可绑定的集合。
 
-> **布局持久化自选。** 库不内置存盘。Demo 用 **System.Text.Json** + Source Generator（AOT 安全）。也可用 XML、SQLite 等 — Tab 集合与 Grid 拓扑由应用负责。见 [进阶](recipes.md)。
-
-## 3. 文件（左右两区域，CommunityToolkit.Mvvm）
+## 3. 最小应用（左右两区域）
 
 ### App.axaml
 
 ```xml
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:semi="https://irihi.tech/semi"
              xmlns:vm="using:MyApp.ViewModels"
              xmlns:views="using:MyApp.Views"
              x:Class="MyApp.App"
@@ -41,13 +35,12 @@ dotnet add package CommunityToolkit.Mvvm   # 可选 — 见下方 MVVM 说明
     </DataTemplate>
   </Application.DataTemplates>
   <Application.Styles>
-    <semi:SemiTheme />
     <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
   </Application.Styles>
 </Application>
 ```
 
-> AOT：`StyleInclude` 必须。见 [AOT](aot-compatibility.md)。
+> 在应用样式中 Include `DockShellStyles.axaml`（与所用 Avalonia 主题无关）。AOT 见 [AOT 兼容](aot-compatibility.md)。
 
 ### PlainTabViewModel.cs
 
@@ -60,19 +53,16 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
     public string Id { get; } = id;
     public string Header { get; } = header;
-    public bool ReuseSurface => false;
 }
 ```
 
-| `IDockTabItem` | 用途 |
-|----------------|------|
+| 成员 | 作用 |
+|------|------|
 | `Id` | 稳定键；`ReuseSurface` 时必填 |
 | `Header` | Tab 标题 |
-| `ReuseSurface` | 默认 `false`；设为 `true` 时在 Parking Lot 缓存 **视图控件** |
+| `ReuseSurface` | 默认 `false`；`true` 在 Parking Lot 缓存 **视图控件** |
 
-每种 Tab 对应一个 ViewModel 类型。用 `Application.DataTemplates`（原生 Avalonia）或 Crystal `AddMvvmTransient` 映射到 View。见 [Crystal.Avalonia](crystal-avalonia.md)。
-
-参考：`samples/GOZA.Dock.Minimal/`（原生 DataTemplate + 可选 `BrowserTabViewModel` / `NativeWebView`）。
+每种 Tab 用 `DataTemplate`（上文）或 Crystal `AddMvvmTransient` 映射 View。见 [Crystal.Avalonia](crystal-avalonia.md)。参考：`samples/GOZA.Dock.Minimal/`。
 
 ### MainViewModel.cs
 
@@ -84,17 +74,11 @@ namespace MyApp;
 
 public partial class MainViewModel : ObservableObject
 {
-    /// <summary>左区域 Tab 列表 → DockRegion ItemsSource。</summary>
     public ObservableCollection<PlainTabViewModel> LeftTabs { get; } = new();
-
-    /// <summary>右区域 Tab 列表 → DockRegion ItemsSource。</summary>
     public ObservableCollection<PlainTabViewModel> RightTabs { get; } = new();
 
-    [ObservableProperty]
-    private PlainTabViewModel? _leftSelected;
-
-    [ObservableProperty]
-    private PlainTabViewModel? _rightSelected;
+    [ObservableProperty] private PlainTabViewModel? _leftSelected;
+    [ObservableProperty] private PlainTabViewModel? _rightSelected;
 
     public MainViewModel()
     {
@@ -107,8 +91,6 @@ public partial class MainViewModel : ObservableObject
     }
 }
 ```
-
-`[ObservableProperty]` 自动生成 `LeftSelected` / `RightSelected` 及变更通知，供双向绑定。
 
 ### MainWindow.axaml
 
@@ -136,10 +118,6 @@ public partial class MainViewModel : ObservableObject
 ### MainWindow.axaml.cs
 
 ```csharp
-using Avalonia.Controls;
-
-namespace MyApp;
-
 public partial class MainWindow : Window
 {
     public MainWindow()
@@ -150,94 +128,21 @@ public partial class MainWindow : Window
 }
 ```
 
-### App.axaml.cs
+### App.axaml.cs / Program.cs
 
-```csharp
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
+标准 Avalonia 桌面启动。见 `samples/GOZA.Dock.Minimal/`。
 
-namespace MyApp;
+## 4. 绑定
 
-public partial class App : Application
-{
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+| ViewModel | `DockRegion` |
+|-----------|--------------|
+| `LeftTabs` / `LeftSelected` | 左 |
+| `RightTabs` / `RightSelected` | 右 |
 
-    public override void OnFrameworkInitializationCompleted()
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime d)
-            d.MainWindow = new MainWindow();
-        base.OnFrameworkInitializationCompleted();
-    }
-}
-```
-
-### Program.cs
-
-```csharp
-using Avalonia;
-using System;
-
-namespace MyApp.Desktop;
-
-internal sealed class Program
-{
-    [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
-
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().LogToTrace();
-}
-```
-
-## 4. 本布局绑定关系
-
-| ViewModel 属性 | 控件属性 | 区域 |
-|----------------|----------|------|
-| `LeftTabs` | `DockRegion.ItemsSource` | 左 |
-| `LeftSelected` | `DockRegion.SelectedItem` | 左（TwoWay） |
-| `RightTabs` | `DockRegion.ItemsSource` | 右 |
-| `RightSelected` | `DockRegion.SelectedItem` | 右（TwoWay） |
-
-## 5. 库公开 API
-
-### DockShell
-
-| 成员 | 类型 | 说明 |
-|------|------|------|
-| `EnableParkingLot` | `bool` | 默认 `true`；为 `ReuseSurface` Tab 启用 Parking Lot |
-| `IsLayoutExpanded` | `bool` | 只读；是否有区域最大化 |
-| `Content` | `object?` | 放置 `Grid` |
-| `ToggleLayoutExpansion` | 方法 | 同双击 Tab 条 |
-
-### DockRegion
-
-| 属性 | 类型 | 默认 | 说明 |
-|------|------|------|------|
-| `ItemsSource` | `IEnumerable?` | — | Tab 集合 |
-| `SelectedItem` | `object?` | — | 当前 Tab；TwoWay 绑定 |
-| `ActiveContent` | `object?` | — | 内容区；`AutoManageContent` 时自动更新 |
-| `AutoManageContent` | `bool` | `true` | 随选中 Tab 更新内容 |
-| `TabStripPlacement` | `DockTabStripPlacement` | `Top` | 上/下/左/右 |
-
-### DockSplitter
-
-继承 `GridSplitter`，根据分割条列/行（固定 px ≤ 32）自动设置方向。
-
-### 可选接口
-
-| 接口 | 作用 |
-|------|------|
-| `ILayoutExpansionHost` | `DockShell` 布局展开 |
-| `IDockRegionSession` | 拖拽回调 |
-
-Tab 视图：为每种 Tab ViewModel 注册 `DataTemplate`（原生）或 `AddMvvmTransient<View, ViewModel>`（Crystal）。库内无内容工厂接口。
-
-详见 [架构](architecture.md)。
+五区域 Grid：复制 `samples/GOZA.Dock.Minimal/MainWindow.axaml`。
 
 ## 下一步
 
-五区域布局 → 复制 `samples/GOZA.Dock.Minimal/MainWindow.axaml`  
-Crystal DI → [Crystal.Avalonia](crystal-avalonia.md)  
-可选模式 → [进阶](recipes.md)
+- 公开 API 与内部结构 → [架构](architecture.md)
+- Crystal DI → [Crystal.Avalonia](crystal-avalonia.md)
+- 拖拽主题、Parking Lot、JSON 布局 → [进阶](recipes.md)
