@@ -6,6 +6,8 @@
   href: crystal-avalonia.md
 - name: Architecture
   href: architecture.md
+- name: Release notes
+  href: release-notes.md
 - name: AOT
   href: aot-compatibility.md
 - name: Recipes

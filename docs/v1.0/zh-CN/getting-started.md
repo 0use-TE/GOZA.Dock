@@ -13,8 +13,10 @@ dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ## 2. 包
 
 ```bash
-dotnet add package GOZA.Dock
+dotnet add package GOZA.Dock --version 1.0.1
 ```
+
+**需要应用引用 [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+。** GOZA.Dock 本身无其他 NuGet 依赖。
 
 可选：**CommunityToolkit.Mvvm**（下文）、**Crystal.Avalonia**（[集成说明](crystal-avalonia.md)），或手写 `INotifyPropertyChanged` — 库只需可绑定的集合。
 

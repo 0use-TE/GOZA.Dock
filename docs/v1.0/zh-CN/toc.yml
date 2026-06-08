@@ -6,6 +6,8 @@
   href: crystal-avalonia.md
 - name: 架构
   href: architecture.md
+- name: 发布说明
+  href: release-notes.md
 - name: AOT
   href: aot-compatibility.md
 - name: 进阶

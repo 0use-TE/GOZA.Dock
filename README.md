@@ -24,9 +24,10 @@ Run the desktop sample:
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
 
-Install the package:
+Install the package (requires **Avalonia 12.0.0+** in your app):
+
 ```bash
-dotnet add package GOZA.Dock
+dotnet add package GOZA.Dock --version 1.0.1
 ```
 
 Documentation and demos

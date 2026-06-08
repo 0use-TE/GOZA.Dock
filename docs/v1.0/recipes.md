@@ -108,7 +108,7 @@ Provide a view for that tab type (DataTemplate or Crystal registration). Example
 services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
 ```
 
-Flow: first select → build view → cache by `tab.Id`; deselect → move control to hidden parking lot; reselect → reuse same instance (WebView state preserved).
+Flow: first select → build view → cache by `tab.Id`; deselect → move control to hidden parking lot; reselect → reuse same instance (WebView state preserved). **One cached control per `Id`** in a `DockShell`; multiple tabs can use `ReuseSurface` with different ids. Matching uses **`Id`**, not VM reference — safe after layout restore when the tab VM instance changes.
 
 ## Custom tab content (native Avalonia)
 

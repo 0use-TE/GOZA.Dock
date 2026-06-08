@@ -13,8 +13,10 @@ Full-featured shell (Crystal DI, layout save/load): `samples/GOZA.Dock.Demo.Desk
 ## 2. Package
 
 ```bash
-dotnet add package GOZA.Dock
+dotnet add package GOZA.Dock --version 1.0.1
 ```
+
+**Requires [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+** in your app. GOZA.Dock has no other NuGet dependencies.
 
 Optional: **CommunityToolkit.Mvvm** (this walkthrough), **Crystal.Avalonia** ([integration guide](crystal-avalonia.md)), or plain `INotifyPropertyChanged` — the library only needs bindable collections.
 

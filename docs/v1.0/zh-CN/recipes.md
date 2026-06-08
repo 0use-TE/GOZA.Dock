@@ -108,7 +108,7 @@ public bool ReuseSurface => true; // IDockTabItem — 缓存的是 Control，不
 services.AddMvvmTransient<BrowserTabView, BrowserTabViewModel>();
 ```
 
-流程：首次选中 → 创建 View → 按 `tab.Id` 缓存；切走 → 控件移入隐藏 Parking Lot；再选中 → 复用同一实例（WebView 状态保留）。
+流程：首次选中 → 创建 View → 按 `tab.Id` 缓存；切走 → 控件移入隐藏 Parking Lot；再选中 → 复用同一实例（WebView 状态保留）。**每个 `Id` 在 `DockShell` 内各缓存一个控件**；多个 Tab 可设 `ReuseSurface` 且 `Id` 不同。匹配按 **`Id`**，不要求 VM 为同一引用 — 布局恢复后 VM 实例变化仍可复用。
 
 ## 自定义 Tab 内容（原生 Avalonia）
 

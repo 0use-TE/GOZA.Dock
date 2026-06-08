@@ -15,4 +15,7 @@
       <Deploy />
     </Project>
   </Folder>
+  <Folder Name="/解决方案项/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
 </Solution>

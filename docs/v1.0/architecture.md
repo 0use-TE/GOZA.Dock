@@ -51,7 +51,7 @@ Tab **views** are not created via a library factory. Map each tab ViewModel type
 | `DockRegionDragCoordinator` | Drop hints, hit-test, cross-region insert |
 | `TabContainerDragController` | Pointer drag, reorder, capture-lost recovery |
 | `DockDragInteractionGuard` | Block cross-drop after collapse |
-| `DockViewHost` | Parking lot activate/release (caches `Control`, keyed by `tab.Id`) |
+| `DockViewHost` | Parking lot activate/release（按 `tab.Id` 缓存 `Control`；`Release`/`Activate` 以 Id 匹配，`Activate` 刷新 `DataContext`） |
 
 ## Content flow
 
@@ -60,7 +60,7 @@ Tab **views** are not created via a library factory. Map each tab ViewModel type
 1. `SelectedItem` changes
 2. `DockTabContentBuilder.Build` looks up a `DataTemplate` for the tab ViewModel (app-level or Crystal ViewLocator)
 3. Built `Control` gets `DataContext = tab`
-4. If `ReuseSurface` + parking lot enabled → `DockViewHost.Activate` reuses cached control by `Id`
+4. If `ReuseSurface` + parking lot enabled → `DockViewHost.Activate` reuses cached control by **`Id`** and sets `DataContext = tab`
 5. If no template → default centered `Header` text
 
 ## Layout expansion

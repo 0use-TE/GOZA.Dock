@@ -51,7 +51,7 @@ Tab **视图**不由库内工厂创建。用 Avalonia `DataTemplate` 或 Crystal
 | `DockRegionDragCoordinator` | 拖放提示、命中、跨区域插入 |
 | `TabContainerDragController` | 指针拖拽、捕获丢失恢复 |
 | `DockDragInteractionGuard` | 折叠后禁止误 drop |
-| `DockViewHost` | Parking Lot 激活/释放（按 `tab.Id` 缓存 `Control`） |
+| `DockViewHost` | Parking Lot 激活/释放（按 `tab.Id` 缓存 `Control`；`Release`/`Activate` 以 Id 匹配，`Activate` 刷新 `DataContext`） |
 
 ## 内容流
 
@@ -60,7 +60,7 @@ Tab **视图**不由库内工厂创建。用 Avalonia `DataTemplate` 或 Crystal
 1. `SelectedItem` 变化
 2. `DockTabContentBuilder.Build` 查找 Tab ViewModel 的 `DataTemplate`（应用级或 Crystal ViewLocator）
 3. 生成的 `Control` 设置 `DataContext = tab`
-4. 若 `ReuseSurface` 且 Parking Lot 开启 → `DockViewHost.Activate` 按 `Id` 复用缓存控件
+4. 若 `ReuseSurface` 且 Parking Lot 开启 → `DockViewHost.Activate` 按 **`Id`** 复用缓存控件并设置 `DataContext = tab`
 5. 无模板 → 居中显示 `Header` 文本
 
 ## 布局展开
