@@ -32,6 +32,8 @@ public sealed class TabContainerDragController : IDisposable
     private Point _startPosTab;
     private Point _startPosOverlay;
     private Point _ghostStartPos;
+    private Point _grabOffsetInContainer;
+    private Point _grabOffsetInGhost;
 
     private Control? _draggedContainer;
     private Border? _dragGhost;
@@ -232,15 +234,13 @@ public sealed class TabContainerDragController : IDisposable
 
         _pressPending = true;
         _activeController = this;
+        _grabOffsetInContainer = e.GetPosition(_draggedContainer);
         _draggedWidth = _draggedContainer.Bounds.Width;
         _draggedHeight = _draggedContainer.Bounds.Height;
 
         _startPosRegion = e.GetPosition(_host);
         _startPosTab = e.GetPosition(_tabSelector);
         _startPosOverlay = e.GetPosition(_overlayLayer);
-
-        var absolutePos = _draggedContainer.TranslatePoint(new Point(0, 0), _overlayLayer);
-        _ghostStartPos = absolutePos ?? new Point(0, 0);
 
         _capturedPointer = e.Pointer;
         AttachTopLevelHandlers();
@@ -285,7 +285,7 @@ public sealed class TabContainerDragController : IDisposable
     {
         CancelLongPressTimer();
         if (_pressPending && !_visualDragActive)
-            ActivateVisualDrag();
+            ActivateVisualDrag(_startPosOverlay);
     }
 
     private void CancelLongPressTimer()
@@ -297,7 +297,7 @@ public sealed class TabContainerDragController : IDisposable
         _longPressTimer = null;
     }
 
-    private void ActivateVisualDrag()
+    private void ActivateVisualDrag(Point overlayPointerPos)
     {
         if (_draggedContainer is null
             || _overlayLayer is null
@@ -309,10 +309,16 @@ public sealed class TabContainerDragController : IDisposable
         _pressPending = false;
         _visualDragActive = true;
 
-        var width = Math.Ceiling(_draggedContainer.Bounds.Width);
-        var height = Math.Ceiling(_draggedContainer.Bounds.Height);
+        UpdateDragMetrics(dragItem);
+        _grabOffsetInGhost = ComputeGrabOffsetInGhost();
+        _ghostStartPos = new Point(
+            overlayPointerPos.X - _grabOffsetInGhost.X,
+            overlayPointerPos.Y - _grabOffsetInGhost.Y);
 
-        _dragGhost = CreateDragGhost(width, height, dragItem);
+        var width = Math.Ceiling(_draggedWidth);
+        var height = Math.Ceiling(_draggedHeight);
+
+        _dragGhost = CreateDragGhost(width, height, dragItem, forceHorizontal: !IsHorizontalTabStrip);
         _dragGhost.RenderTransform = new TranslateTransform(_ghostStartPos.X, _ghostStartPos.Y);
 
         _overlayLayer.Children.Add(_dragGhost);
@@ -335,7 +341,7 @@ public sealed class TabContainerDragController : IDisposable
                 return;
 
             CancelLongPressTimer();
-            ActivateVisualDrag();
+            ActivateVisualDrag(e.GetPosition(_overlayLayer));
         }
 
         if (!_visualDragActive
@@ -347,8 +353,6 @@ public sealed class TabContainerDragController : IDisposable
         }
 
         var currentPosOverlay = e.GetPosition(_overlayLayer);
-        double overlayDeltaX = currentPosOverlay.X - _startPosOverlay.X;
-        double overlayDeltaY = currentPosOverlay.Y - _startPosOverlay.Y;
 
         var currentPosTab = e.GetPosition(_tabSelector);
         double localDeltaX = currentPosTab.X - _startPosTab.X;
@@ -360,8 +364,8 @@ public sealed class TabContainerDragController : IDisposable
         if (_dragGhost.RenderTransform is not TranslateTransform ghostTt)
             return;
 
-        ghostTt.X = _ghostStartPos.X + overlayDeltaX;
-        ghostTt.Y = _ghostStartPos.Y + overlayDeltaY;
+        ghostTt.X = currentPosOverlay.X - _grabOffsetInGhost.X;
+        ghostTt.Y = currentPosOverlay.Y - _grabOffsetInGhost.Y;
 
         var topLevel = TopLevel.GetTopLevel(_host);
         var pointerPos = topLevel is not null ? e.GetPosition(topLevel) : default;
@@ -394,8 +398,6 @@ public sealed class TabContainerDragController : IDisposable
     {
         if (horizontalStrip)
         {
-            ghostTt.Y = _ghostStartPos.Y;
-
             double myVirtualLeft = _draggedContainer!.Bounds.X + localDeltaX;
             double myVirtualRight = myVirtualLeft + _draggedWidth;
 
@@ -416,8 +418,6 @@ public sealed class TabContainerDragController : IDisposable
         }
         else
         {
-            ghostTt.X = _ghostStartPos.X;
-
             double myVirtualTop = _draggedContainer!.Bounds.Y + localDeltaY;
             double myVirtualBottom = myVirtualTop + _draggedHeight;
 
@@ -771,7 +771,55 @@ public sealed class TabContainerDragController : IDisposable
         _globalDraggedItem = null;
     }
 
-    private static Border CreateDragGhost(double width, double height, IDockTabItem dragItem)
+    private Point ComputeGrabOffsetInGhost()
+    {
+        if (_draggedContainer is null)
+            return default;
+
+        if (IsHorizontalTabStrip)
+        {
+            return new Point(
+                Math.Clamp(_grabOffsetInContainer.X, 0, _draggedWidth),
+                Math.Clamp(_grabOffsetInContainer.Y, 0, _draggedHeight));
+        }
+
+        var containerWidth = Math.Max(1, _draggedContainer.Bounds.Width);
+        var containerHeight = Math.Max(1, _draggedContainer.Bounds.Height);
+        var relativeX = _grabOffsetInContainer.X / containerWidth;
+        var relativeY = _grabOffsetInContainer.Y / containerHeight;
+
+        return new Point(
+            Math.Clamp(relativeX * _draggedWidth, 0, _draggedWidth),
+            Math.Clamp(relativeY * _draggedHeight, 0, _draggedHeight));
+    }
+
+    private void UpdateDragMetrics(IDockTabItem? dragItem)
+    {
+        if (_draggedContainer is null)
+            return;
+
+        if (IsHorizontalTabStrip)
+        {
+            _draggedWidth = _draggedContainer.Bounds.Width;
+            _draggedHeight = _draggedContainer.Bounds.Height;
+            return;
+        }
+
+        _draggedWidth = EstimateHorizontalGhostWidth(dragItem?.Header);
+        _draggedHeight = 28;
+    }
+
+    private static double EstimateHorizontalGhostWidth(string? header)
+    {
+        var length = string.IsNullOrWhiteSpace(header) ? 4 : header.Length;
+        return Math.Clamp(48 + length * 7, 72, 220);
+    }
+
+    private static Border CreateDragGhost(
+        double width,
+        double height,
+        IDockTabItem dragItem,
+        bool forceHorizontal)
     {
         return new Border
         {
@@ -789,7 +837,10 @@ public sealed class TabContainerDragController : IDisposable
             Child = new TextBlock
             {
                 Margin = new Thickness(8, 4),
+                HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
+                TextAlignment = forceHorizontal ? TextAlignment.Center : TextAlignment.Left,
+                TextWrapping = forceHorizontal ? TextWrapping.NoWrap : TextWrapping.Wrap,
                 Foreground = DockThemeBrushHelper.Resolve(
                     DockThemeResources.DragGhostForegroundBrush,
                     DockThemeBrushHelper.DragGhostForegroundFallback()),

@@ -59,6 +59,8 @@
           <Grid Grid.Column="2" RowDefinitions="*,8,*">
             <DockRegion Grid.Row="0"
                         TabStripPlacement="Top"
+                        ShowAddDoc="True"
+                        AddDocCommand="{Binding AddDocCommand}"
                         ItemsSource="{Binding CenterTopTabs}"
                         SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
 

@@ -17,6 +17,7 @@ public partial class App : CrystalApplication
         services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
         services.AddMvvmSingleton<MainView, MainViewModel>();
 
+        services.AddMvvmTransient<DynamicDocTabView, DynamicDocTabViewModel>();
         services.AddMvvmTransient<GuideTabView, GuideTabViewModel>();
         services.AddMvvmTransient<HomeTabView, HomeTabViewModel>();
         services.AddMvvmTransient<LeftInfoTabView, LeftInfoTabViewModel>();

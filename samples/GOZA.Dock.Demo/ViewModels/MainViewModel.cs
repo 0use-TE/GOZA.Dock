@@ -12,7 +12,20 @@ namespace GOZA.Dock.Demo.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    private static readonly string[] DocTitlePrefixes =
+    [
+        "Notes",
+        "Report",
+        "Preview",
+        "Snippet",
+        "Draft",
+        "Memo",
+        "Outline",
+    ];
+
     private readonly IReadOnlyList<IDockTabViewModel> _tabs;
+    private readonly List<DynamicDocTabViewModel> _dynamicTabs = [];
+    private int _docSerial;
 
     public HomeTabViewModel HomeTab { get; }
     public LeftInfoTabViewModel InfoTab { get; }
@@ -118,6 +131,23 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void AddDoc()
+    {
+        var serial = ++_docSerial;
+        var prefix = DocTitlePrefixes[Random.Shared.Next(DocTitlePrefixes.Length)];
+        var header = $"{prefix} {serial}";
+        var tab = new DynamicDocTabViewModel(
+            $"ct-doc-{serial}",
+            header,
+            DockRegionIds.CenterTop,
+            $"Random document #{serial}. Close with × or drag it to another region.");
+
+        _dynamicTabs.Add(tab);
+        OpenTab(tab, tab.RegionId, select: true);
+        Notify("Notice", $"Added \"{header}\".");
+    }
+
+    [RelayCommand]
     private void ToggleTheme()
     {
         if (Application.Current is not Application app)
@@ -217,11 +247,31 @@ public partial class MainViewModel : ObservableObject
         if (snapshot.Id is "ct-guide" or "right-guide")
             return GuideTab;
 
+        if (snapshot.Id.StartsWith("ct-doc-", StringComparison.Ordinal))
+            return RestoreDynamicTab(snapshot);
+
         throw new InvalidOperationException($"Unknown tab id '{snapshot.Id}' in saved layout.");
+    }
+
+    private DynamicDocTabViewModel RestoreDynamicTab(TabSnapshot snapshot)
+    {
+        if (int.TryParse(snapshot.Id.AsSpan("ct-doc-".Length), out var serial))
+            _docSerial = Math.Max(_docSerial, serial);
+
+        var tab = new DynamicDocTabViewModel(
+            snapshot.Id,
+            snapshot.Header,
+            DockRegionIds.CenterTop,
+            $"Restored document \"{snapshot.Header}\".");
+
+        _dynamicTabs.Add(tab);
+        return tab;
     }
 
     private void ClearAllRegions()
     {
+        _dynamicTabs.Clear();
+
         LeftSelected = null;
         CenterTopSelected = null;
         CenterBottomSelected = null;

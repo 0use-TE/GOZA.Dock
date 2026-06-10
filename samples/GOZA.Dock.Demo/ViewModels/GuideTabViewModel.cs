@@ -30,10 +30,12 @@ public sealed partial class GuideTabViewModel : ObservableObject, IDockTabViewMo
     [ObservableProperty]
     private string _basics =
         "• View menu: open document tabs\n" +
+        "• + on a region: add a random closable document\n" +
         "• × on a tab: close closable documents\n" +
         "• Drag tabs: reorder or move across DockRegions\n" +
         "• Layout menu: save / load / reset layout\n" +
-        "• Set TabStripPlacement on each DockRegion";
+        "• Set TabStripPlacement on each DockRegion\n" +
+        "• Left/right strips stack header letters vertically by default (DockShell.UseVerticalTabHeaders)";
 
     [ObservableProperty]
     private string _integrationTitle = "Integration (short)";

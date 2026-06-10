@@ -34,6 +34,12 @@ public class DockShell : ContentControl, ILayoutExpansionHost
     public static readonly StyledProperty<bool> EnableParkingLotProperty =
         AvaloniaProperty.Register<DockShell, bool>(nameof(EnableParkingLot), true);
 
+    /// <summary>
+    /// When true (default), left/right tab strips stack header letters vertically with the close button at the bottom.
+    /// </summary>
+    public static readonly StyledProperty<bool> UseVerticalTabHeadersProperty =
+        AvaloniaProperty.Register<DockShell, bool>(nameof(UseVerticalTabHeaders), true);
+
     static DockShell()
     {
         EnableParkingLotProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.TrySetupParkingLot());
@@ -44,6 +50,13 @@ public class DockShell : ContentControl, ILayoutExpansionHost
     {
         get => GetValue(EnableParkingLotProperty);
         set => SetValue(EnableParkingLotProperty, value);
+    }
+
+    /// <inheritdoc cref="UseVerticalTabHeadersProperty"/>
+    public bool UseVerticalTabHeaders
+    {
+        get => GetValue(UseVerticalTabHeadersProperty);
+        set => SetValue(UseVerticalTabHeadersProperty, value);
     }
 
     /// <inheritdoc />

@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
+             x:Class="GOZA.Dock.Demo.Views.DynamicDocTabView"
+             x:DataType="vm:DynamicDocTabViewModel">
+  <ScrollViewer Padding="20">
+    <StackPanel MaxWidth="640" Spacing="12">
+      <TextBlock FontSize="20"
+                 FontWeight="SemiBold"
+                 Text="{Binding Header}" />
+      <TextBlock LineHeight="22"
+                 Opacity="0.85"
+                 Text="{Binding Body}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

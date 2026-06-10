@@ -50,6 +50,19 @@ public partial class DockRegion : UserControl, IDockRegionSession
     public static readonly StyledProperty<bool> ShowAddDocProperty =
         AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowAddDoc));
 
+    /// <summary>
+    /// Per-region override for stacked vertical tab headers. When null, inherits
+    /// <see cref="DockShell.UseVerticalTabHeaders"/>.
+    /// </summary>
+    public static readonly StyledProperty<bool?> UseVerticalTabHeadersProperty =
+        AvaloniaProperty.Register<DockRegion, bool?>(nameof(UseVerticalTabHeaders));
+
+    /// <summary>Identifies the <see cref="VerticalTabHeader"/> property.</summary>
+    public static readonly DirectProperty<DockRegion, bool> VerticalTabHeaderProperty =
+        AvaloniaProperty.RegisterDirect<DockRegion, bool>(
+            nameof(VerticalTabHeader),
+            region => region.VerticalTabHeader);
+
     /// <summary>Identifies the <see cref="HeaderPlacement"/> property (alias of <see cref="TabStripPlacement"/>).</summary>
     public static readonly StyledProperty<DockTabStripPlacement> HeaderPlacementProperty =
         AvaloniaProperty.Register<DockRegion, DockTabStripPlacement>(nameof(HeaderPlacement), DockTabStripPlacement.Top);
@@ -66,7 +79,11 @@ public partial class DockRegion : UserControl, IDockRegionSession
         {
             if (e.NewValue is DockTabStripPlacement placement)
                 region.SetCurrentValue(HeaderPlacementProperty, placement);
+            region.UpdateVerticalTabHeader();
         });
+
+        UseVerticalTabHeadersProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateVerticalTabHeader());
     }
 
     private Grid? _layoutGrid;
@@ -82,6 +99,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private Border? _dropHint;
     private TabContainerDragController? _dragController;
     private object? _previousSelected;
+    private DockShell? _hostShell;
+    private bool _verticalTabHeader;
 
     public DockRegion()
     {
@@ -180,11 +199,34 @@ public partial class DockRegion : UserControl, IDockRegionSession
         set => SetValue(ShowAddDocProperty, value);
     }
 
+    /// <inheritdoc cref="UseVerticalTabHeadersProperty"/>
+    public bool? UseVerticalTabHeaders
+    {
+        get => GetValue(UseVerticalTabHeadersProperty);
+        set => SetValue(UseVerticalTabHeadersProperty, value);
+    }
+
+    /// <summary>Effective stacked-letter header mode for the current tab strip placement.</summary>
+    public bool VerticalTabHeader => _verticalTabHeader;
+
     /// <summary>Discards a cached reusable surface after the tab is removed from <see cref="ItemsSource"/>.</summary>
     public void EvictTabSurface(IDockTabItem tab)
     {
         if (tab.ReuseSurface)
             ResolveViewHost()?.Evict(tab.Id);
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        AttachShellHeaderSubscription();
+        UpdateVerticalTabHeader();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        _hostShell = null;
+        base.OnDetachedFromVisualTree(e);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -300,6 +342,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
         tabStrip.TabStripPlacement = TabStripPlacement.ToAvaloniaDock();
         ApplyTabStripSeparator(tabStripHost, contentPane);
+        UpdateVerticalTabHeader();
     }
 
     /// <summary>Draws a 1px edge between the tab strip host and content (theme-agnostic gray).</summary>
@@ -422,16 +465,35 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private bool ContainsItem(object item) =>
         ItemsSource?.Cast<object>().Any(x => ReferenceEquals(x, item)) == true;
 
-    private void OnTabCloseClick(object? sender, RoutedEventArgs e)
+    internal void RequestCloseTab(IDockTabItem tab)
     {
-        e.Handled = true;
-
-        if (sender is not Control { DataContext: IDockTabItem tab } || !tab.IsClosable)
+        if (!tab.IsClosable)
             return;
 
         RemoveTab(tab);
         EvictTabSurface(tab);
         CloseTabCommand?.Execute(tab);
+    }
+
+    private void AttachShellHeaderSubscription() =>
+        _hostShell = this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
+
+    private void UpdateVerticalTabHeader()
+    {
+        var value = ComputeVerticalTabHeader();
+        if (value == _verticalTabHeader)
+            return;
+
+        _verticalTabHeader = value;
+        RaisePropertyChanged(VerticalTabHeaderProperty, !value, value);
+    }
+
+    private bool ComputeVerticalTabHeader()
+    {
+        if (TabStripPlacement.IsHorizontal())
+            return false;
+
+        return UseVerticalTabHeaders ?? _hostShell?.UseVerticalTabHeaders ?? true;
     }
 
     private void OnAddDocClick(object? sender, RoutedEventArgs e)

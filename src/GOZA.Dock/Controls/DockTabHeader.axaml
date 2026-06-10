@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:GOZA.Dock.Controls"
+             x:Class="GOZA.Dock.Controls.DockTabHeader"
+             x:Name="Root">
+  <Grid>
+    <Grid x:Name="HorizontalPanel"
+          ColumnDefinitions="*,Auto"
+          IsVisible="{Binding !IsVertical, ElementName=Root}">
+      <TextBlock Grid.Column="0"
+                 Margin="8,4"
+                 VerticalAlignment="Center"
+                 Text="{Binding Header, ElementName=Root}" />
+      <Button Grid.Column="1"
+              Classes="dock-tab-close"
+              IsVisible="{Binding IsClosable, ElementName=Root}"
+              Click="OnCloseClick">
+        <controls:DockChromeIcon Kind="Close"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+      </Button>
+    </Grid>
+
+    <StackPanel x:Name="VerticalPanel"
+                Margin="4,6"
+                HorizontalAlignment="Center"
+                Spacing="2"
+                IsVisible="{Binding IsVertical, ElementName=Root}">
+      <ItemsControl ItemsSource="{Binding Letters, ElementName=Root}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <TextBlock HorizontalAlignment="Center"
+                       FontSize="12"
+                       LineHeight="14"
+                       Text="{Binding}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Spacing="1" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+      </ItemsControl>
+      <Button Margin="0,4,0,0"
+              Classes="dock-tab-close dock-tab-close-vertical"
+              HorizontalAlignment="Center"
+              IsVisible="{Binding IsClosable, ElementName=Root}"
+              Click="OnCloseClick">
+        <controls:DockChromeIcon Kind="Close"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+      </Button>
+    </StackPanel>
+  </Grid>
+</UserControl>

@@ -1,66 +1,60 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="using:GOZA.Dock.Controls"
-             xmlns:dock="using:GOZA.Dock"
-             x:Class="GOZA.Dock.Controls.DockRegion"
-             HorizontalAlignment="Stretch"
-             VerticalAlignment="Stretch"
-             MinWidth="20"
-             MinHeight="20">
-  <Grid x:Name="LayoutGrid">
-    <Border x:Name="TabStripHost">
-      <Grid x:Name="TabStripLayout">
-      <TabControl x:Name="TabStrip"
-                  ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=DockRegion}}"
-                  SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DockRegion}, Mode=TwoWay}">
-        <TabControl.ItemTemplate>
-          <DataTemplate x:DataType="dock:IDockTabItem">
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0"
-                         Margin="8,4"
-                         VerticalAlignment="Center"
-                         Text="{Binding Header}" />
-              <Button Grid.Column="1"
-                      Classes="dock-tab-close"
-                      Content="×"
-                      IsVisible="{Binding IsClosable}"
-                      Click="OnTabCloseClick" />
-            </Grid>
-          </DataTemplate>
-        </TabControl.ItemTemplate>
-        <TabControl.ContentTemplate>
-          <DataTemplate>
-            <Panel />
-          </DataTemplate>
-        </TabControl.ContentTemplate>
-      </TabControl>
-
-      <Button x:Name="AddDocButton"
-              Classes="dock-add-doc"
-              Content="⋮"
-              IsVisible="{Binding ShowAddDoc, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
-              Click="OnAddDocClick" />
-      </Grid>
-    </Border>
-
-    <Border x:Name="ContentPane" MinHeight="32" MinWidth="32">
-      <Grid>
-      <ContentControl x:Name="ContentHost"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      Content="{Binding ActiveContent, RelativeSource={RelativeSource AncestorType=DockRegion}}" />
-
-      <Border x:Name="DropHint"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch"
-              Background="{DynamicResource DockDropHintBackgroundBrush}"
-              BorderBrush="{DynamicResource DockDropHintBorderBrush}"
-              BorderThickness="1"
-              CornerRadius="2"
-              IsVisible="False"
-              IsHitTestVisible="False" />
-      </Grid>
-    </Border>
-  </Grid>
-</UserControl>
-
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:GOZA.Dock.Controls"
+             xmlns:dock="using:GOZA.Dock"
+             x:Class="GOZA.Dock.Controls.DockRegion"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             MinWidth="20"
+             MinHeight="20">
+  <Grid x:Name="LayoutGrid">
+    <Border x:Name="TabStripHost">
+      <Grid x:Name="TabStripLayout">
+      <TabControl x:Name="TabStrip"
+                  ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=DockRegion}}"
+                  SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DockRegion}, Mode=TwoWay}">
+        <TabControl.ItemTemplate>
+          <DataTemplate x:DataType="dock:IDockTabItem">
+            <controls:DockTabHeader Header="{Binding Header}"
+                                    IsClosable="{Binding IsClosable}"
+                                    IsVertical="{Binding VerticalTabHeader, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}" />
+          </DataTemplate>
+        </TabControl.ItemTemplate>
+        <TabControl.ContentTemplate>
+          <DataTemplate>
+            <Panel />
+          </DataTemplate>
+        </TabControl.ContentTemplate>
+      </TabControl>
+
+      <Button x:Name="AddDocButton"
+              Classes="dock-add-doc"
+              IsVisible="{Binding ShowAddDoc, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
+              Click="OnAddDocClick">
+        <controls:DockChromeIcon Kind="Add"
+                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+      </Button>
+      </Grid>
+    </Border>
+
+    <Border x:Name="ContentPane" MinHeight="32" MinWidth="32">
+      <Grid>
+      <ContentControl x:Name="ContentHost"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Content="{Binding ActiveContent, RelativeSource={RelativeSource AncestorType=DockRegion}}" />
+
+      <Border x:Name="DropHint"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              Background="{DynamicResource DockDropHintBackgroundBrush}"
+              BorderBrush="{DynamicResource DockDropHintBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="2"
+              IsVisible="False"
+              IsHitTestVisible="False" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>
+

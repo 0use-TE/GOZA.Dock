@@ -29,28 +29,43 @@
   <Style Selector="DockRegion Button.dock-tab-close">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="6,2" />
-    <Setter Property="MinWidth" Value="0" />
-    <Setter Property="MinHeight" Value="0" />
-    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="MinWidth" Value="18" />
+    <Setter Property="MinHeight" Value="18" />
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
     <Setter Property="Opacity" Value="0.65" />
     <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="DockRegion Button.dock-tab-close:pointerover">
     <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="DockRegion Button.dock-tab-close-vertical">
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+  </Style>
+
+  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Left] /template/ TabItem">
+    <Setter Property="MinWidth" Value="28" />
+    <Setter Property="Padding" Value="2,6" />
+  </Style>
+  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Right] /template/ TabItem">
+    <Setter Property="MinWidth" Value="28" />
+    <Setter Property="Padding" Value="2,6" />
   </Style>
 
   <Style Selector="DockRegion Button.dock-add-doc">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="8,2" />
-    <Setter Property="MinWidth" Value="24" />
-    <Setter Property="MinHeight" Value="0" />
-    <Setter Property="FontSize" Value="18" />
-    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Padding" Value="6,4" />
+    <Setter Property="MinWidth" Value="22" />
+    <Setter Property="MinHeight" Value="22" />
     <Setter Property="Foreground" Value="#1888D4" />
     <Setter Property="Opacity" Value="0.85" />
     <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="DockRegion Button.dock-add-doc:pointerover">
     <Setter Property="Opacity" Value="1" />
