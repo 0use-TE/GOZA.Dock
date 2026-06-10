@@ -1,6 +1,10 @@
 
 English | [简体中文](README.zh-CN.md)
 
+<p align="center">
+  <img src="src/GOZA.Dock/wwwroot/GOZA.png" alt="GOZA.Dock" width="320" />
+</p>
+
 # GOZA.Dock
 
 GOZA.Dock is a lightweight docking library for Avalonia. It provides flexible panel layouts by combining Grid, DockRegion and DockSplitter, and works for desktop applications as well as WebAssembly (WASM) demos.

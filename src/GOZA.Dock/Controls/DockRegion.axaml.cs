@@ -4,9 +4,11 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using GOZA.Dock;
 using System.Collections;
+using System.Windows.Input;
 
 namespace GOZA.Dock.Controls;
 
@@ -36,12 +38,46 @@ public partial class DockRegion : UserControl, IDockRegionSession
     public static readonly StyledProperty<DockTabStripPlacement> TabStripPlacementProperty =
         AvaloniaProperty.Register<DockRegion, DockTabStripPlacement>(nameof(TabStripPlacement), DockTabStripPlacement.Top);
 
+    /// <summary>Identifies the <see cref="CloseTabCommand"/> property.</summary>
+    public static readonly StyledProperty<ICommand?> CloseTabCommandProperty =
+        AvaloniaProperty.Register<DockRegion, ICommand?>(nameof(CloseTabCommand));
+
+    /// <summary>Identifies the <see cref="AddDocCommand"/> property.</summary>
+    public static readonly StyledProperty<ICommand?> AddDocCommandProperty =
+        AvaloniaProperty.Register<DockRegion, ICommand?>(nameof(AddDocCommand));
+
+    /// <summary>Identifies the <see cref="ShowAddDoc"/> property.</summary>
+    public static readonly StyledProperty<bool> ShowAddDocProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowAddDoc));
+
+    /// <summary>Identifies the <see cref="HeaderPlacement"/> property (alias of <see cref="TabStripPlacement"/>).</summary>
+    public static readonly StyledProperty<DockTabStripPlacement> HeaderPlacementProperty =
+        AvaloniaProperty.Register<DockRegion, DockTabStripPlacement>(nameof(HeaderPlacement), DockTabStripPlacement.Top);
+
+    static DockRegion()
+    {
+        HeaderPlacementProperty.Changed.AddClassHandler<DockRegion>((region, e) =>
+        {
+            if (e.NewValue is DockTabStripPlacement placement)
+                region.SetCurrentValue(TabStripPlacementProperty, placement);
+        });
+
+        TabStripPlacementProperty.Changed.AddClassHandler<DockRegion>((region, e) =>
+        {
+            if (e.NewValue is DockTabStripPlacement placement)
+                region.SetCurrentValue(HeaderPlacementProperty, placement);
+        });
+    }
+
     private Grid? _layoutGrid;
+    private Border? _tabStripHost;
+    private Grid? _tabStripLayout;
     private Border? _contentPane;
 
     private static readonly SolidColorBrush TabStripSeparatorBrush =
         new(Color.FromArgb(0xAA, 0x90, 0x90, 0x90));
     private TabControl? _tabStrip;
+    private Button? _addDocButton;
     private ContentControl? _contentHost;
     private Border? _dropHint;
     private TabContainerDragController? _dragController;
@@ -55,11 +91,20 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private Grid LayoutGridControl => _layoutGrid ??= this.FindControl<Grid>("LayoutGrid")
         ?? throw new InvalidOperationException("DockRegion template is missing LayoutGrid.");
 
+    private Border TabStripHostControl => _tabStripHost ??= this.FindControl<Border>("TabStripHost")
+        ?? throw new InvalidOperationException("DockRegion template is missing TabStripHost.");
+
+    private Grid TabStripLayoutControl => _tabStripLayout ??= this.FindControl<Grid>("TabStripLayout")
+        ?? throw new InvalidOperationException("DockRegion template is missing TabStripLayout.");
+
     private Border ContentPaneControl => _contentPane ??= this.FindControl<Border>("ContentPane")
         ?? throw new InvalidOperationException("DockRegion template is missing ContentPane.");
 
     private TabControl TabStripControl => _tabStrip ??= this.FindControl<TabControl>("TabStrip")
         ?? throw new InvalidOperationException("DockRegion template is missing TabStrip.");
+
+    private Button AddDocButtonControl => _addDocButton ??= this.FindControl<Button>("AddDocButton")
+        ?? throw new InvalidOperationException("DockRegion template is missing AddDocButton.");
 
     private ContentControl ContentHostControl => _contentHost ??= this.FindControl<ContentControl>("ContentHost")
         ?? throw new InvalidOperationException("DockRegion template is missing ContentHost.");
@@ -97,11 +142,49 @@ public partial class DockRegion : UserControl, IDockRegionSession
         set => SetValue(AutoManageContentProperty, value);
     }
 
-    /// <summary>Position of the tab strip relative to the content area.</summary>
+    /// <summary>Position of the tab header strip relative to the content area (Top, Bottom, Left, Right).</summary>
     public DockTabStripPlacement TabStripPlacement
     {
         get => GetValue(TabStripPlacementProperty);
         set => SetValue(TabStripPlacementProperty, value);
+    }
+
+    /// <summary>Tab header strip position. Alias of <see cref="TabStripPlacement"/> for XAML binding.</summary>
+    public DockTabStripPlacement HeaderPlacement
+    {
+        get => GetValue(HeaderPlacementProperty);
+        set => SetValue(HeaderPlacementProperty, value);
+    }
+
+    /// <summary>
+    /// Optional hook after the library removes a closable tab from <see cref="ItemsSource"/>.
+    /// Receives the closed tab as <see cref="ICommand.Execute"/> parameter.
+    /// </summary>
+    public ICommand? CloseTabCommand
+    {
+        get => GetValue(CloseTabCommandProperty);
+        set => SetValue(CloseTabCommandProperty, value);
+    }
+
+    /// <summary>Invoked when the user clicks the optional add-document (+) button on the tab strip.</summary>
+    public ICommand? AddDocCommand
+    {
+        get => GetValue(AddDocCommandProperty);
+        set => SetValue(AddDocCommandProperty, value);
+    }
+
+    /// <summary>When true, shows the add-document (+) button beside the tab strip.</summary>
+    public bool ShowAddDoc
+    {
+        get => GetValue(ShowAddDocProperty);
+        set => SetValue(ShowAddDocProperty, value);
+    }
+
+    /// <summary>Discards a cached reusable surface after the tab is removed from <see cref="ItemsSource"/>.</summary>
+    public void EvictTabSurface(IDockTabItem tab)
+    {
+        if (tab.ReuseSurface)
+            ResolveViewHost()?.Evict(tab.Id);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -134,11 +217,16 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private void ApplyTabStripLayout()
     {
         var grid = LayoutGridControl;
+        var tabStripHost = TabStripHostControl;
+        var tabStripLayout = TabStripLayoutControl;
         var tabStrip = TabStripControl;
+        var addDocButton = AddDocButtonControl;
         var contentPane = ContentPaneControl;
 
         grid.RowDefinitions.Clear();
         grid.ColumnDefinitions.Clear();
+        tabStripLayout.RowDefinitions.Clear();
+        tabStripLayout.ColumnDefinitions.Clear();
 
         switch (TabStripPlacement)
         {
@@ -147,75 +235,87 @@ public partial class DockRegion : UserControl, IDockRegionSession
                 grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
                 Grid.SetRow(contentPane, 0);
                 Grid.SetColumn(contentPane, 0);
-                Grid.SetRow(tabStrip, 1);
+                Grid.SetRow(tabStripHost, 1);
+                Grid.SetColumn(tabStripHost, 0);
+                tabStripLayout.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
+                tabStripLayout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+                Grid.SetRow(tabStrip, 0);
                 Grid.SetColumn(tabStrip, 0);
+                Grid.SetRow(addDocButton, 0);
+                Grid.SetColumn(addDocButton, 1);
                 break;
 
             case DockTabStripPlacement.Left:
                 grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
-                Grid.SetRow(tabStrip, 0);
-                Grid.SetColumn(tabStrip, 0);
+                Grid.SetRow(tabStripHost, 0);
+                Grid.SetColumn(tabStripHost, 0);
                 Grid.SetRow(contentPane, 0);
                 Grid.SetColumn(contentPane, 1);
+                tabStripLayout.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Star));
+                tabStripLayout.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+                Grid.SetRow(tabStrip, 0);
+                Grid.SetColumn(tabStrip, 0);
+                Grid.SetRow(addDocButton, 1);
+                Grid.SetColumn(addDocButton, 0);
                 break;
 
             case DockTabStripPlacement.Right:
                 grid.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-                Grid.SetRow(tabStrip, 0);
-                Grid.SetColumn(tabStrip, 1);
+                Grid.SetRow(tabStripHost, 0);
+                Grid.SetColumn(tabStripHost, 1);
                 Grid.SetRow(contentPane, 0);
                 Grid.SetColumn(contentPane, 0);
+                tabStripLayout.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Star));
+                tabStripLayout.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+                Grid.SetRow(tabStrip, 0);
+                Grid.SetColumn(tabStrip, 0);
+                Grid.SetRow(addDocButton, 1);
+                Grid.SetColumn(addDocButton, 0);
                 break;
 
             default:
                 grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
                 grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Star));
-                Grid.SetRow(tabStrip, 0);
-                Grid.SetColumn(tabStrip, 0);
+                Grid.SetRow(tabStripHost, 0);
+                Grid.SetColumn(tabStripHost, 0);
                 Grid.SetRow(contentPane, 1);
                 Grid.SetColumn(contentPane, 0);
+                tabStripLayout.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
+                tabStripLayout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+                Grid.SetRow(tabStrip, 0);
+                Grid.SetColumn(tabStrip, 0);
+                Grid.SetRow(addDocButton, 0);
+                Grid.SetColumn(addDocButton, 1);
                 break;
         }
 
-        Grid.SetRowSpan(tabStrip, 1);
-        Grid.SetColumnSpan(tabStrip, 1);
+        Grid.SetRowSpan(tabStripHost, 1);
+        Grid.SetColumnSpan(tabStripHost, 1);
         Grid.SetRowSpan(contentPane, 1);
         Grid.SetColumnSpan(contentPane, 1);
+        Grid.SetRowSpan(tabStrip, 1);
+        Grid.SetColumnSpan(tabStrip, 1);
 
         tabStrip.TabStripPlacement = TabStripPlacement.ToAvaloniaDock();
-        ApplyTabStripSeparator(tabStrip, contentPane);
+        ApplyTabStripSeparator(tabStripHost, contentPane);
     }
 
-    /// <summary>Draws a 1px edge between the tab strip and content (theme-agnostic gray).</summary>
-    private static void ApplyTabStripSeparator(TabControl tabStrip, Border contentPane)
+    /// <summary>Draws a 1px edge between the tab strip host and content (theme-agnostic gray).</summary>
+    private void ApplyTabStripSeparator(Border tabStripHost, Border contentPane)
     {
-        tabStrip.BorderBrush = TabStripSeparatorBrush;
+        tabStripHost.BorderBrush = TabStripSeparatorBrush;
         contentPane.BorderBrush = TabStripSeparatorBrush;
+        contentPane.BorderThickness = new Thickness(0);
 
-        switch (tabStrip.TabStripPlacement)
+        tabStripHost.BorderThickness = TabStripPlacement switch
         {
-            case Avalonia.Controls.Dock.Left:
-                tabStrip.BorderThickness = new Thickness(0, 0, 1, 0);
-                contentPane.BorderThickness = new Thickness(0);
-                break;
-
-            case Avalonia.Controls.Dock.Right:
-                tabStrip.BorderThickness = new Thickness(1, 0, 0, 0);
-                contentPane.BorderThickness = new Thickness(0);
-                break;
-
-            case Avalonia.Controls.Dock.Bottom:
-                tabStrip.BorderThickness = new Thickness(0, 1, 0, 0);
-                contentPane.BorderThickness = new Thickness(0);
-                break;
-
-            default:
-                tabStrip.BorderThickness = new Thickness(0, 0, 0, 1);
-                contentPane.BorderThickness = new Thickness(0);
-                break;
-        }
+            DockTabStripPlacement.Left => new Thickness(0, 0, 1, 0),
+            DockTabStripPlacement.Right => new Thickness(1, 0, 0, 0),
+            DockTabStripPlacement.Bottom => new Thickness(0, 1, 0, 0),
+            _ => new Thickness(0, 0, 0, 1),
+        };
     }
 
     public void RegisterContentHost(ContentControl host) { }
@@ -270,6 +370,18 @@ public partial class DockRegion : UserControl, IDockRegionSession
         if (!AutoManageContent)
             return;
 
+        // Defer detach/attach until after the current pointer input finishes routing.
+        // Synchronous moves (especially NativeWebView) can leave PlatformImpl null while input is still in flight.
+        Dispatcher.UIThread.Post(
+            () => ApplySelectionContent(oldItem, newItem),
+            DispatcherPriority.Background);
+    }
+
+    private void ApplySelectionContent(object? oldItem, object? newItem)
+    {
+        if (!ReferenceEquals(SelectedItem, newItem))
+            return;
+
         var viewHost = ResolveViewHost();
 
         if (oldItem is IDockTabItem oldTab && viewHost is not null && oldTab.ReuseSurface)
@@ -277,7 +389,11 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
         if (newItem is IDockTabItem newTab)
         {
-            var surface = DockTabContentBuilder.Build(this, newTab);
+            Control surface = viewHost is not null
+                && newTab.ReuseSurface
+                && viewHost.TryGetCached(newTab.Id, out var cached)
+                ? cached
+                : DockTabContentBuilder.Build(this, newTab);
 
             if (viewHost is not null && newTab.ReuseSurface)
             {
@@ -305,6 +421,41 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
     private bool ContainsItem(object item) =>
         ItemsSource?.Cast<object>().Any(x => ReferenceEquals(x, item)) == true;
+
+    private void OnTabCloseClick(object? sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+
+        if (sender is not Control { DataContext: IDockTabItem tab } || !tab.IsClosable)
+            return;
+
+        RemoveTab(tab);
+        EvictTabSurface(tab);
+        CloseTabCommand?.Execute(tab);
+    }
+
+    private void OnAddDocClick(object? sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        AddDocCommand?.Execute(null);
+    }
+
+    private void RemoveTab(IDockTabItem tab)
+    {
+        if (ItemsSource is not IList list || !list.Contains(tab))
+            return;
+
+        if (ReferenceEquals(SelectedItem, tab))
+        {
+            var index = list.IndexOf(tab);
+            object? next = index + 1 < list.Count
+                ? list[index + 1]
+                : index > 0 ? list[index - 1] : null;
+            SelectedItem = next;
+        }
+
+        list.Remove(tab);
+    }
 
     private DockViewHost? ResolveViewHost()
     {

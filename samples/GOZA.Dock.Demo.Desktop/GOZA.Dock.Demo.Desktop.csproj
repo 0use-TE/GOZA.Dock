@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<PublishAot>true</PublishAot>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-
+		<ApplicationIcon>..\..\src\GOZA.Dock\wwwroot\GOZA.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

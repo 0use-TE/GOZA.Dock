@@ -196,6 +196,9 @@ public sealed class TabContainerDragController : IDisposable
 
     private void OnPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (e.Source is Visual pressedVisual && IsDockChromeControl(pressedVisual))
+            return;
+
         if (!IsTabStripHit(e.Source))
             return;
 
@@ -690,6 +693,24 @@ public sealed class TabContainerDragController : IDisposable
 
         return ReferenceEquals(visual, _tabSelector)
                || _tabSelector.IsVisualAncestorOf(visual);
+    }
+
+    private static bool IsDockChromeControl(Visual visual)
+    {
+        var current = visual;
+        while (current is not null)
+        {
+            if (current is Button button
+                && (button.Classes.Contains("dock-tab-close")
+                    || button.Classes.Contains("dock-add-doc")))
+            {
+                return true;
+            }
+
+            current = current.GetVisualParent();
+        }
+
+        return false;
     }
 
     private SelectingItemsControl? FindTargetContainerAtPointer(PointerReleasedEventArgs e)

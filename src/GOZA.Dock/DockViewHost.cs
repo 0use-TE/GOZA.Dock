@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 
 namespace GOZA.Dock;
@@ -24,6 +25,10 @@ public sealed class DockViewHost
             root.Children.Add(_parkingLot);
     }
 
+    /// <summary>Returns a cached reusable surface when one already exists for <paramref name="tabId"/>.</summary>
+    public bool TryGetCached(string tabId, [NotNullWhen(true)] out Control? control) =>
+        _cached.TryGetValue(tabId, out control);
+
     /// <summary>Attaches a tab surface to <paramref name="host"/> (from cache or <paramref name="surface"/> on first use).</summary>
     public Control Activate(IDockTabItem tab, ContentControl host, Control surface)
     {
@@ -32,10 +37,21 @@ public sealed class DockViewHost
             : surface;
 
         control.DataContext = tab;
+        control.IsHitTestVisible = true;
 
         Detach(control);
         host.Content = control;
         return control;
+    }
+
+    /// <summary>Removes a cached surface when a reusable tab is closed permanently.</summary>
+    public void Evict(string tabId)
+    {
+        if (!_cached.Remove(tabId, out var control))
+            return;
+
+        Detach(control);
+        _parkingLot.Children.Remove(control);
     }
 
     /// <summary>Moves the current surface from <paramref name="host"/> to the parking lot when reusable.</summary>
@@ -74,6 +90,7 @@ public sealed class DockViewHost
 
     private void Park(Control surface)
     {
+        surface.IsHitTestVisible = false;
         Detach(surface);
         if (!_parkingLot.Children.Contains(surface))
             _parkingLot.Children.Add(surface);

@@ -16,4 +16,10 @@ public interface IDockTabItem
     /// Register the tab view model with Crystal AddMvvmTransient, or an app-level data template.
     /// </summary>
     bool ReuseSurface => false;
+
+    /// <summary>
+    /// When true, a close button is shown. <see cref="Controls.DockRegion"/> removes the item from
+    /// <see cref="Controls.DockRegion.ItemsSource"/> when it is an <see cref="System.Collections.IList"/>.
+    /// </summary>
+    bool IsClosable => false;
 }

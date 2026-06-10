@@ -1,5 +1,9 @@
 [English](README.md) | 简体中文
 
+<p align="center">
+  <img src="src/GOZA.Dock/wwwroot/GOZA.png" alt="GOZA.Dock" width="320" />
+</p>
+
 # GOZA.Dock
 
 Avalonia 停靠布局：`Grid` + `DockRegion` + `DockSplitter`。

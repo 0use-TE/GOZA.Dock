@@ -10,12 +10,14 @@ public abstract class DockTabViewModelBase : ObservableObject, IDockTabViewModel
         string id,
         string header,
         string regionId,
-        bool selectOnStartup = false)
+        bool selectOnStartup = false,
+        bool isClosable = true)
     {
         Id = id;
         Header = header;
         RegionId = regionId;
         SelectOnStartup = selectOnStartup;
+        IsClosable = isClosable;
     }
 
     public string Id { get; }
@@ -27,6 +29,8 @@ public abstract class DockTabViewModelBase : ObservableObject, IDockTabViewModel
 
     /// <summary>Whether this tab is selected when the default layout is applied.</summary>
     public bool SelectOnStartup { get; }
+
+    public bool IsClosable { get; }
 
     public virtual bool ReuseSurface => false;
 }

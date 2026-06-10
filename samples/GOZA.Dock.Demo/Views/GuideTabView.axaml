@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
+             x:Class="GOZA.Dock.Demo.Views.GuideTabView"
+             x:DataType="vm:GuideTabViewModel">
+  <ScrollViewer Padding="20">
+    <StackPanel MaxWidth="640" Spacing="16">
+      <TextBlock FontSize="20"
+                 FontWeight="SemiBold"
+                 Text="{Binding Title}" />
+      <TextBlock LineHeight="22"
+                 Text="{Binding Intro}"
+                 TextWrapping="Wrap" />
+      <TextBlock FontWeight="SemiBold"
+                 Text="{Binding BasicsTitle}" />
+      <TextBlock LineHeight="22"
+                 Text="{Binding Basics}"
+                 TextWrapping="Wrap" />
+      <TextBlock FontWeight="SemiBold"
+                 Text="{Binding IntegrationTitle}" />
+      <TextBlock LineHeight="22"
+                 Text="{Binding Integration}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
