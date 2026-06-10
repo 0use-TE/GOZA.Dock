@@ -22,15 +22,15 @@ DockRegion
 
 | 类型 | 主要成员 |
 |------|----------|
-| `DockShell` | `EnableParkingLot`（默认 `true`）、`IsLayoutExpanded`、`Content`、`ToggleLayoutExpansion` |
-| `DockRegion` | `ItemsSource`、`SelectedItem`、`ActiveContent`、`AutoManageContent`、`TabStripPlacement` |
+| `DockShell` | `EnableParkingLot`（默认 `true`）、`UseVerticalTabHeaders`（默认 `true`）、`IsLayoutExpanded`、`Content`、`ToggleLayoutExpansion` |
+| `DockRegion` | `ItemsSource`、`SelectedItem`、`ActiveContent`、`AutoManageContent`、`TabStripPlacement`、`UseVerticalTabHeaders`、`ShowAddDoc`、`AddDocCommand`、`CloseTabCommand` |
 | `DockSplitter` | `GridSplitter` + 根据 gutter 像素自动方向 |
 
 ### 模型 / 枚举
 
 | 类型 | 成员 |
 |------|------|
-| `IDockTabItem` | `Id`、`Header`、`ReuseSurface`（默认 `false`） |
+| `IDockTabItem` | `Id`、`Header`、`ReuseSurface`（默认 `false`）、`IsClosable`（默认 `false`） |
 | `DockTabStripPlacement` | `Top`、`Bottom`、`Left`、`Right` |
 | `DockThemeResources` | 拖拽/拖放提示画刷的资源键（可在应用样式中覆盖） |
 

@@ -27,6 +27,52 @@ Content = `*`, splitter gutter = fixed px (e.g. `8`).
 <DockRegion TabStripPlacement="Bottom" ... />
 ```
 
+## Vertical side-tab headers
+
+Left/right strips use stacked vertical letters by default. Disable globally or per region:
+
+```xml
+<DockShell UseVerticalTabHeaders="False">
+  ...
+</DockShell>
+
+<!-- or only one side bar -->
+<DockRegion TabStripPlacement="Left" UseVerticalTabHeaders="False" ... />
+```
+
+## Closable tabs
+
+```csharp
+public sealed class DocTabViewModel(string id, string header) : IDockTabItem
+{
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool IsClosable => true;
+}
+```
+
+`ItemsSource` must be an `IList` (e.g. `ObservableCollection<T>`). Closing selects a neighbor tab, removes the item, and evicts any parking-lot cache for that `Id`.
+
+Optional cleanup hook:
+
+```xml
+<DockRegion CloseTabCommand="{Binding OnTabClosedCommand}" ... />
+```
+
+Command parameter is the closed `IDockTabItem`.
+
+## Add document button
+
+Show a “+” at the end of the tab strip:
+
+```xml
+<DockRegion ShowAddDoc="True"
+            AddDocCommand="{Binding AddDocCommand}"
+            ... />
+```
+
+Your command creates a new tab ViewModel and adds it to the bound collection. Demo: `samples/GOZA.Dock.Demo/ViewModels/MainViewModel.cs` (`AddDoc`).
+
 ## Tab drag
 
 | Gesture | Effect |

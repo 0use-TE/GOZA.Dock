@@ -13,7 +13,7 @@ dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ## 2. 包
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.1
+dotnet add package GOZA.Dock --version 1.0.2
 ```
 
 **需要应用引用 [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+。** GOZA.Dock 本身无其他 NuGet 依赖。
@@ -63,6 +63,7 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 | `Id` | 稳定键；`ReuseSurface` 时必填 |
 | `Header` | Tab 标题 |
 | `ReuseSurface` | 默认 `false`；`true` 在 Parking Lot 缓存 **视图控件** |
+| `IsClosable` | 默认 `false`；`true` 显示关闭按钮并从 `ItemsSource` 移除 |
 
 每种 Tab 用 `DataTemplate`（上文）或 Crystal `AddMvvmTransient` 映射 View。见 [Crystal.Avalonia](crystal-avalonia.md)。参考：`samples/GOZA.Dock.Minimal/`。
 

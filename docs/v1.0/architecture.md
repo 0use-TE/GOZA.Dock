@@ -22,15 +22,15 @@ DockRegion
 
 | Type | Key members |
 |------|-------------|
-| `DockShell` | `EnableParkingLot` (default `true`), `IsLayoutExpanded`, `Content`, `ToggleLayoutExpansion` |
-| `DockRegion` | `ItemsSource`, `SelectedItem`, `ActiveContent`, `AutoManageContent`, `TabStripPlacement` |
+| `DockShell` | `EnableParkingLot` (default `true`), `UseVerticalTabHeaders` (default `true`), `IsLayoutExpanded`, `Content`, `ToggleLayoutExpansion` |
+| `DockRegion` | `ItemsSource`, `SelectedItem`, `ActiveContent`, `AutoManageContent`, `TabStripPlacement`, `UseVerticalTabHeaders`, `ShowAddDoc`, `AddDocCommand`, `CloseTabCommand` |
 | `DockSplitter` | `GridSplitter` + auto orientation from gutter px |
 
 ### Models / enums
 
 | Type | Members |
 |------|---------|
-| `IDockTabItem` | `Id`, `Header`, `ReuseSurface` (default `false`) |
+| `IDockTabItem` | `Id`, `Header`, `ReuseSurface` (default `false`), `IsClosable` (default `false`) |
 | `DockTabStripPlacement` | `Top`, `Bottom`, `Left`, `Right` |
 | `DockThemeResources` | Resource key constants for drag/drop hint brushes (override in app styles) |
 

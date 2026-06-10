@@ -13,7 +13,7 @@ Full-featured shell (Crystal DI, layout save/load): `samples/GOZA.Dock.Demo.Desk
 ## 2. Package
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.1
+dotnet add package GOZA.Dock --version 1.0.2
 ```
 
 **Requires [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+** in your app. GOZA.Dock has no other NuGet dependencies.
@@ -63,6 +63,7 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 | `Id` | Stable key; required when `ReuseSurface` is true |
 | `Header` | Tab title |
 | `ReuseSurface` | Default `false`; `true` caches the **view** in the parking lot |
+| `IsClosable` | Default `false`; `true` shows close button and removes from `ItemsSource` when closed |
 
 Map each tab ViewModel to a view via `DataTemplate` (above) or Crystal `AddMvvmTransient` — see [Crystal.Avalonia](crystal-avalonia.md). Reference: `samples/GOZA.Dock.Minimal/`.
 

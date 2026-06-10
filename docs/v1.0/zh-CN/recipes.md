@@ -27,6 +27,52 @@
 <DockRegion TabStripPlacement="Bottom" ... />
 ```
 
+## 侧栏竖排 Tab 标题
+
+左/右 Tab 条默认竖排字母标题。全局或单区域关闭：
+
+```xml
+<DockShell UseVerticalTabHeaders="False">
+  ...
+</DockShell>
+
+<!-- 或仅某一侧栏 -->
+<DockRegion TabStripPlacement="Left" UseVerticalTabHeaders="False" ... />
+```
+
+## 可关闭 Tab
+
+```csharp
+public sealed class DocTabViewModel(string id, string header) : IDockTabItem
+{
+    public string Id { get; } = id;
+    public string Header { get; } = header;
+    public bool IsClosable => true;
+}
+```
+
+`ItemsSource` 须为 `IList`（如 `ObservableCollection<T>`）。关闭时会选中相邻 Tab、从集合移除，并清除该 `Id` 的 Parking Lot 缓存。
+
+可选清理命令：
+
+```xml
+<DockRegion CloseTabCommand="{Binding OnTabClosedCommand}" ... />
+```
+
+命令参数为被关闭的 `IDockTabItem`。
+
+## 新建文档按钮
+
+Tab 条末尾显示 “+”：
+
+```xml
+<DockRegion ShowAddDoc="True"
+            AddDocCommand="{Binding AddDocCommand}"
+            ... />
+```
+
+在命令中创建 Tab ViewModel 并加入绑定集合。Demo：`samples/GOZA.Dock.Demo/ViewModels/MainViewModel.cs`（`AddDoc`）。
+
 ## Tab 拖拽
 
 | 操作 | 效果 |

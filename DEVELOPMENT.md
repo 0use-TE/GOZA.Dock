@@ -100,7 +100,7 @@ your-org/GOZA.Dock/
 |---|---|
 | .NET | 10.0 |
 | Avalonia | 12.0.0（库唯一 NuGet 依赖） |
-| GOZA.Dock | 1.0.1 |
+| GOZA.Dock | 1.0.2 |
 | 语言 | C# latest |
 
 ```bash
@@ -174,6 +174,7 @@ dotnet run --project samples/GOZA.Dock.Demo.Browser
 |-------------|------|
 | `Content` | 根布局，通常为 `Grid` |
 | `EnableParkingLot` | `true` 时启用 `DockViewHost` + Parking Lot |
+| `UseVerticalTabHeaders` | 默认 `true`；左/右 Tab 条使用竖排字母标题 |
 | `IsLayoutExpanded` | 是否处于全屏展开 |
 | `ToggleLayoutExpansion(DockRegion)` | 切换指定区域全屏 |
 
@@ -195,6 +196,9 @@ dotnet run --project samples/GOZA.Dock.Demo.Browser
 | `ActiveContent` | 内容区显示的控件（只读用途为主，库内部维护） |
 | `AutoManageContent` | 默认 `true`；`false` 时自行管理 `ActiveContent` |
 | `TabStripPlacement` | Tab 条相对内容区位置：`Top`（默认）、`Bottom`、`Left`、`Right`（`DockTabStripPlacement`） |
+| `UseVerticalTabHeaders` | `bool?`；覆盖 `DockShell.UseVerticalTabHeaders` |
+| `ShowAddDoc` / `AddDocCommand` | Tab 条末尾 “+” 按钮 |
+| `CloseTabCommand` | 关闭 Tab 后可选命令（参数为 `IDockTabItem`） |
 
 **默认内容：** 未注册 Tab ViewModel 的 `DataTemplate`（或 Crystal ViewLocator 映射）时，选中 Tab 后在内容区居中显示 `Header` 文本。
 
@@ -276,6 +280,7 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
     public string Id { get; } = id;
     public string Header { get; } = header;
     public bool ReuseSurface => false;
+    public bool IsClosable => false;
 }
 
 public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
@@ -454,18 +459,21 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 
 ## 14. 发布 NuGet
 
+详见 **[PUBLISHING.md](PUBLISHING.md)**（含 GitHub Pages 与 nuget.org 步骤）。
+
 ```bash
 dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release -o ./artifacts
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.2.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
 ```
 
-当前版本 **1.0.1**，依赖 **Avalonia 12.0.0**。包内仅含 `GOZA.Dock.dll` 与 `Themes/*.axaml` 嵌入资源（`avares://GOZA.Dock/...`）。
+当前版本 **1.0.2**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
 
 发布说明：`docs/v1.0/release-notes.md`
 
 引用方：
 
 ```xml
-<PackageReference Include="GOZA.Dock" Version="1.0.1" />
+<PackageReference Include="GOZA.Dock" Version="1.0.2" />
 <PackageReference Include="Avalonia" Version="12.0.0" />
 ```
 
