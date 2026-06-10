@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
-             xmlns:services="using:GOZA.Dock.Demo.Services"
              x:Class="GOZA.Dock.Demo.Views.MainView"
              x:DataType="vm:MainViewModel"
              ViewModelLocator.AutoWireViewModel="True"
@@ -9,57 +8,43 @@
              MinHeight="240">
   <Grid>
     <DockPanel>
-      <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto">
-        <Menu Grid.Column="0">
-          <MenuItem Header="_Layout">
-            <MenuItem Header="_Save layout"
-                      Command="{Binding SaveLayoutCommand}" />
-            <MenuItem Header="_Load layout"
-                      Command="{Binding LoadLayoutCommand}" />
-            <Separator />
-            <MenuItem Header="_Reset default"
-                      Command="{Binding ResetLayoutCommand}" />
-          </MenuItem>
-          <MenuItem Header="_View">
-            <MenuItem Header="Home"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding HomeTab}" />
-            <MenuItem Header="Info"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding InfoTab}" />
-            <MenuItem Header="Chart"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding ChartTab}" />
-            <MenuItem Header="Log"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding LogTab}" />
-            <MenuItem Header="Browser"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding BrowserTab}" />
-            <MenuItem Header="Tools"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding ToolsTab}" />
-            <MenuItem Header="{Binding GuideTab.Header}"
-                      Command="{Binding OpenTabCommand}"
-                      CommandParameter="{Binding GuideTab}" />
-            <Separator />
-            <MenuItem Header="{Binding ThemeToggleLabel}"
-                      Command="{Binding ToggleThemeCommand}" />
-          </MenuItem>
-        </Menu>
-
-        <ComboBox Grid.Column="1"
-                  Margin="8,4,12,4"
-                  MinWidth="100"
-                  ItemsSource="{Binding LanguageOptions}"
-                  SelectedItem="{Binding SelectedLanguage}">
-          <ComboBox.ItemTemplate>
-            <DataTemplate x:DataType="services:LanguageOption">
-              <TextBlock Text="{Binding DisplayName}" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-      </Grid>
+      <Menu DockPanel.Dock="Top">
+        <MenuItem Header="_Layout">
+          <MenuItem Header="_Save layout"
+                    Command="{Binding SaveLayoutCommand}" />
+          <MenuItem Header="_Load layout"
+                    Command="{Binding LoadLayoutCommand}" />
+          <Separator />
+          <MenuItem Header="_Reset default"
+                    Command="{Binding ResetLayoutCommand}" />
+        </MenuItem>
+        <MenuItem Header="_View">
+          <MenuItem Header="Home"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding HomeTab}" />
+          <MenuItem Header="Info"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding InfoTab}" />
+          <MenuItem Header="Chart"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding ChartTab}" />
+          <MenuItem Header="Log"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding LogTab}" />
+          <MenuItem Header="Browser"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding BrowserTab}" />
+          <MenuItem Header="Tools"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding ToolsTab}" />
+          <MenuItem Header="Guide"
+                    Command="{Binding OpenTabCommand}"
+                    CommandParameter="{Binding GuideTab}" />
+          <Separator />
+          <MenuItem Header="{Binding ThemeToggleLabel}"
+                    Command="{Binding ToggleThemeCommand}" />
+        </MenuItem>
+      </Menu>
 
       <DockShell x:Name="Shell">
         <Grid ColumnDefinitions="*,8,*,8,*">

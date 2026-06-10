@@ -12,10 +12,7 @@ namespace GOZA.Dock.Demo.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly AppLanguageService _language;
     private readonly IReadOnlyList<IDockTabViewModel> _tabs;
-
-    public IReadOnlyList<LanguageOption> LanguageOptions { get; } = LanguageOption.All;
 
     public HomeTabViewModel HomeTab { get; }
     public LeftInfoTabViewModel InfoTab { get; }
@@ -54,13 +51,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _notificationBody = string.Empty;
 
-    [ObservableProperty]
-    private LanguageOption _selectedLanguage = LanguageOption.Chinese;
-
     private DispatcherTimer? _notificationTimer;
 
     public MainViewModel(
-        AppLanguageService language,
         HomeTabViewModel home,
         LeftInfoTabViewModel leftInfo,
         ChartTabViewModel chart,
@@ -69,7 +62,6 @@ public partial class MainViewModel : ObservableObject
         BrowserTabViewModel browser,
         GuideTabViewModel guide)
     {
-        _language = language;
         HomeTab = home;
         InfoTab = leftInfo;
         ChartTab = chart;
@@ -89,10 +81,6 @@ public partial class MainViewModel : ObservableObject
             guide,
         ];
 
-        SelectedLanguage = _language.Current == DemoLanguage.English
-            ? LanguageOption.English
-            : LanguageOption.Chinese;
-
         ThemeToggleLabel = GetThemeToggleLabel();
 
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
@@ -101,15 +89,12 @@ public partial class MainViewModel : ObservableObject
             ApplyDefaultLayout();
     }
 
-    partial void OnSelectedLanguageChanged(LanguageOption value) =>
-        _language.Current = value.Value;
-
     [RelayCommand]
     private void SaveLayout()
     {
         var snapshot = DockLayoutPersistence.Capture(GetRegionMap(), GetSelectedMap());
         DockLayoutPersistence.Save(snapshot);
-        Notify("布局", "Layout", "布局已保存。", "Layout saved.");
+        Notify("Layout", "Layout saved.");
     }
 
     [RelayCommand]
@@ -117,19 +102,19 @@ public partial class MainViewModel : ObservableObject
     {
         if (!DockLayoutPersistence.TryLoad(out var snapshot) || snapshot is null)
         {
-            Notify("布局", "Layout", "未找到已保存的布局文件。", "No saved layout file found.");
+            Notify("Layout", "No saved layout file found.");
             return;
         }
 
         ApplySnapshot(snapshot);
-        Notify("布局", "Layout", "布局已加载。", "Layout loaded.");
+        Notify("Layout", "Layout loaded.");
     }
 
     [RelayCommand]
     private void ResetLayout()
     {
         ApplyDefaultLayout();
-        Notify("布局", "Layout", "已恢复默认布局。", "Reset to default layout.");
+        Notify("Layout", "Reset to default layout.");
     }
 
     [RelayCommand]
@@ -150,19 +135,13 @@ public partial class MainViewModel : ObservableObject
         {
             SetSelected(openRegionId, tab);
             Notify(
-                "提示",
                 "Notice",
-                $"「{tab.Header}」已在{RegionDisplayNames.ToChinese(openRegionId)}区域打开。",
-                $"\"{tab.Header}\" is already open in the {RegionDisplayNames.ToEnglish(openRegionId)} region.");
+                $"\"{tab.Header}\" is already open in the {FormatRegionName(openRegionId)} region.");
             return;
         }
 
         OpenTab(tab, tab.RegionId, select: true);
-        Notify(
-            "提示",
-            "Notice",
-            $"已打开「{tab.Header}」。",
-            $"Opened \"{tab.Header}\".");
+        Notify("Notice", $"Opened \"{tab.Header}\".");
     }
 
     public void OpenTab(IDockTabViewModel tab, string regionId, bool select = true)
@@ -178,8 +157,7 @@ public partial class MainViewModel : ObservableObject
             SetSelected(regionId, tab);
     }
 
-    private void Notify(string zhTitle, string enTitle, string zhBody, string enBody) =>
-        ShowNotification(_language.Pick(zhTitle, enTitle), _language.Pick(zhBody, enBody));
+    private void Notify(string title, string body) => ShowNotification(title, body);
 
     private void ShowNotification(string title, string body)
     {
@@ -203,6 +181,16 @@ public partial class MainViewModel : ObservableObject
 
     private static string GetThemeToggleLabel() =>
         Application.Current?.ActualThemeVariant == ThemeVariant.Dark ? "Light" : "Dark";
+
+    private static string FormatRegionName(string regionId) =>
+        regionId switch
+        {
+            DockRegionIds.Left => "left",
+            DockRegionIds.CenterTop => "center top",
+            DockRegionIds.CenterBottom => "center bottom",
+            DockRegionIds.Right => "right",
+            _ => regionId,
+        };
 
     private void ApplyDefaultLayout()
     {

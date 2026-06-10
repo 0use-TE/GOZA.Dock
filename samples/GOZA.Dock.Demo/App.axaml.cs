@@ -1,6 +1,5 @@
 using Avalonia.Markup.Xaml;
 using Crystal.Avalonia;
-using GOZA.Dock.Demo.Services;
 using GOZA.Dock.Demo.ViewModels;
 using GOZA.Dock.Demo.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,6 @@ public partial class App : CrystalApplication
 
     public override void RegisterServices(IServiceCollection services)
     {
-        services.AddSingleton<AppLanguageService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainView>();
         services.AddMvvmSingleton<MainWindow, MainWindowViewModel>();
