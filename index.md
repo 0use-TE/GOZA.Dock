@@ -11,10 +11,16 @@ dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 dotnet add package GOZA.Dock --version 1.0.2
 ```
 
-Use **Version** and **Lang** in the top navbar, then open [Quick Start](docs/v1.0/getting-started.md).
+Use **Version** (package release) and **Lang** in the top navbar.
+
+| Package | Docs |
+|---------|------|
+| **1.0.2** (latest) | [Quick Start](docs/1.0.2/getting-started.md) |
+| 1.0.1 | [Quick Start](docs/1.0.1/getting-started.md) |
+| 1.0.0 | [Quick Start](docs/1.0.0/getting-started.md) |
 
 | | |
 |---|---|
 | Browser demo | [WASM demo](/GOZA.Dock/demo/) |
-| Release notes | [1.0.2](docs/v1.0/release-notes.md) |
+| API (latest build) | [API Reference](https://0use.net/GOZA.Dock/api/) |
 | Repository | [GitHub](https://github.com/0use-TE/GOZA.Dock) |

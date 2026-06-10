@@ -65,7 +65,7 @@ Tab items implement `IDockTabItem` (`Id`, `Header`, optional `ReuseSurface`, `Is
 |----------|-----|
 | Online docs | https://0use.net/GOZA.Dock/ |
 | Browser demo (WASM) | https://0use.net/GOZA.Dock/demo/ |
-| Release notes | [docs/v1.0/release-notes.md](docs/v1.0/release-notes.md) |
+| Release notes | [docs/1.0.2/release-notes.md](docs/1.0.2/release-notes.md) |
 | NuGet publish (maintainers) | [PUBLISHING.md](PUBLISHING.md) |
 
 Build docs locally (requires [DocFX](https://dotnet.github.io/docfx/)):

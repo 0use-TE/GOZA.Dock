@@ -1,0 +1,18 @@
+{
+  "default": "1.0.2",
+  "versions": [
+    { "id": "1.0.2", "label": "1.0.2 (latest)" },
+    { "id": "1.0.1", "label": "1.0.1" },
+    { "id": "1.0.0", "label": "1.0.0" }
+  ],
+  "pages": [
+    "getting-started",
+    "crystal-avalonia",
+    "architecture",
+    "aot-compatibility",
+    "recipes",
+    "release-notes",
+    "introduction",
+    "index"
+  ]
+}

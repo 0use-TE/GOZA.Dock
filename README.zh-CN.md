@@ -35,7 +35,7 @@ dotnet add package GOZA.Dock --version 1.0.2
 |------|------|
 | 在线文档 | https://0use.net/GOZA.Dock/ |
 | 浏览器 Demo | https://0use.net/GOZA.Dock/demo/ |
-| 发布说明 | [docs/v1.0/zh-CN/release-notes.md](docs/v1.0/zh-CN/release-notes.md) |
+| 发布说明 | [docs/1.0.2/zh-CN/release-notes.md](docs/1.0.2/zh-CN/release-notes.md) |
 | NuGet 发布 | [PUBLISHING.md](PUBLISHING.md) |
 
 本地文档：`docfx docfx.json && docfx serve _site --port 8080`

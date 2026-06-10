@@ -6,49 +6,90 @@
   const rel = document.querySelector('meta[name="docfx:rel"]')?.content ?? '';
   const path = window.location.pathname;
 
-  const docPages = new Set([
-    'getting-started',
-    'crystal-avalonia',
-    'architecture',
-    'aot-compatibility',
-    'recipes',
-    'introduction',
-    'index',
-  ]);
+  /** @type {{ default: string, versions: { id: string, label: string }[], pages: string[] }} */
+  let config = {
+    default: '1.0.2',
+    versions: [
+      { id: '1.0.2', label: '1.0.2 (latest)' },
+      { id: '1.0.1', label: '1.0.1' },
+      { id: '1.0.0', label: '1.0.0' },
+    ],
+    pages: [
+      'getting-started',
+      'crystal-avalonia',
+      'architecture',
+      'aot-compatibility',
+      'recipes',
+      'release-notes',
+      'introduction',
+      'index',
+    ],
+  };
+
+  function loadConfig() {
+    return fetch(rel + 'public/goza-versions.json')
+      .then((r) => (r.ok ? r.json() : config))
+      .then((data) => {
+        config = data;
+        populateVersionSelect();
+      })
+      .catch(() => populateVersionSelect());
+  }
+
+  function populateVersionSelect() {
+    versionSelect.replaceChildren();
+    for (const v of config.versions) {
+      const opt = document.createElement('option');
+      opt.value = v.id;
+      opt.textContent = v.label;
+      versionSelect.appendChild(opt);
+    }
+  }
 
   function currentLang() {
     return path.includes('/zh-CN/') ? 'zh-CN' : 'en';
   }
 
   function currentVersion() {
-    return path.includes('/v1.0/') ? 'v1.0' : 'v1.0';
+    const match = path.match(/\/docs\/(\d+\.\d+\.\d+)\//);
+    if (match) return match[1];
+    return config.default;
   }
 
   function currentPage() {
-    const match = path.match(/\/docs\/v1\.0\/(?:zh-CN\/)?([^/]+)\.html/i);
-    if (match && docPages.has(match[1])) return match[1];
+    const match = path.match(/\/docs\/\d+\.\d+\.\d+\/(?:zh-CN\/)?([^/]+)\.html/i);
+    if (match && config.pages.includes(match[1])) return match[1];
     return 'getting-started';
   }
 
   function buildDocUrl(version, lang, page) {
-    if (version !== 'v1.0') return rel + 'index.html';
-    const prefix = lang === 'zh-CN' ? 'docs/v1.0/zh-CN/' : 'docs/v1.0/';
+    const prefix =
+      lang === 'zh-CN' ? `docs/${version}/zh-CN/` : `docs/${version}/`;
     return rel + prefix + page + '.html';
   }
 
-  versionSelect.value = currentVersion();
-  langSelect.value = currentLang();
+  function syncControls() {
+    versionSelect.value = currentVersion();
+    langSelect.value = currentLang();
+  }
 
-  versionSelect.addEventListener('change', () => {
-    const v = versionSelect.value;
-    if (v === 'v1.0') {
-      window.location.href = buildDocUrl(v, langSelect.value, currentPage());
-    } else {
-      versionSelect.value = currentVersion();
-    }
-  });
+  loadConfig().then(() => {
+    syncControls();
 
-  langSelect.addEventListener('change', () => {
-    window.location.href = buildDocUrl(versionSelect.value, langSelect.value, currentPage());
+    versionSelect.addEventListener('change', () => {
+      window.location.href = buildDocUrl(
+        versionSelect.value,
+        langSelect.value,
+        currentPage()
+      );
+    });
+
+    langSelect.addEventListener('change', () => {
+      window.location.href = buildDocUrl(
+        versionSelect.value,
+        langSelect.value,
+        currentPage()
+      );
+    });
   });
 })();

@@ -70,11 +70,12 @@ dotnet nuget push ./artifacts/GOZA.Dock.1.0.2.nupkg --api-key $env:NUGET_API_KEY
 ### Before each release
 
 1. Update `<Version>` and `<PackageReleaseNotes>` in `GOZA.Dock.csproj`.
-2. Add a section to `docs/v1.0/release-notes.md` and `docs/v1.0/zh-CN/release-notes.md`.
-3. Update version strings in `README.md`, `README.zh-CN.md`, and `docs/v1.0/getting-started.md`.
-4. `dotnet build GOZA.Dock.slnx -c Release`
-5. `dotnet pack` and smoke-test in a sample app.
-6. Push to `master` (docs site updates).
-7. `dotnet nuget push` the new `.nupkg`.
+2. Copy `docs/1.0.2/` to `docs/{newVersion}/` (or edit in place for patch), update release notes (EN + zh-CN).
+3. Add the new version to `docfx/template/public/goza-versions.json` and set it as `default`.
+4. Update `toc.yml` `topicHref`, root `index.md`, and README version strings.
+5. `dotnet build GOZA.Dock.slnx -c Release`
+6. `dotnet pack` and smoke-test in a sample app.
+7. Push to `master` (docs site updates via GitHub Actions).
+8. `dotnet nuget push` the new `.nupkg`.
 
 Release notes for the package summary field should stay short; link to the full markdown in the repo.

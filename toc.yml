@@ -1,7 +1,7 @@
 - name: Home
   href: index.md
-- name: v1.0
-  href: docs/v1.0/
-  topicHref: docs/v1.0/getting-started.md
+- name: Docs
+  href: docs/1.0.2/
+  topicHref: docs/1.0.2/getting-started.md
 - name: API Reference
   href: api/

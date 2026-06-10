@@ -1,0 +1,14 @@
+- name: 简介
+  href: introduction.md
+- name: 快速开始
+  href: getting-started.md
+- name: Crystal.Avalonia
+  href: crystal-avalonia.md
+- name: 架构
+  href: architecture.md
+- name: 发布说明
+  href: release-notes.md
+- name: AOT
+  href: aot-compatibility.md
+- name: 进阶
+  href: recipes.md
