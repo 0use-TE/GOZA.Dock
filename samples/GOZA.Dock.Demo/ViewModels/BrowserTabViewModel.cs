@@ -10,11 +10,9 @@ public sealed class BrowserTabViewModel : DockTabViewModelBase
     public static Uri DefaultUri { get; } = new(DefaultUrl);
 
     public BrowserTabViewModel()
-        : base("ct-browser", "Browser", DockRegionIds.CenterTop, selectOnStartup: true)
+        : base("ct-browser", "Browser", DockRegionIds.CenterTop, selectOnStartup: true, reuseSurface: true)
     {
     }
-
-    public override bool ReuseSurface => true;
 
     public bool ShowEmbeddedWebView => !OperatingSystem.IsBrowser();
 

@@ -1,6 +1,6 @@
 # Quick Start
 
-> **NuGet package [1.0.0](https://www.nuget.org/packages/GOZA.Dock/1.0.0)** — initial release documentation. See [1.0.1](../1.0.1/getting-started.md), [1.0.2](../1.0.2/getting-started.md), or [1.0.3](../1.0.3/getting-started.md) (latest).
+> **NuGet package [1.0.3](https://www.nuget.org/packages/GOZA.Dock/1.0.3)** — this site section documents **1.0.3**. Use the **Version** dropdown for older releases. API Reference (navbar) is built from the latest source.
 
 ## 1. Run the sample
 
@@ -15,7 +15,7 @@ Full-featured shell (Crystal DI, layout save/load): `samples/GOZA.Dock.Demo.Desk
 ## 2. Package
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.0
+dotnet add package GOZA.Dock --version 1.0.3
 ```
 
 **Requires [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+** in your app. GOZA.Dock has no other NuGet dependencies.
@@ -57,6 +57,8 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
     public string Id { get; } = id;
     public string Header { get; } = header;
+    public bool ReuseSurface => false;
+    public bool IsClosable => false;
 }
 ```
 
@@ -64,7 +66,8 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 |--------|------|
 | `Id` | Stable key; required when `ReuseSurface` is true |
 | `Header` | Tab title |
-| `ReuseSurface` | Default `false`; `true` caches the **view** in the parking lot |
+| `ReuseSurface` | `true` caches the **view** in the parking lot |
+| `IsClosable` | `true` shows close button and removes from `ItemsSource` when closed |
 
 Map each tab ViewModel to a view via `DataTemplate` (above) or Crystal `AddMvvmTransient` — see [Crystal.Avalonia](crystal-avalonia.md). Reference: `samples/GOZA.Dock.Minimal/`.
 

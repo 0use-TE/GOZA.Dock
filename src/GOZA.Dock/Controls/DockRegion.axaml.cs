@@ -8,6 +8,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using GOZA.Dock;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Windows.Input;
 
 namespace GOZA.Dock.Controls;
@@ -84,6 +85,12 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
         UseVerticalTabHeadersProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateVerticalTabHeader());
+
+        ItemsSourceProperty.Changed.AddClassHandler<DockRegion>((region, e) =>
+            region.OnItemsSourceChanged(e.OldValue as IEnumerable, e.NewValue as IEnumerable));
+
+        AddDocContentProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.ApplyAddDocButtonContent());
     }
 
     private Grid? _layoutGrid;
@@ -101,6 +108,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private object? _previousSelected;
     private DockShell? _hostShell;
     private bool _verticalTabHeader;
+    private INotifyCollectionChanged? _itemsSourceNotifier;
+    private DockChromeIcon? _defaultAddIcon;
 
     public DockRegion()
     {
@@ -199,6 +208,28 @@ public partial class DockRegion : UserControl, IDockRegionSession
         set => SetValue(ShowAddDocProperty, value);
     }
 
+    /// <summary>Identifies the <see cref="AddDocContent"/> property.</summary>
+    public static readonly StyledProperty<object?> AddDocContentProperty =
+        AvaloniaProperty.Register<DockRegion, object?>(nameof(AddDocContent));
+
+    /// <summary>Identifies the <see cref="CloseTabContent"/> property.</summary>
+    public static readonly StyledProperty<object?> CloseTabContentProperty =
+        AvaloniaProperty.Register<DockRegion, object?>(nameof(CloseTabContent));
+
+    /// <summary>Custom content for the add-document (+) button. Default vector icon when null.</summary>
+    public object? AddDocContent
+    {
+        get => GetValue(AddDocContentProperty);
+        set => SetValue(AddDocContentProperty, value);
+    }
+
+    /// <summary>Custom content for tab close buttons in this region. Default vector icon when null.</summary>
+    public object? CloseTabContent
+    {
+        get => GetValue(CloseTabContentProperty);
+        set => SetValue(CloseTabContentProperty, value);
+    }
+
     /// <inheritdoc cref="UseVerticalTabHeadersProperty"/>
     public bool? UseVerticalTabHeaders
     {
@@ -234,6 +265,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
         base.OnLoaded(e);
         ApplyTabStripLayout();
         AttachInteraction();
+        ApplyAddDocButtonContent();
 
         if (SelectedItem is not null)
             OnSelectionChanged(_previousSelected, SelectedItem);
@@ -242,6 +274,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
     protected override void OnUnloaded(RoutedEventArgs e)
     {
         DetachInteraction();
+        UnhookItemsSourceNotifier();
         base.OnUnloaded(e);
     }
 
@@ -517,6 +550,71 @@ public partial class DockRegion : UserControl, IDockRegionSession
         }
 
         list.Remove(tab);
+        TryCollapseLayoutIfEmpty();
+    }
+
+    private void OnItemsSourceChanged(IEnumerable? oldSource, IEnumerable? newSource)
+    {
+        UnhookItemsSourceNotifier();
+
+        if (newSource is INotifyCollectionChanged notifier)
+        {
+            _itemsSourceNotifier = notifier;
+            notifier.CollectionChanged += OnItemsSourceCollectionChanged;
+        }
+
+        if (oldSource is not null && GetItemCount(newSource) == 0)
+            TryCollapseLayoutIfEmpty();
+    }
+
+    private void UnhookItemsSourceNotifier()
+    {
+        if (_itemsSourceNotifier is null)
+            return;
+
+        _itemsSourceNotifier.CollectionChanged -= OnItemsSourceCollectionChanged;
+        _itemsSourceNotifier = null;
+    }
+
+    private void OnItemsSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        TryCollapseLayoutIfEmpty();
+
+    private void TryCollapseLayoutIfEmpty()
+    {
+        if (GetItemCount() > 0)
+            return;
+
+        _hostShell ??= this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
+        _hostShell?.CollapseLayoutIfExpanded(this);
+    }
+
+    private int GetItemCount(IEnumerable? source = null)
+    {
+        source ??= ItemsSource;
+        if (source is ICollection collection)
+            return collection.Count;
+
+        return source?.Cast<object>().Count() ?? 0;
+    }
+
+    private void ApplyAddDocButtonContent()
+    {
+        if (_addDocButton is null)
+            return;
+
+        var custom = AddDocContent;
+        if (custom is null)
+        {
+            _defaultAddIcon ??= new DockChromeIcon
+            {
+                Kind = DockChromeIconKind.Add,
+            };
+            _defaultAddIcon.Bind(DockChromeIcon.ForegroundProperty, _addDocButton.GetObservable(Button.ForegroundProperty));
+            _addDocButton.Content = _defaultAddIcon;
+            return;
+        }
+
+        _addDocButton.Content = custom;
     }
 
     private DockViewHost? ResolveViewHost()

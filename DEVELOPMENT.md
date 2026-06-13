@@ -100,7 +100,7 @@ your-org/GOZA.Dock/
 |---|---|
 | .NET | 10.0 |
 | Avalonia | 12.0.0（库唯一 NuGet 依赖） |
-| GOZA.Dock | 1.0.2 |
+| GOZA.Dock | 1.0.3 |
 | 语言 | C# latest |
 
 ```bash
@@ -463,17 +463,17 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 
 ```bash
 dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release -o ./artifacts
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.2.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.3.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
 ```
 
-当前版本 **1.0.2**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
+当前版本 **1.0.3**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
 
-发布说明：`docs/v1.0/release-notes.md`
+发布说明：`docs/1.0.3/release-notes.md`
 
 引用方：
 
 ```xml
-<PackageReference Include="GOZA.Dock" Version="1.0.2" />
+<PackageReference Include="GOZA.Dock" Version="1.0.3" />
 <PackageReference Include="Avalonia" Version="12.0.0" />
 ```
 

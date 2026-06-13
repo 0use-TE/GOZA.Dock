@@ -11,13 +11,15 @@ public abstract class DockTabViewModelBase : ObservableObject, IDockTabViewModel
         string header,
         string regionId,
         bool selectOnStartup = false,
-        bool isClosable = true)
+        bool isClosable = true,
+        bool reuseSurface = false)
     {
         Id = id;
         Header = header;
         RegionId = regionId;
         SelectOnStartup = selectOnStartup;
         IsClosable = isClosable;
+        ReuseSurface = reuseSurface;
     }
 
     public string Id { get; }
@@ -32,5 +34,5 @@ public abstract class DockTabViewModelBase : ObservableObject, IDockTabViewModel
 
     public bool IsClosable { get; }
 
-    public virtual bool ReuseSurface => false;
+    public bool ReuseSurface { get; }
 }

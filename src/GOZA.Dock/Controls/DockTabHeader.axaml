@@ -1,6 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="using:GOZA.Dock.Controls"
              x:Class="GOZA.Dock.Controls.DockTabHeader"
              x:Name="Root">
   <Grid>
@@ -11,13 +10,11 @@
                  Margin="8,4"
                  VerticalAlignment="Center"
                  Text="{Binding Header, ElementName=Root}" />
-      <Button Grid.Column="1"
+      <Button x:Name="HorizontalCloseButton"
+              Grid.Column="1"
               Classes="dock-tab-close"
               IsVisible="{Binding IsClosable, ElementName=Root}"
-              Click="OnCloseClick">
-        <controls:DockChromeIcon Kind="Close"
-                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-      </Button>
+              Click="OnCloseClick" />
     </Grid>
 
     <StackPanel x:Name="VerticalPanel"
@@ -40,14 +37,12 @@
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
       </ItemsControl>
-      <Button Margin="0,4,0,0"
+      <Button x:Name="VerticalCloseButton"
+              Margin="0,4,0,0"
               Classes="dock-tab-close dock-tab-close-vertical"
               HorizontalAlignment="Center"
               IsVisible="{Binding IsClosable, ElementName=Root}"
-              Click="OnCloseClick">
-        <controls:DockChromeIcon Kind="Close"
-                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-      </Button>
+              Click="OnCloseClick" />
     </StackPanel>
   </Grid>
 </UserControl>

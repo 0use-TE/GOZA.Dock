@@ -14,6 +14,8 @@ public sealed partial class GuideTabViewModel : ObservableObject, IDockTabViewMo
 
     public bool IsClosable => false;
 
+    public bool ReuseSurface => false;
+
     [ObservableProperty]
     private string _header = "Guide";
 

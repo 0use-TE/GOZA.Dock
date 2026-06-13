@@ -13,13 +13,11 @@ public interface IDockTabItem
 
     /// <summary>
     /// When true, the control surface is cached in <see cref="DockViewHost"/> instead of recreated on each selection.
-    /// Register the tab view model with Crystal AddMvvmTransient, or an app-level data template.
     /// </summary>
-    bool ReuseSurface => false;
+    bool ReuseSurface { get; }
 
     /// <summary>
-    /// When true, a close button is shown. <see cref="Controls.DockRegion"/> removes the item from
-    /// <see cref="Controls.DockRegion.ItemsSource"/> when it is an <see cref="System.Collections.IList"/>.
+    /// When true, a close button is shown and the tab can be removed from the region collection when closed.
     /// </summary>
-    bool IsClosable => false;
+    bool IsClosable { get; }
 }

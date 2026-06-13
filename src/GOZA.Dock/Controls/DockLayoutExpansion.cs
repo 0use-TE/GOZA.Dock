@@ -15,6 +15,18 @@ internal sealed class DockLayoutExpansion
 
     public bool IsExpanded => _expandedRegion is not null;
 
+    public bool IsRegionExpanded(DockRegion region) => _expandedRegion == region;
+
+    /// <summary>Restores layout when <paramref name="region"/> is the expanded target.</summary>
+    public bool CollapseIfExpanded(DockRegion region)
+    {
+        if (_expandedRegion != region)
+            return false;
+
+        Collapse();
+        return true;
+    }
+
     public void Toggle(DockRegion region)
     {
         if (_expandedRegion == region)

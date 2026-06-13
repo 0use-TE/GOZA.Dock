@@ -57,14 +57,14 @@ Expect at least: `README.md`, `package-icon.png`, `lib/net10.0/GOZA.Dock.dll`, `
 One-time: create an API key at https://www.nuget.org/account/apikeys (scope: `GOZA.Dock`, push).
 
 ```bash
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.2.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.3.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
 ```
 
 Or with environment variable (no key in shell history):
 
 ```bash
 $env:NUGET_API_KEY = "..."
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.2.nupkg --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.3.nupkg --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
 ```
 
 ### Before each release

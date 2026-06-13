@@ -24,5 +24,7 @@ public sealed partial class DynamicDocTabViewModel : ObservableObject, IDockTabV
 
     public bool IsClosable => true;
 
+    public bool ReuseSurface => false;
+
     public string Body { get; }
 }

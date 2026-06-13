@@ -9,4 +9,6 @@ public sealed class BrowserTabViewModel(string id, string header) : IDockTabItem
     public string Header { get; } = header;
 
     public bool ReuseSurface => true;
+
+    public bool IsClosable => false;
 }

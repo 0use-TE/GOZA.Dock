@@ -17,6 +17,7 @@
           <DataTemplate x:DataType="dock:IDockTabItem">
             <controls:DockTabHeader Header="{Binding Header}"
                                     IsClosable="{Binding IsClosable}"
+                                    CloseContent="{Binding CloseTabContent, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
                                     IsVertical="{Binding VerticalTabHeader, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}" />
           </DataTemplate>
         </TabControl.ItemTemplate>
@@ -30,10 +31,7 @@
       <Button x:Name="AddDocButton"
               Classes="dock-add-doc"
               IsVisible="{Binding ShowAddDoc, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
-              Click="OnAddDocClick">
-        <controls:DockChromeIcon Kind="Add"
-                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-      </Button>
+              Click="OnAddDocClick" />
       </Grid>
     </Border>
 
