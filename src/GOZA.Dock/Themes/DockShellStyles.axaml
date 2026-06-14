@@ -25,6 +25,10 @@
     <Setter Property="Height" Value="0" />
     <Setter Property="MinHeight" Value="0" />
   </Style>
+  <!-- Semi (and similar themes) draw TabControl#PART_BorderSeparator; DockRegion uses TabStripHost border instead -->
+  <Style Selector="DockRegion TabControl#TabStrip /template/ Border#PART_BorderSeparator">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
 
   <Style Selector="DockRegion Button.dock-tab-close">
     <Setter Property="Background" Value="Transparent" />

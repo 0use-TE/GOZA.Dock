@@ -22,7 +22,7 @@
 
 ```bash
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet add package GOZA.Dock --version 1.0.3
+dotnet add package GOZA.Dock --version 1.0.4
 ```
 
 完整 Demo（Crystal、布局存盘、动态文档）：`samples/GOZA.Dock.Demo.Desktop`
@@ -35,7 +35,7 @@ dotnet add package GOZA.Dock --version 1.0.3
 |------|------|
 | 在线文档 | https://0use.net/GOZA.Dock/ |
 | 浏览器 Demo | https://0use.net/GOZA.Dock/demo/ |
-| 发布说明 | [docs/1.0.3/zh-CN/release-notes.md](docs/1.0.3/zh-CN/release-notes.md) |
+| 发布说明 | [docs/1.0.4/zh-CN/release-notes.md](docs/1.0.4/zh-CN/release-notes.md) |
 | NuGet 发布 | [PUBLISHING.md](PUBLISHING.md) |
 
 本地文档：`docfx docfx.json && docfx serve _site --port 8080`

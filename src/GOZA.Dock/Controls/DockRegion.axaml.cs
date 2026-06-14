@@ -91,6 +91,9 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
         AddDocContentProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.ApplyAddDocButtonContent());
+
+        ShowAddDocProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateTabStripChrome());
     }
 
     private Grid? _layoutGrid;
@@ -374,8 +377,92 @@ public partial class DockRegion : UserControl, IDockRegionSession
         Grid.SetColumnSpan(tabStrip, 1);
 
         tabStrip.TabStripPlacement = TabStripPlacement.ToAvaloniaDock();
-        ApplyTabStripSeparator(tabStripHost, contentPane);
+        UpdateTabStripChrome();
         UpdateVerticalTabHeader();
+    }
+
+    /// <summary>
+    /// Shows the tab header strip when there are tabs or an add-doc button. Hides the strip and
+    /// separator only when <see cref="ItemsSource"/> is empty and <see cref="ShowAddDoc"/> is false.
+    /// </summary>
+    private void UpdateTabStripChrome()
+    {
+        if (!IsLoaded)
+            return;
+
+        var tabStripHost = TabStripHostControl;
+        var contentPane = ContentPaneControl;
+        var hasItems = GetItemCount() > 0;
+        var showHeader = hasItems || ShowAddDoc;
+
+        tabStripHost.IsVisible = showHeader;
+
+        TabStripControl.IsVisible = hasItems;
+        SyncAddDocButtonLayout(hasItems);
+
+        if (showHeader)
+            ApplyTabStripSeparator(tabStripHost, contentPane);
+        else
+            ClearTabStripSeparator(tabStripHost, contentPane);
+    }
+
+    /// <summary>
+    /// When only <see cref="ShowAddDoc"/> is visible (no tabs), span the add button across the header strip.
+    /// </summary>
+    private void SyncAddDocButtonLayout(bool hasItems)
+    {
+        if (!ShowAddDoc)
+            return;
+
+        var addDocButton = AddDocButtonControl;
+        var tabStripLayout = TabStripLayoutControl;
+        var columnCount = tabStripLayout.ColumnDefinitions.Count;
+        var rowCount = tabStripLayout.RowDefinitions.Count;
+
+        if (!hasItems)
+        {
+            Grid.SetRow(addDocButton, 0);
+            Grid.SetColumn(addDocButton, 0);
+            Grid.SetRowSpan(addDocButton, Math.Max(rowCount, 1));
+            Grid.SetColumnSpan(addDocButton, Math.Max(columnCount, 1));
+
+            (addDocButton.HorizontalAlignment, addDocButton.VerticalAlignment) = TabStripPlacement switch
+            {
+                DockTabStripPlacement.Left => (HorizontalAlignment.Center, VerticalAlignment.Bottom),
+                DockTabStripPlacement.Right => (HorizontalAlignment.Center, VerticalAlignment.Bottom),
+                DockTabStripPlacement.Bottom => (HorizontalAlignment.Right, VerticalAlignment.Center),
+                _ => (HorizontalAlignment.Right, VerticalAlignment.Center),
+            };
+            return;
+        }
+
+        Grid.SetRowSpan(addDocButton, 1);
+        Grid.SetColumnSpan(addDocButton, 1);
+
+        switch (TabStripPlacement)
+        {
+            case DockTabStripPlacement.Bottom:
+                Grid.SetRow(addDocButton, 0);
+                Grid.SetColumn(addDocButton, 1);
+                addDocButton.HorizontalAlignment = HorizontalAlignment.Center;
+                addDocButton.VerticalAlignment = VerticalAlignment.Center;
+                break;
+
+            case DockTabStripPlacement.Left:
+            case DockTabStripPlacement.Right:
+                Grid.SetRow(addDocButton, 1);
+                Grid.SetColumn(addDocButton, 0);
+                addDocButton.HorizontalAlignment = HorizontalAlignment.Center;
+                addDocButton.VerticalAlignment = VerticalAlignment.Center;
+                break;
+
+            default:
+                Grid.SetRow(addDocButton, 0);
+                Grid.SetColumn(addDocButton, 1);
+                addDocButton.HorizontalAlignment = HorizontalAlignment.Center;
+                addDocButton.VerticalAlignment = VerticalAlignment.Center;
+                break;
+        }
     }
 
     /// <summary>Draws a 1px edge between the tab strip host and content (theme-agnostic gray).</summary>
@@ -392,6 +479,14 @@ public partial class DockRegion : UserControl, IDockRegionSession
             DockTabStripPlacement.Bottom => new Thickness(0, 1, 0, 0),
             _ => new Thickness(0, 0, 0, 1),
         };
+    }
+
+    private static void ClearTabStripSeparator(Border tabStripHost, Border contentPane)
+    {
+        tabStripHost.BorderBrush = null;
+        tabStripHost.BorderThickness = new Thickness(0);
+        contentPane.BorderBrush = null;
+        contentPane.BorderThickness = new Thickness(0);
     }
 
     public void RegisterContentHost(ContentControl host) { }
@@ -550,6 +645,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
         }
 
         list.Remove(tab);
+        UpdateTabStripChrome();
         TryCollapseLayoutIfEmpty();
     }
 
@@ -562,6 +658,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
             _itemsSourceNotifier = notifier;
             notifier.CollectionChanged += OnItemsSourceCollectionChanged;
         }
+
+        UpdateTabStripChrome();
 
         if (oldSource is not null && GetItemCount(newSource) == 0)
             TryCollapseLayoutIfEmpty();
@@ -576,8 +674,11 @@ public partial class DockRegion : UserControl, IDockRegionSession
         _itemsSourceNotifier = null;
     }
 
-    private void OnItemsSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+    private void OnItemsSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        UpdateTabStripChrome();
         TryCollapseLayoutIfEmpty();
+    }
 
     private void TryCollapseLayoutIfEmpty()
     {

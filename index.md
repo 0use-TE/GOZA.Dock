@@ -8,14 +8,15 @@ Cross-platform Avalonia docking — draggable tabs, closable documents, optional
 
 ```bash
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet add package GOZA.Dock --version 1.0.3
+dotnet add package GOZA.Dock --version 1.0.4
 ```
 
 Use **Version** (package release) and **Lang** in the top navbar.
 
 | Package | Docs |
 |---------|------|
-| **1.0.3** (latest) | [Quick Start](docs/1.0.3/getting-started.md) |
+| **1.0.4** (latest) | [Quick Start](docs/1.0.4/getting-started.md) |
+| 1.0.3 | [Quick Start](docs/1.0.3/getting-started.md) |
 | 1.0.2 | [Quick Start](docs/1.0.2/getting-started.md) |
 | 1.0.1 | [Quick Start](docs/1.0.1/getting-started.md) |
 | 1.0.0 | [Quick Start](docs/1.0.0/getting-started.md) |

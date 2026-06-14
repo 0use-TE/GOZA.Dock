@@ -1,6 +1,6 @@
 # Quick Start
 
-> **NuGet package [1.0.3](https://www.nuget.org/packages/GOZA.Dock/1.0.3)** — this site section documents **1.0.3**. Use the **Version** dropdown for older releases. API Reference (navbar) is built from the latest source.
+> **NuGet package [1.0.3](https://www.nuget.org/packages/GOZA.Dock/1.0.3)** — this site section documents **1.0.3**. Newer [1.0.4](../1.0.4/getting-started.md) is latest. Use the **Version** dropdown for older releases. API Reference (navbar) is built from the latest source.
 
 ## 1. Run the sample
 

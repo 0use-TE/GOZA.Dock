@@ -1,6 +1,6 @@
 # 快速开始
 
-> **NuGet [1.0.3](https://www.nuget.org/packages/GOZA.Dock/1.0.3)** — 本节为 **1.0.3** 文档。顶栏 **Version** 可切换旧版本。API 参考（顶栏）来自最新源码构建。
+> **NuGet [1.0.3](https://www.nuget.org/packages/GOZA.Dock/1.0.3)** — 本节为 **1.0.3** 文档。较新 [1.0.4](../1.0.4/zh-CN/getting-started.md) 为最新。顶栏 **Version** 可切换旧版本。API 参考（顶栏）来自最新源码构建。
 
 ## 1. 运行示例
 

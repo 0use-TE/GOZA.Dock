@@ -1,6 +1,6 @@
 # Quick Start
 
-> **NuGet package [1.0.1](https://www.nuget.org/packages/GOZA.Dock/1.0.1)** — this section documents **1.0.1**. Newer [1.0.2](../1.0.2/getting-started.md) adds closable tabs; [1.0.3](../1.0.3/getting-started.md) is latest. Older [1.0.0](../1.0.0/getting-started.md).
+> **NuGet package [1.0.1](https://www.nuget.org/packages/GOZA.Dock/1.0.1)** — this section documents **1.0.1**. Newer [1.0.2](../1.0.2/getting-started.md) adds closable tabs; [1.0.4](../1.0.4/getting-started.md) is latest. Older [1.0.0](../1.0.0/getting-started.md).
 
 ## 1. Run the sample
 

@@ -1,8 +1,8 @@
-# Quick Start
+# 快速开始
 
-> **NuGet package [1.0.0](https://www.nuget.org/packages/GOZA.Dock/1.0.0)** — initial release documentation. See [1.0.1](../1.0.1/getting-started.md), [1.0.2](../1.0.2/getting-started.md), or [1.0.4](../1.0.4/getting-started.md) (latest).
+> **NuGet [1.0.4](https://www.nuget.org/packages/GOZA.Dock/1.0.4)** — 本节为 **1.0.4** 文档。顶栏 **Version** 可切换旧版本。API 参考（顶栏）来自最新源码构建。
 
-## 1. Run the sample
+## 1. 运行示例
 
 ```bash
 git clone https://github.com/0use-TE/GOZA.Dock.git
@@ -10,19 +10,19 @@ cd GOZA.Dock
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 ```
 
-Full-featured shell (Crystal DI, layout save/load): `samples/GOZA.Dock.Demo.Desktop`
+完整壳（Crystal DI、布局存盘）：`samples/GOZA.Dock.Demo.Desktop`
 
-## 2. Package
+## 2. 包
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.0
+dotnet add package GOZA.Dock --version 1.0.4
 ```
 
-**Requires [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+** in your app. GOZA.Dock has no other NuGet dependencies.
+**需要应用引用 [Avalonia](https://www.nuget.org/packages/Avalonia) 12.0.0+。** GOZA.Dock 本身无其他 NuGet 依赖。
 
-Optional: **CommunityToolkit.Mvvm** (this walkthrough), **Crystal.Avalonia** ([integration guide](crystal-avalonia.md)), or plain `INotifyPropertyChanged` — the library only needs bindable collections.
+可选：**CommunityToolkit.Mvvm**（下文）、**Crystal.Avalonia**（[集成说明](crystal-avalonia.md)），或手写 `INotifyPropertyChanged` — 库只需可绑定的集合。
 
-## 3. Minimal app (two regions)
+## 3. 最小应用（左右两区域）
 
 ### App.axaml
 
@@ -44,7 +44,7 @@ Optional: **CommunityToolkit.Mvvm** (this walkthrough), **Crystal.Avalonia** ([i
 </Application>
 ```
 
-> Include `DockShellStyles.axaml` in your app styles (any Avalonia theme). AOT: see [AOT](aot-compatibility.md).
+> 在应用样式中 Include `DockShellStyles.axaml`（与所用 Avalonia 主题无关）。AOT 见 [AOT 兼容](aot-compatibility.md)。
 
 ### PlainTabViewModel.cs
 
@@ -57,16 +57,19 @@ public sealed class PlainTabViewModel(string id, string header) : IDockTabItem
 {
     public string Id { get; } = id;
     public string Header { get; } = header;
+    public bool ReuseSurface => false;
+    public bool IsClosable => false;
 }
 ```
 
-| Member | Role |
-|--------|------|
-| `Id` | Stable key; required when `ReuseSurface` is true |
-| `Header` | Tab title |
-| `ReuseSurface` | Default `false`; `true` caches the **view** in the parking lot |
+| 成员 | 作用 |
+|------|------|
+| `Id` | 稳定键；`ReuseSurface` 时必填 |
+| `Header` | Tab 标题 |
+| `ReuseSurface` | `true` 时在 Parking Lot 缓存 **视图控件** |
+| `IsClosable` | `true` 显示关闭按钮并从 `ItemsSource` 移除 |
 
-Map each tab ViewModel to a view via `DataTemplate` (above) or Crystal `AddMvvmTransient` — see [Crystal.Avalonia](crystal-avalonia.md). Reference: `samples/GOZA.Dock.Minimal/`.
+每种 Tab 用 `DataTemplate`（上文）或 Crystal `AddMvvmTransient` 映射 View。见 [Crystal.Avalonia](crystal-avalonia.md)。参考：`samples/GOZA.Dock.Minimal/`。
 
 ### MainViewModel.cs
 
@@ -134,19 +137,19 @@ public partial class MainWindow : Window
 
 ### App.axaml.cs / Program.cs
 
-Standard Avalonia desktop bootstrap (`Initialize` + `MainWindow` lifetime). See `samples/GOZA.Dock.Minimal/`.
+标准 Avalonia 桌面启动。见 `samples/GOZA.Dock.Minimal/`。
 
-## 4. Bindings
+## 4. 绑定
 
 | ViewModel | `DockRegion` |
 |-----------|--------------|
-| `LeftTabs` / `LeftSelected` | left |
-| `RightTabs` / `RightSelected` | right |
+| `LeftTabs` / `LeftSelected` | 左 |
+| `RightTabs` / `RightSelected` | 右 |
 
-Five-region grid: copy `samples/GOZA.Dock.Minimal/MainWindow.axaml`.
+五区域 Grid：复制 `samples/GOZA.Dock.Minimal/MainWindow.axaml`。
 
-## Next
+## 下一步
 
-- Public API & internals → [Architecture](architecture.md)
-- Crystal DI shell → [Crystal.Avalonia](crystal-avalonia.md)
-- Drag themes, parking lot, JSON layout → [Recipes](recipes.md)
+- 公开 API 与内部结构 → [架构](architecture.md)
+- Crystal DI → [Crystal.Avalonia](crystal-avalonia.md)
+- 拖拽主题、Parking Lot、JSON 布局 → [进阶](recipes.md)
