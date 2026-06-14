@@ -57,20 +57,20 @@ Expect at least: `README.md`, `package-icon.png`, `lib/net10.0/GOZA.Dock.dll`, `
 One-time: create an API key at https://www.nuget.org/account/apikeys (scope: `GOZA.Dock`, push).
 
 ```bash
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.4.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.5.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
 ```
 
 Or with environment variable (no key in shell history):
 
 ```bash
 $env:NUGET_API_KEY = "..."
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.4.nupkg --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.5.nupkg --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json
 ```
 
 ### Before each release
 
 1. Update `<Version>` and `<PackageReleaseNotes>` in `GOZA.Dock.csproj`.
-2. Copy `docs/1.0.2/` to `docs/{newVersion}/` (or edit in place for patch), update release notes (EN + zh-CN).
+2. Copy the latest `docs/{version}/` folder to `docs/{newVersion}/` (EN + zh-CN), update release notes, recipes, and architecture tables.
 3. Add the new version to `docfx/template/public/goza-versions.json` and set it as `default`.
 4. Update `toc.yml` `topicHref`, root `index.md`, and README version strings.
 5. `dotnet build GOZA.Dock.slnx -c Release`

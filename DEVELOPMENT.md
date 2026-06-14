@@ -1,6 +1,6 @@
 # GOZA.Dock 开发指南
 
-> **English user documentation:** build with DocFX — see [README.md](README.md#documentation). Docs live under `docs/v1.0/`; API reference is generated from XML comments in `src/GOZA.Dock/`.
+> **English user documentation:** build with DocFX — see [README.md](README.md#documentation). Docs live under `docs/{version}/` (latest `docs/1.0.5/`); API reference is generated from XML comments in `src/GOZA.Dock/`.
 
 本文档面向将 **GOZA.Dock** 迁出 GOZAReframe、作为独立仓库继续开发的场景，涵盖架构、集成方式、交互约定与常见坑。
 
@@ -100,7 +100,7 @@ your-org/GOZA.Dock/
 |---|---|
 | .NET | 10.0 |
 | Avalonia | 12.0.0（库唯一 NuGet 依赖） |
-| GOZA.Dock | 1.0.4 |
+| GOZA.Dock | 1.0.5 |
 | 语言 | C# latest |
 
 ```bash
@@ -447,6 +447,7 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 | 现象 | 可能原因 | 处理 |
 |------|----------|------|
 | Tab 条空白 | `DockRegion` 未 `AvaloniaXamlLoader.Load` 或 `ItemsSource` 绑定失败 | 检查模板与 `RelativeSource` 绑定 |
+| 内容区空白（Tab 标题可见） | 无 Tab View 的 `DataTemplate` / ViewLocator 映射 | 注册 View 映射；1.0.5+ 会自动选中第一项 |
 | 灰色 DropHint 不显示 | 仍在 Header 内拖拽；或坐标转换方向错误 | 向下拖出 Tab 条再试 |
 | 分隔条不可见 / 无 Preview | 旧版自定义 Template 覆盖了 GridSplitter | 使用当前 `OnRender` + 默认 Template 方案 |
 | 全屏只占中间一列 | 旧版只对直接父 Grid 展开 | 确认已用根 Grid 路径版 `DockLayoutExpansion` |
@@ -463,17 +464,17 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 
 ```bash
 dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release -o ./artifacts
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.4.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.1.0.5.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
 ```
 
-当前版本 **1.0.4**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
+当前版本 **1.0.5**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
 
-发布说明：`docs/1.0.4/release-notes.md`
+发布说明：`docs/1.0.5/release-notes.md`
 
 引用方：
 
 ```xml
-<PackageReference Include="GOZA.Dock" Version="1.0.4" />
+<PackageReference Include="GOZA.Dock" Version="1.0.5" />
 <PackageReference Include="Avalonia" Version="12.0.0" />
 ```
 

@@ -41,13 +41,15 @@ internal sealed class DockLayoutExpansion
         {
             if (_savedRows.TryGetValue(grid, out var rows))
             {
-                for (var i = 0; i < grid.RowDefinitions.Count; i++)
+                var rowCount = Math.Min(grid.RowDefinitions.Count, rows.Length);
+                for (var i = 0; i < rowCount; i++)
                     grid.RowDefinitions[i].Height = rows[i];
             }
 
             if (_savedCols.TryGetValue(grid, out var cols))
             {
-                for (var i = 0; i < grid.ColumnDefinitions.Count; i++)
+                var colCount = Math.Min(grid.ColumnDefinitions.Count, cols.Length);
+                for (var i = 0; i < colCount; i++)
                     grid.ColumnDefinitions[i].Width = cols[i];
             }
         }

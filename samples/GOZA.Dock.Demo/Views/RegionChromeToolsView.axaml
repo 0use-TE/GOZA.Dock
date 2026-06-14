@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="GOZA.Dock.Demo.Views.RegionChromeToolsView">
+  <Button Classes="dock-tab-strip-chrome-btn"
+          ToolTip.Tip="Expand this region to fill the shell (click again to restore)"
+          Click="OnExpandClick">
+    <TextBlock FontSize="11"
+               FontWeight="SemiBold"
+               Text="⛶" />
+  </Button>
+</UserControl>

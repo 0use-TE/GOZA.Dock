@@ -40,9 +40,20 @@ public class DockShell : ContentControl, ILayoutExpansionHost
     public static readonly StyledProperty<bool> UseVerticalTabHeadersProperty =
         AvaloniaProperty.Register<DockShell, bool>(nameof(UseVerticalTabHeaders), true);
 
+    /// <summary>
+    /// Default tab strip position for child <see cref="DockRegion"/> controls whose
+    /// <see cref="DockRegion.TabStripPlacement"/> is unset (<c>null</c>).
+    /// </summary>
+    public static readonly StyledProperty<DockTabStripPlacement> DefaultTabStripPlacementProperty =
+        AvaloniaProperty.Register<DockShell, DockTabStripPlacement>(
+            nameof(DefaultTabStripPlacement),
+            DockTabStripPlacement.Top);
+
     static DockShell()
     {
         EnableParkingLotProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.TrySetupParkingLot());
+        DefaultTabStripPlacementProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
+            shell.NotifyRegionsDefaultTabStripPlacementChanged());
     }
 
     /// <inheritdoc cref="EnableParkingLotProperty"/>
@@ -57,6 +68,13 @@ public class DockShell : ContentControl, ILayoutExpansionHost
     {
         get => GetValue(UseVerticalTabHeadersProperty);
         set => SetValue(UseVerticalTabHeadersProperty, value);
+    }
+
+    /// <inheritdoc cref="DefaultTabStripPlacementProperty"/>
+    public DockTabStripPlacement DefaultTabStripPlacement
+    {
+        get => GetValue(DefaultTabStripPlacementProperty);
+        set => SetValue(DefaultTabStripPlacementProperty, value);
     }
 
     /// <inheritdoc />
@@ -153,5 +171,11 @@ public class DockShell : ContentControl, ILayoutExpansionHost
 
         if (change.Property == ContentProperty)
             TrySetupParkingLot();
+    }
+
+    private void NotifyRegionsDefaultTabStripPlacementChanged()
+    {
+        foreach (var region in this.GetVisualDescendants().OfType<DockRegion>())
+            region.OnShellDefaultTabStripPlacementChanged();
     }
 }

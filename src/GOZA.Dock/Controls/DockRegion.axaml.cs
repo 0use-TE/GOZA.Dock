@@ -36,8 +36,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
         AvaloniaProperty.Register<DockRegion, bool>(nameof(AutoManageContent), true);
 
     /// <summary>Identifies the <see cref="TabStripPlacement"/> property.</summary>
-    public static readonly StyledProperty<DockTabStripPlacement> TabStripPlacementProperty =
-        AvaloniaProperty.Register<DockRegion, DockTabStripPlacement>(nameof(TabStripPlacement), DockTabStripPlacement.Top);
+    public static readonly StyledProperty<DockTabStripPlacement?> TabStripPlacementProperty =
+        AvaloniaProperty.Register<DockRegion, DockTabStripPlacement?>(nameof(TabStripPlacement));
 
     /// <summary>Identifies the <see cref="CloseTabCommand"/> property.</summary>
     public static readonly StyledProperty<ICommand?> CloseTabCommandProperty =
@@ -65,22 +65,19 @@ public partial class DockRegion : UserControl, IDockRegionSession
             region => region.VerticalTabHeader);
 
     /// <summary>Identifies the <see cref="HeaderPlacement"/> property (alias of <see cref="TabStripPlacement"/>).</summary>
-    public static readonly StyledProperty<DockTabStripPlacement> HeaderPlacementProperty =
-        AvaloniaProperty.Register<DockRegion, DockTabStripPlacement>(nameof(HeaderPlacement), DockTabStripPlacement.Top);
+    public static readonly StyledProperty<DockTabStripPlacement?> HeaderPlacementProperty =
+        AvaloniaProperty.Register<DockRegion, DockTabStripPlacement?>(nameof(HeaderPlacement));
 
     static DockRegion()
     {
         HeaderPlacementProperty.Changed.AddClassHandler<DockRegion>((region, e) =>
-        {
-            if (e.NewValue is DockTabStripPlacement placement)
-                region.SetCurrentValue(TabStripPlacementProperty, placement);
-        });
+            region.SetCurrentValue(TabStripPlacementProperty, e.NewValue));
 
         TabStripPlacementProperty.Changed.AddClassHandler<DockRegion>((region, e) =>
         {
-            if (e.NewValue is DockTabStripPlacement placement)
-                region.SetCurrentValue(HeaderPlacementProperty, placement);
+            region.SetCurrentValue(HeaderPlacementProperty, e.NewValue);
             region.UpdateVerticalTabHeader();
+            region.SyncPlacementFlyoutChecks();
         });
 
         UseVerticalTabHeadersProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
@@ -94,6 +91,12 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
         ShowAddDocProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateTabStripChrome());
+
+        ShowTabStripPlacementPickerProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateTabStripChrome());
+
+        TabStripTrailingContentProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateTabStripChrome());
     }
 
     private Grid? _layoutGrid;
@@ -104,7 +107,10 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private static readonly SolidColorBrush TabStripSeparatorBrush =
         new(Color.FromArgb(0xAA, 0x90, 0x90, 0x90));
     private TabControl? _tabStrip;
+    private StackPanel? _tabStripChromePanel;
     private Button? _addDocButton;
+    private Button? _tabStripPlacementButton;
+    private ContentControl? _tabStripTrailingHost;
     private ContentControl? _contentHost;
     private Border? _dropHint;
     private TabContainerDragController? _dragController;
@@ -113,6 +119,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private bool _verticalTabHeader;
     private INotifyCollectionChanged? _itemsSourceNotifier;
     private DockChromeIcon? _defaultAddIcon;
+    private DockChromeIcon? _defaultOptionsIcon;
+    private MenuFlyout? _tabStripPlacementFlyout;
 
     public DockRegion()
     {
@@ -136,6 +144,12 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
     private Button AddDocButtonControl => _addDocButton ??= this.FindControl<Button>("AddDocButton")
         ?? throw new InvalidOperationException("DockRegion template is missing AddDocButton.");
+
+    private StackPanel TabStripChromePanelControl => _tabStripChromePanel ??= this.FindControl<StackPanel>("TabStripChromePanel")
+        ?? throw new InvalidOperationException("DockRegion template is missing TabStripChromePanel.");
+
+    private ContentControl TabStripTrailingHostControl => _tabStripTrailingHost ??= this.FindControl<ContentControl>("TabStripTrailingHost")
+        ?? throw new InvalidOperationException("DockRegion template is missing TabStripTrailingHost.");
 
     private ContentControl ContentHostControl => _contentHost ??= this.FindControl<ContentControl>("ContentHost")
         ?? throw new InvalidOperationException("DockRegion template is missing ContentHost.");
@@ -173,19 +187,28 @@ public partial class DockRegion : UserControl, IDockRegionSession
         set => SetValue(AutoManageContentProperty, value);
     }
 
-    /// <summary>Position of the tab header strip relative to the content area (Top, Bottom, Left, Right).</summary>
-    public DockTabStripPlacement TabStripPlacement
+    /// <summary>
+    /// Tab strip position for this region. When <c>null</c>, inherits
+    /// <see cref="DockShell.DefaultTabStripPlacement"/>.
+    /// </summary>
+    public DockTabStripPlacement? TabStripPlacement
     {
         get => GetValue(TabStripPlacementProperty);
         set => SetValue(TabStripPlacementProperty, value);
     }
 
     /// <summary>Tab header strip position. Alias of <see cref="TabStripPlacement"/> for XAML binding.</summary>
-    public DockTabStripPlacement HeaderPlacement
+    public DockTabStripPlacement? HeaderPlacement
     {
         get => GetValue(HeaderPlacementProperty);
         set => SetValue(HeaderPlacementProperty, value);
     }
+
+    /// <summary>Resolved tab strip position (region override or shell default).</summary>
+    internal DockTabStripPlacement EffectiveTabStripPlacement =>
+        TabStripPlacement ?? _hostShell?.DefaultTabStripPlacement ?? DockTabStripPlacement.Top;
+
+    DockTabStripPlacement IDockRegionSession.TabStripPlacement => EffectiveTabStripPlacement;
 
     /// <summary>
     /// Optional hook after the library removes a closable tab from <see cref="ItemsSource"/>.
@@ -209,6 +232,34 @@ public partial class DockRegion : UserControl, IDockRegionSession
     {
         get => GetValue(ShowAddDocProperty);
         set => SetValue(ShowAddDocProperty, value);
+    }
+
+    /// <summary>Identifies the <see cref="ShowTabStripPlacementPicker"/> property.</summary>
+    public static readonly StyledProperty<bool> ShowTabStripPlacementPickerProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowTabStripPlacementPicker));
+
+    /// <summary>
+    /// When true, shows a ⋮ button after Add that opens a menu to set
+    /// <see cref="TabStripPlacement"/> (Top / Right / Bottom / Left).
+    /// </summary>
+    public bool ShowTabStripPlacementPicker
+    {
+        get => GetValue(ShowTabStripPlacementPickerProperty);
+        set => SetValue(ShowTabStripPlacementPickerProperty, value);
+    }
+
+    /// <summary>Identifies the <see cref="TabStripTrailingContent"/> property.</summary>
+    public static readonly StyledProperty<object?> TabStripTrailingContentProperty =
+        AvaloniaProperty.Register<DockRegion, object?>(nameof(TabStripTrailingContent));
+
+    /// <summary>
+    /// Optional custom chrome to the right of Add and the optional placement menu.
+    /// Bind a <see cref="Control"/> or use app-level <c>DataTemplate</c> via content type.
+    /// </summary>
+    public object? TabStripTrailingContent
+    {
+        get => GetValue(TabStripTrailingContentProperty);
+        set => SetValue(TabStripTrailingContentProperty, value);
     }
 
     /// <summary>Identifies the <see cref="AddDocContent"/> property.</summary>
@@ -269,6 +320,10 @@ public partial class DockRegion : UserControl, IDockRegionSession
         ApplyTabStripLayout();
         AttachInteraction();
         ApplyAddDocButtonContent();
+        ApplyTabStripPlacementButtonContent();
+        UpdateTabStripChrome();
+
+        EnsureDefaultSelection();
 
         if (SelectedItem is not null)
             OnSelectionChanged(_previousSelected, SelectedItem);
@@ -291,14 +346,15 @@ public partial class DockRegion : UserControl, IDockRegionSession
             ApplyTabStripLayout();
     }
 
-    /// <summary>Arranges tab strip and content rows/columns from <see cref="TabStripPlacement"/>.</summary>
+    /// <summary>Arranges tab strip and content rows/columns from the effective tab strip placement.</summary>
     private void ApplyTabStripLayout()
     {
+        var placement = EffectiveTabStripPlacement;
         var grid = LayoutGridControl;
         var tabStripHost = TabStripHostControl;
         var tabStripLayout = TabStripLayoutControl;
         var tabStrip = TabStripControl;
-        var addDocButton = AddDocButtonControl;
+        var chromePanel = TabStripChromePanelControl;
         var contentPane = ContentPaneControl;
 
         grid.RowDefinitions.Clear();
@@ -306,7 +362,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
         tabStripLayout.RowDefinitions.Clear();
         tabStripLayout.ColumnDefinitions.Clear();
 
-        switch (TabStripPlacement)
+        switch (placement)
         {
             case DockTabStripPlacement.Bottom:
                 grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Star));
@@ -319,8 +375,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
                 tabStripLayout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
                 Grid.SetRow(tabStrip, 0);
                 Grid.SetColumn(tabStrip, 0);
-                Grid.SetRow(addDocButton, 0);
-                Grid.SetColumn(addDocButton, 1);
+                Grid.SetRow(chromePanel, 0);
+                Grid.SetColumn(chromePanel, 1);
                 break;
 
             case DockTabStripPlacement.Left:
@@ -334,8 +390,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
                 tabStripLayout.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
                 Grid.SetRow(tabStrip, 0);
                 Grid.SetColumn(tabStrip, 0);
-                Grid.SetRow(addDocButton, 1);
-                Grid.SetColumn(addDocButton, 0);
+                Grid.SetRow(chromePanel, 1);
+                Grid.SetColumn(chromePanel, 0);
                 break;
 
             case DockTabStripPlacement.Right:
@@ -349,8 +405,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
                 tabStripLayout.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
                 Grid.SetRow(tabStrip, 0);
                 Grid.SetColumn(tabStrip, 0);
-                Grid.SetRow(addDocButton, 1);
-                Grid.SetColumn(addDocButton, 0);
+                Grid.SetRow(chromePanel, 1);
+                Grid.SetColumn(chromePanel, 0);
                 break;
 
             default:
@@ -364,8 +420,8 @@ public partial class DockRegion : UserControl, IDockRegionSession
                 tabStripLayout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
                 Grid.SetRow(tabStrip, 0);
                 Grid.SetColumn(tabStrip, 0);
-                Grid.SetRow(addDocButton, 0);
-                Grid.SetColumn(addDocButton, 1);
+                Grid.SetRow(chromePanel, 0);
+                Grid.SetColumn(chromePanel, 1);
                 break;
         }
 
@@ -376,14 +432,14 @@ public partial class DockRegion : UserControl, IDockRegionSession
         Grid.SetRowSpan(tabStrip, 1);
         Grid.SetColumnSpan(tabStrip, 1);
 
-        tabStrip.TabStripPlacement = TabStripPlacement.ToAvaloniaDock();
+        tabStrip.TabStripPlacement = placement.ToAvaloniaDock();
         UpdateTabStripChrome();
         UpdateVerticalTabHeader();
     }
 
     /// <summary>
-    /// Shows the tab header strip when there are tabs or an add-doc button. Hides the strip and
-    /// separator only when <see cref="ItemsSource"/> is empty and <see cref="ShowAddDoc"/> is false.
+    /// Shows the tab header strip when there are tabs or any chrome (Add, placement menu, trailing).
+    /// Hides the strip and separator only when the region is fully empty.
     /// </summary>
     private void UpdateTabStripChrome()
     {
@@ -393,12 +449,16 @@ public partial class DockRegion : UserControl, IDockRegionSession
         var tabStripHost = TabStripHostControl;
         var contentPane = ContentPaneControl;
         var hasItems = GetItemCount() > 0;
-        var showHeader = hasItems || ShowAddDoc;
+        var hasChrome = HasTabStripChrome();
+        var showHeader = hasItems || hasChrome;
 
         tabStripHost.IsVisible = showHeader;
 
         TabStripControl.IsVisible = hasItems;
-        SyncAddDocButtonLayout(hasItems);
+        TabStripChromePanelControl.IsVisible = hasChrome;
+        TabStripTrailingHostControl.IsVisible = TabStripTrailingContent is not null;
+        SyncTabStripChromeOrientation();
+        SyncTabStripChromeLayout(hasItems);
 
         if (showHeader)
             ApplyTabStripSeparator(tabStripHost, contentPane);
@@ -406,27 +466,37 @@ public partial class DockRegion : UserControl, IDockRegionSession
             ClearTabStripSeparator(tabStripHost, contentPane);
     }
 
-    /// <summary>
-    /// When only <see cref="ShowAddDoc"/> is visible (no tabs), span the add button across the header strip.
-    /// </summary>
-    private void SyncAddDocButtonLayout(bool hasItems)
+    private bool HasTabStripChrome() =>
+        ShowAddDoc || ShowTabStripPlacementPicker || TabStripTrailingContent is not null;
+
+    private void SyncTabStripChromeOrientation()
     {
-        if (!ShowAddDoc)
+        TabStripChromePanelControl.Orientation = EffectiveTabStripPlacement.IsHorizontal()
+            ? Orientation.Horizontal
+            : Orientation.Vertical;
+    }
+
+    /// <summary>
+    /// When only chrome is visible (no tabs), span the chrome panel across the header strip.
+    /// </summary>
+    private void SyncTabStripChromeLayout(bool hasItems)
+    {
+        if (!HasTabStripChrome())
             return;
 
-        var addDocButton = AddDocButtonControl;
+        var chromePanel = TabStripChromePanelControl;
         var tabStripLayout = TabStripLayoutControl;
         var columnCount = tabStripLayout.ColumnDefinitions.Count;
         var rowCount = tabStripLayout.RowDefinitions.Count;
 
         if (!hasItems)
         {
-            Grid.SetRow(addDocButton, 0);
-            Grid.SetColumn(addDocButton, 0);
-            Grid.SetRowSpan(addDocButton, Math.Max(rowCount, 1));
-            Grid.SetColumnSpan(addDocButton, Math.Max(columnCount, 1));
+            Grid.SetRow(chromePanel, 0);
+            Grid.SetColumn(chromePanel, 0);
+            Grid.SetRowSpan(chromePanel, Math.Max(rowCount, 1));
+            Grid.SetColumnSpan(chromePanel, Math.Max(columnCount, 1));
 
-            (addDocButton.HorizontalAlignment, addDocButton.VerticalAlignment) = TabStripPlacement switch
+            (chromePanel.HorizontalAlignment, chromePanel.VerticalAlignment) = EffectiveTabStripPlacement switch
             {
                 DockTabStripPlacement.Left => (HorizontalAlignment.Center, VerticalAlignment.Bottom),
                 DockTabStripPlacement.Right => (HorizontalAlignment.Center, VerticalAlignment.Bottom),
@@ -436,31 +506,27 @@ public partial class DockRegion : UserControl, IDockRegionSession
             return;
         }
 
-        Grid.SetRowSpan(addDocButton, 1);
-        Grid.SetColumnSpan(addDocButton, 1);
+        Grid.SetRowSpan(chromePanel, 1);
+        Grid.SetColumnSpan(chromePanel, 1);
+        chromePanel.HorizontalAlignment = HorizontalAlignment.Center;
+        chromePanel.VerticalAlignment = VerticalAlignment.Center;
 
-        switch (TabStripPlacement)
+        switch (EffectiveTabStripPlacement)
         {
             case DockTabStripPlacement.Bottom:
-                Grid.SetRow(addDocButton, 0);
-                Grid.SetColumn(addDocButton, 1);
-                addDocButton.HorizontalAlignment = HorizontalAlignment.Center;
-                addDocButton.VerticalAlignment = VerticalAlignment.Center;
+                Grid.SetRow(chromePanel, 0);
+                Grid.SetColumn(chromePanel, 1);
                 break;
 
             case DockTabStripPlacement.Left:
             case DockTabStripPlacement.Right:
-                Grid.SetRow(addDocButton, 1);
-                Grid.SetColumn(addDocButton, 0);
-                addDocButton.HorizontalAlignment = HorizontalAlignment.Center;
-                addDocButton.VerticalAlignment = VerticalAlignment.Center;
+                Grid.SetRow(chromePanel, 1);
+                Grid.SetColumn(chromePanel, 0);
                 break;
 
             default:
-                Grid.SetRow(addDocButton, 0);
-                Grid.SetColumn(addDocButton, 1);
-                addDocButton.HorizontalAlignment = HorizontalAlignment.Center;
-                addDocButton.VerticalAlignment = VerticalAlignment.Center;
+                Grid.SetRow(chromePanel, 0);
+                Grid.SetColumn(chromePanel, 1);
                 break;
         }
     }
@@ -472,7 +538,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
         contentPane.BorderBrush = TabStripSeparatorBrush;
         contentPane.BorderThickness = new Thickness(0);
 
-        tabStripHost.BorderThickness = TabStripPlacement switch
+        tabStripHost.BorderThickness = EffectiveTabStripPlacement switch
         {
             DockTabStripPlacement.Left => new Thickness(0, 0, 1, 0),
             DockTabStripPlacement.Right => new Thickness(1, 0, 0, 0),
@@ -493,11 +559,18 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
     public void OnTabDraggedAway(object item)
     {
-        if (!ContainsItem(item))
+        if (GetItemCount() == 0)
+        {
+            if (SelectedItem is not null)
+                SelectedItem = null;
+
+            return;
+        }
+
+        if (!ReferenceEquals(SelectedItem, item))
             return;
 
-        if (ReferenceEquals(SelectedItem, item))
-            SelectedItem = ItemsSource?.Cast<object>().FirstOrDefault(x => !ReferenceEquals(x, item));
+        SelectedItem = ItemsSource?.Cast<object>().FirstOrDefault();
     }
 
     public void OnTabReceived(object item)
@@ -603,8 +676,24 @@ public partial class DockRegion : UserControl, IDockRegionSession
         CloseTabCommand?.Execute(tab);
     }
 
-    private void AttachShellHeaderSubscription() =>
+    private void AttachShellHeaderSubscription()
+    {
         _hostShell = this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
+        if (TabStripPlacement is null && IsLoaded)
+            ApplyTabStripLayout();
+    }
+
+    internal void OnShellDefaultTabStripPlacementChanged()
+    {
+        if (TabStripPlacement is not null)
+            return;
+
+        UpdateVerticalTabHeader();
+        SyncPlacementFlyoutChecks();
+
+        if (IsLoaded)
+            ApplyTabStripLayout();
+    }
 
     private void UpdateVerticalTabHeader()
     {
@@ -618,7 +707,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
     private bool ComputeVerticalTabHeader()
     {
-        if (TabStripPlacement.IsHorizontal())
+        if (EffectiveTabStripPlacement.IsHorizontal())
             return false;
 
         return UseVerticalTabHeaders ?? _hostShell?.UseVerticalTabHeaders ?? true;
@@ -661,8 +750,18 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
         UpdateTabStripChrome();
 
-        if (oldSource is not null && GetItemCount(newSource) == 0)
-            TryCollapseLayoutIfEmpty();
+        if (GetItemCount(newSource) == 0)
+        {
+            if (SelectedItem is not null)
+                SelectedItem = null;
+
+            if (oldSource is not null)
+                TryCollapseLayoutIfEmpty();
+
+            return;
+        }
+
+        EnsureDefaultSelection();
     }
 
     private void UnhookItemsSourceNotifier()
@@ -677,7 +776,32 @@ public partial class DockRegion : UserControl, IDockRegionSession
     private void OnItemsSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         UpdateTabStripChrome();
-        TryCollapseLayoutIfEmpty();
+
+        if (GetItemCount() == 0)
+        {
+            if (SelectedItem is not null)
+                SelectedItem = null;
+
+            TryCollapseLayoutIfEmpty();
+            return;
+        }
+
+        EnsureDefaultSelection();
+    }
+
+    /// <summary>
+    /// When <see cref="ItemsSource"/> has items and <see cref="SelectedItem"/> is unset or stale,
+    /// selects the first tab so <see cref="ActiveContent"/> is populated.
+    /// </summary>
+    private void EnsureDefaultSelection()
+    {
+        if (GetItemCount() == 0)
+            return;
+
+        if (SelectedItem is not null && ContainsItem(SelectedItem))
+            return;
+
+        SelectedItem = ItemsSource?.Cast<object>().FirstOrDefault();
     }
 
     private void TryCollapseLayoutIfEmpty()
@@ -685,8 +809,17 @@ public partial class DockRegion : UserControl, IDockRegionSession
         if (GetItemCount() > 0)
             return;
 
-        _hostShell ??= this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
-        _hostShell?.CollapseLayoutIfExpanded(this);
+        // Defer until after TabControl / drag handlers finish mutating the strip.
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                if (GetItemCount() > 0)
+                    return;
+
+                _hostShell ??= this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
+                _hostShell?.CollapseLayoutIfExpanded(this);
+            },
+            DispatcherPriority.Background);
     }
 
     private int GetItemCount(IEnumerable? source = null)
@@ -700,8 +833,11 @@ public partial class DockRegion : UserControl, IDockRegionSession
 
     private void ApplyAddDocButtonContent()
     {
-        if (_addDocButton is null)
+        var button = _addDocButton ?? this.FindControl<Button>("AddDocButton");
+        if (button is null)
             return;
+
+        _addDocButton = button;
 
         var custom = AddDocContent;
         if (custom is null)
@@ -710,12 +846,69 @@ public partial class DockRegion : UserControl, IDockRegionSession
             {
                 Kind = DockChromeIconKind.Add,
             };
-            _defaultAddIcon.Bind(DockChromeIcon.ForegroundProperty, _addDocButton.GetObservable(Button.ForegroundProperty));
-            _addDocButton.Content = _defaultAddIcon;
+            _defaultAddIcon.Bind(DockChromeIcon.ForegroundProperty, button.GetObservable(Button.ForegroundProperty));
+            button.Content = _defaultAddIcon;
             return;
         }
 
-        _addDocButton.Content = custom;
+        button.Content = custom;
+    }
+
+    private void ApplyTabStripPlacementButtonContent()
+    {
+        var button = _tabStripPlacementButton ?? this.FindControl<Button>("TabStripPlacementButton");
+        if (button is null)
+            return;
+
+        _tabStripPlacementButton = button;
+        EnsureTabStripPlacementFlyout(button);
+
+        _defaultOptionsIcon ??= new DockChromeIcon { Kind = DockChromeIconKind.MoreVertical };
+        _defaultOptionsIcon.Bind(DockChromeIcon.ForegroundProperty, button.GetObservable(Button.ForegroundProperty));
+        button.Content = _defaultOptionsIcon;
+        ToolTip.SetTip(button, "Tab strip placement…");
+        SyncPlacementFlyoutChecks();
+    }
+
+    private void EnsureTabStripPlacementFlyout(Button button)
+    {
+        if (_tabStripPlacementFlyout is not null)
+            return;
+
+        _tabStripPlacementFlyout = new MenuFlyout();
+        AddPlacementMenuItem(DockTabStripPlacement.Top, "Top");
+        AddPlacementMenuItem(DockTabStripPlacement.Right, "Right");
+        AddPlacementMenuItem(DockTabStripPlacement.Bottom, "Bottom");
+        AddPlacementMenuItem(DockTabStripPlacement.Left, "Left");
+        button.Flyout = _tabStripPlacementFlyout;
+    }
+
+    private void AddPlacementMenuItem(DockTabStripPlacement placement, string header)
+    {
+        var item = new MenuItem
+        {
+            Header = header,
+            Tag = placement,
+            ToggleType = MenuItemToggleType.Radio,
+        };
+        item.Click += (_, _) =>
+        {
+            TabStripPlacement = placement;
+            _tabStripPlacementFlyout?.Hide();
+        };
+        _tabStripPlacementFlyout!.Items.Add(item);
+    }
+
+    private void SyncPlacementFlyoutChecks()
+    {
+        if (_tabStripPlacementFlyout is null)
+            return;
+
+        foreach (var item in _tabStripPlacementFlyout.Items)
+        {
+            if (item is MenuItem menuItem && menuItem.Tag is DockTabStripPlacement placement)
+                menuItem.IsChecked = EffectiveTabStripPlacement == placement;
+        }
     }
 
     private DockViewHost? ResolveViewHost()

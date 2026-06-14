@@ -16,9 +16,7 @@
         <TabControl.ItemTemplate>
           <DataTemplate x:DataType="dock:IDockTabItem">
             <controls:DockTabHeader Header="{Binding Header}"
-                                    IsClosable="{Binding IsClosable}"
-                                    CloseContent="{Binding CloseTabContent, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
-                                    IsVertical="{Binding VerticalTabHeader, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}" />
+                                    IsClosable="{Binding IsClosable}" />
           </DataTemplate>
         </TabControl.ItemTemplate>
         <TabControl.ContentTemplate>
@@ -28,10 +26,20 @@
         </TabControl.ContentTemplate>
       </TabControl>
 
-      <Button x:Name="AddDocButton"
-              Classes="dock-add-doc"
-              IsVisible="{Binding ShowAddDoc, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
-              Click="OnAddDocClick" />
+      <StackPanel x:Name="TabStripChromePanel"
+                  Classes="dock-tab-strip-chrome">
+        <Button x:Name="AddDocButton"
+                Classes="dock-add-doc"
+                IsVisible="{Binding ShowAddDoc, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}"
+                Click="OnAddDocClick" />
+
+        <Button x:Name="TabStripPlacementButton"
+                Classes="dock-tab-strip-options"
+                IsVisible="{Binding ShowTabStripPlacementPicker, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}" />
+
+        <ContentControl x:Name="TabStripTrailingHost"
+                        Content="{Binding TabStripTrailingContent, RelativeSource={RelativeSource AncestorType=controls:DockRegion}}" />
+      </StackPanel>
       </Grid>
     </Border>
 

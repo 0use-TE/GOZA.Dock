@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
@@ -33,6 +34,8 @@ public partial class DockTabHeader : UserControl
     private Button? _horizontalCloseButton;
     private Button? _verticalCloseButton;
     private DockChromeIcon? _defaultCloseIcon;
+    private IDisposable? _closeContentBinding;
+    private IDisposable? _isVerticalBinding;
 
     static DockTabHeader()
     {
@@ -74,12 +77,44 @@ public partial class DockTabHeader : UserControl
 
     public ReadOnlyObservableCollection<string> Letters => _lettersView;
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        AttachRegionBindings();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        DetachRegionBindings();
+        base.OnDetachedFromVisualTree(e);
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
         _horizontalCloseButton ??= this.FindControl<Button>("HorizontalCloseButton");
         _verticalCloseButton ??= this.FindControl<Button>("VerticalCloseButton");
         ApplyCloseButtonContent();
+    }
+
+    private void AttachRegionBindings()
+    {
+        DetachRegionBindings();
+
+        var region = this.GetVisualAncestors().OfType<DockRegion>().FirstOrDefault();
+        if (region is null)
+            return;
+
+        _closeContentBinding = this.Bind(CloseContentProperty, region.GetObservable(DockRegion.CloseTabContentProperty));
+        _isVerticalBinding = this.Bind(IsVerticalProperty, region.GetObservable(DockRegion.VerticalTabHeaderProperty));
+    }
+
+    private void DetachRegionBindings()
+    {
+        _closeContentBinding?.Dispose();
+        _closeContentBinding = null;
+        _isVerticalBinding?.Dispose();
+        _isVerticalBinding = null;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

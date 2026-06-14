@@ -10,6 +10,7 @@ public enum DockChromeIconKind
 {
     Add,
     Close,
+    MoreVertical,
 }
 
 /// <summary>Vector tab chrome icon that renders consistently across platforms (no font glyphs).</summary>
@@ -23,6 +24,11 @@ public partial class DockChromeIcon : UserControl
 
     private static readonly Geometry CloseGeometry =
         Parse("M 5,5 L 15,15 M 15,5 L 5,15");
+
+    private static readonly Geometry MoreVerticalGeometry =
+        Parse("M 9,4.5 A 1.5,1.5 0 1 0 11,4.5 A 1.5,1.5 0 1 0 9,4.5 " +
+              "M 9,10 A 1.5,1.5 0 1 0 11,10 A 1.5,1.5 0 1 0 9,10 " +
+              "M 9,15.5 A 1.5,1.5 0 1 0 11,15.5 A 1.5,1.5 0 1 0 9,15.5");
 
     private PathShape? _iconPath;
 
@@ -53,6 +59,7 @@ public partial class DockChromeIcon : UserControl
         _iconPath.Data = Kind switch
         {
             DockChromeIconKind.Close => CloseGeometry,
+            DockChromeIconKind.MoreVertical => MoreVerticalGeometry,
             _ => AddGeometry,
         };
     }

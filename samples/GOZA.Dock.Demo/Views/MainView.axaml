@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
+             xmlns:views="using:GOZA.Dock.Demo.Views"
              x:Class="GOZA.Dock.Demo.Views.MainView"
              x:DataType="vm:MainViewModel"
              ViewModelLocator.AutoWireViewModel="True"
@@ -45,7 +46,7 @@
                     Command="{Binding ToggleThemeCommand}" />
         </MenuItem>
       </Menu>
-        <Border BorderBrush="LightGray" BorderThickness="0 0.5 0 0" DockPanel.Dock="Top"></Border>
+        <Border DockPanel.Dock="Top" BorderBrush="LightGray" BorderThickness="0 1 0 0"></Border>
       <DockShell x:Name="Shell">
         <Grid ColumnDefinitions="*,8,*,8,*">
           <DockRegion Grid.Column="0"
@@ -60,9 +61,14 @@
             <DockRegion Grid.Row="0"
                         TabStripPlacement="Top"
                         ShowAddDoc="True"
+                        ShowTabStripPlacementPicker="True"
                         AddDocCommand="{Binding AddDocCommand}"
                         ItemsSource="{Binding CenterTopTabs}"
-                        SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
+                        SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}">
+              <DockRegion.TabStripTrailingContent>
+                <views:RegionChromeToolsView />
+              </DockRegion.TabStripTrailingContent>
+            </DockRegion>
 
             <DockSplitter Grid.Row="1"
                           ShowsPreview="True" />

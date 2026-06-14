@@ -259,11 +259,8 @@ public sealed class TabContainerDragController : IDisposable
         var current = source;
         while (current is not null && !ReferenceEquals(current, _tabSelector))
         {
-            if (current is ListBoxItem item
-                && _tabSelector.IndexFromContainer(item) >= 0)
-            {
-                return item;
-            }
+            if (current is Control container && _tabSelector.IndexFromContainer(container) >= 0)
+                return container;
 
             current = current.GetVisualParent();
         }
@@ -461,7 +458,7 @@ public sealed class TabContainerDragController : IDisposable
     }
 
     private bool IsHorizontalTabStrip =>
-        _region.TabStripPlacement.IsHorizontal();
+        _region.EffectiveTabStripPlacement.IsHorizontal();
 
     private void UpdateDropTargetHighlight(
         TopLevel? topLevel,
@@ -553,81 +550,118 @@ public sealed class TabContainerDragController : IDisposable
 
         var targetContainer = FindTargetContainerAtPointer(e);
 
+        var draggedItem = _globalDraggedItem;
+        var draggedContainer = _draggedContainer;
+        var reorderOffset = inSourceHeader && draggedContainer is not null && draggedItem is not null
+            ? ComputeReorderOffset(draggedContainer, draggedItem)
+            : 0;
+
+        CleanupVisuals();
+
         if (TryCrossRegionDrop(
                 targetHeaderTab,
                 e.GetPosition(targetHeaderTab),
-                targetHeaderTab is not null))
+                targetHeaderTab is not null,
+                draggedItem))
         {
-            // handled
+            return;
         }
-        else if (TryCrossRegionDrop(
-                     targetContainer,
-                     targetContainer is not null ? e.GetPosition(targetContainer) : default,
-                     targetHeaderTab is null && targetContainer is not null))
-        {
-            // handled
-        }
-        else if (inSourceHeader)
-        {
-            int oldIndex = _tabSelector.IndexFromContainer(_draggedContainer);
-            int offset = 0;
-            var neighbors = _tabSelector.GetRealizedContainers().Cast<Control>().ToList();
-            var horizontalStrip = IsHorizontalTabStrip;
 
-            foreach (var child in neighbors)
+        if (TryCrossRegionDrop(
+                targetContainer,
+                targetContainer is not null ? e.GetPosition(targetContainer) : default,
+                targetHeaderTab is null && targetContainer is not null,
+                draggedItem))
+        {
+            return;
+        }
+
+        if (inSourceHeader && draggedItem is not null)
+            ApplySourceReorder(draggedItem, reorderOffset);
+    }
+
+    private int ComputeReorderOffset(Control draggedContainer, object draggedItem)
+    {
+        if (_tabSelector.ItemsSource is not IList list)
+            return 0;
+
+        int oldIndex = list.IndexOf(draggedItem);
+        if (oldIndex < 0)
+            oldIndex = _tabSelector.IndexFromContainer(draggedContainer);
+
+        if (oldIndex < 0)
+            return 0;
+
+        int offset = 0;
+        var horizontalStrip = IsHorizontalTabStrip;
+
+        foreach (var child in _tabSelector.GetRealizedContainers().Cast<Control>())
+        {
+            if (ReferenceEquals(child, draggedContainer))
+                continue;
+
+            if (child.RenderTransform is not TranslateTransform tt)
+                continue;
+
+            int childIndex = _tabSelector.IndexFromContainer(child);
+            if (childIndex < 0)
+                continue;
+
+            if (horizontalStrip)
             {
-                if (ReferenceEquals(child, _draggedContainer))
+                if (Math.Abs(tt.X) <= 0.1)
                     continue;
 
-                if (child.RenderTransform is not TranslateTransform tt)
+                if (oldIndex < childIndex && tt.X < 0)
+                    offset++;
+                else if (oldIndex > childIndex && tt.X > 0)
+                    offset--;
+            }
+            else
+            {
+                if (Math.Abs(tt.Y) <= 0.1)
                     continue;
 
-                if (horizontalStrip)
-                {
-                    if (Math.Abs(tt.X) <= 0.1)
-                        continue;
-
-                    int childIndex = _tabSelector.IndexFromContainer(child);
-                    if (oldIndex < childIndex && tt.X < 0)
-                        offset++;
-                    else if (oldIndex > childIndex && tt.X > 0)
-                        offset--;
-                }
-                else
-                {
-                    if (Math.Abs(tt.Y) <= 0.1)
-                        continue;
-
-                    int childIndex = _tabSelector.IndexFromContainer(child);
-                    if (oldIndex < childIndex && tt.Y < 0)
-                        offset++;
-                    else if (oldIndex > childIndex && tt.Y > 0)
-                        offset--;
-                }
-            }
-
-            int newIndex = oldIndex + offset;
-            if (newIndex != oldIndex && _tabSelector.ItemsSource is IList list)
-            {
-                var item = list[oldIndex]!;
-                list.RemoveAt(oldIndex);
-                list.Insert(newIndex, item);
-                _tabSelector.SelectedIndex = newIndex;
+                if (oldIndex < childIndex && tt.Y < 0)
+                    offset++;
+                else if (oldIndex > childIndex && tt.Y > 0)
+                    offset--;
             }
         }
 
-        CleanupVisuals();
+        return offset;
+    }
+
+    private void ApplySourceReorder(object draggedItem, int offset)
+    {
+        if (_tabSelector.ItemsSource is not IList list)
+            return;
+
+        int oldIndex = list.IndexOf(draggedItem);
+        if (oldIndex < 0 || oldIndex >= list.Count)
+            return;
+
+        int newIndex = Math.Clamp(oldIndex + offset, 0, list.Count - 1);
+        if (newIndex == oldIndex)
+            return;
+
+        var item = list[oldIndex]!;
+        list.RemoveAt(oldIndex);
+        newIndex = Math.Clamp(newIndex, 0, list.Count);
+        list.Insert(newIndex, item);
+        _tabSelector.SelectedItem = item;
     }
 
     private bool TryCrossRegionDrop(
         SelectingItemsControl? targetTab,
         Point positionInTarget,
-        bool canDrop)
+        bool canDrop,
+        object? draggedItem)
     {
         if (!canDrop
             || targetTab is null
             || targetTab == _tabSelector
-            || _globalDraggedItem is null
+            || draggedItem is null
             || DockDragInteractionGuard.IsCrossRegionDropSuppressed()
             || _tabSelector.ItemsSource is not IList sourceList
             || targetTab.ItemsSource is not IList targetList)
@@ -635,21 +669,45 @@ public sealed class TabContainerDragController : IDisposable
             return false;
         }
 
-        sourceList.Remove(_globalDraggedItem);
+        PrepareSourceSelectionBeforeRemove(sourceList, draggedItem);
+        sourceList.Remove(draggedItem);
 
         var insertIndex = DockRegionDragCoordinator.GetTabInsertIndex(targetTab, positionInTarget);
 
-        if (!targetList.Contains(_globalDraggedItem))
-            targetList.Insert(Math.Clamp(insertIndex, 0, targetList.Count), _globalDraggedItem);
+        if (!targetList.Contains(draggedItem))
+            targetList.Insert(Math.Clamp(insertIndex, 0, targetList.Count), draggedItem);
 
-        targetTab.SelectedItem = _globalDraggedItem;
+        targetTab.SelectedItem = draggedItem;
 
         DockRegionDragCoordinator.NotifyCrossContainerDrop(
             _tabSelector,
             targetTab,
-            _globalDraggedItem);
+            draggedItem);
 
         return true;
+    }
+
+    /// <summary>
+    /// Clears or moves selection before <see cref="IList.Remove"/> so TabControl does not index a removed item.
+    /// </summary>
+    private void PrepareSourceSelectionBeforeRemove(IList sourceList, object draggedItem)
+    {
+        if (!ReferenceEquals(_region.SelectedItem, draggedItem)
+            && !ReferenceEquals(_tabSelector.SelectedItem, draggedItem))
+        {
+            return;
+        }
+
+        var index = sourceList.IndexOf(draggedItem);
+        object? next = null;
+        if (index >= 0 && sourceList.Count > 1)
+        {
+            next = index + 1 < sourceList.Count
+                ? sourceList[index + 1]
+                : sourceList[index > 0 ? index - 1 : 0];
+        }
+
+        _region.SelectedItem = next;
     }
 
     private void ResetDoubleTapState()
