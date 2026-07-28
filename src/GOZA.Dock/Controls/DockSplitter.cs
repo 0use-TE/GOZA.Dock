@@ -30,8 +30,8 @@ public class DockSplitter : GridSplitter
     {
         ShowsPreview = true;
         Background = Brushes.Transparent;
-        MinWidth = 8;
-        MinHeight = 8;
+        MinWidth = 16;
+        MinHeight = 16;
     }
 
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)

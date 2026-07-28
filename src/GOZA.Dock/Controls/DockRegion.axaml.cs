@@ -562,7 +562,15 @@ public partial class DockRegion : UserControl, IDockRegionSession
         if (GetItemCount() == 0)
         {
             if (SelectedItem is not null)
-                SelectedItem = null;
+            {
+                Dispatcher.UIThread.Post(
+                () =>
+                {
+                    if (GetItemCount() == 0)
+                        SelectedItem = null;
+                },
+                DispatcherPriority.Background);
+            }
 
             return;
         }
@@ -570,7 +578,14 @@ public partial class DockRegion : UserControl, IDockRegionSession
         if (!ReferenceEquals(SelectedItem, item))
             return;
 
-        SelectedItem = ItemsSource?.Cast<object>().FirstOrDefault();
+        var localItem = item;
+        Dispatcher.UIThread.Post(
+        () =>
+        {
+            if (SelectedItem is null || ReferenceEquals(SelectedItem, localItem))
+                SelectedItem = ItemsSource?.Cast<object>().FirstOrDefault();
+        },
+        DispatcherPriority.Background);
     }
 
     public void OnTabReceived(object item)
@@ -753,7 +768,14 @@ public partial class DockRegion : UserControl, IDockRegionSession
         if (GetItemCount(newSource) == 0)
         {
             if (SelectedItem is not null)
-                SelectedItem = null;
+            {
+                Dispatcher.UIThread.Post(
+                () =>
+                {
+                    SelectedItem = null;
+                },
+                DispatcherPriority.Background);
+            }
 
             if (oldSource is not null)
                 TryCollapseLayoutIfEmpty();
@@ -761,7 +783,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
             return;
         }
 
-        EnsureDefaultSelection();
+        Dispatcher.UIThread.Post(EnsureDefaultSelection, DispatcherPriority.Background);
     }
 
     private void UnhookItemsSourceNotifier()
@@ -780,13 +802,20 @@ public partial class DockRegion : UserControl, IDockRegionSession
         if (GetItemCount() == 0)
         {
             if (SelectedItem is not null)
-                SelectedItem = null;
+            {
+                Dispatcher.UIThread.Post(
+                () =>
+                {
+                    SelectedItem = null;
+                },
+                DispatcherPriority.Background);
+            }
 
             TryCollapseLayoutIfEmpty();
             return;
         }
 
-        EnsureDefaultSelection();
+        Dispatcher.UIThread.Post(EnsureDefaultSelection, DispatcherPriority.Background);
     }
 
     /// <summary>
@@ -846,7 +875,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
             {
                 Kind = DockChromeIconKind.Add,
             };
-            _defaultAddIcon.Bind(DockChromeIcon.ForegroundProperty, button.GetObservable(Button.ForegroundProperty));
+            // Foreground is now driven by DynamicResource DockChromeIconForegroundBrush
             button.Content = _defaultAddIcon;
             return;
         }
@@ -864,7 +893,7 @@ public partial class DockRegion : UserControl, IDockRegionSession
         EnsureTabStripPlacementFlyout(button);
 
         _defaultOptionsIcon ??= new DockChromeIcon { Kind = DockChromeIconKind.MoreVertical };
-        _defaultOptionsIcon.Bind(DockChromeIcon.ForegroundProperty, button.GetObservable(Button.ForegroundProperty));
+        // Foreground is now driven by DynamicResource DockChromeIconForegroundBrush
         button.Content = _defaultOptionsIcon;
         ToolTip.SetTip(button, "Tab strip placement…");
         SyncPlacementFlyoutChecks();

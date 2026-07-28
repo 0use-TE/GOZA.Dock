@@ -9,10 +9,10 @@
     <LangVersion>latest</LangVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.5.0</FileVersion>
-    <InformationalVersion>1.0.5</InformationalVersion>
+    <FileVersion>1.0.6.0</FileVersion>
+    <InformationalVersion>1.0.6</InformationalVersion>
 
     <Title>GOZA.Dock</Title>
     <Description>Cross-platform Avalonia docking layout with draggable tab regions, optional view parking lot, and layout expansion.</Description>
@@ -25,8 +25,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Auto-select first tab; DefaultTabStripPlacement, TabStrip placement menu and TabStripTrailingContent; fixes cross-region drag crash and tab header bindings. Requires Avalonia 12.0.0. See docs/1.0.5/release-notes.md.</PackageReleaseNotes>
-
+    <PackageReleaseNotes>Collapse() on DockShell/ILayoutExpansionHost; fix ItemsSource selection re-entrancy; rotated vertical headers; DockChromeIconForegroundBrush; SystemAccentColor drop-hint fallbacks. Requires Avalonia 12.0.0. See docs/1.0.6/release-notes.md.</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>

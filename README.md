@@ -17,7 +17,7 @@ Lightweight docking layout for [Avalonia](https://avaloniaui.net/) — compose p
 - **Closable tabs** — `IDockTabItem.IsClosable`; optional Add Doc button on a region.
 - **Tab strip chrome** — shell default placement, optional **⋮** placement menu, trailing toolbar slot.
 - **Auto tab selection** — first tab selected when `SelectedItem` is unset (bind when restoring layout).
-- **Side tab strips** — vertical stacked headers on left/right strips (toggle globally or per region).
+- **Side tab strips** — rotated full-header labels on left/right strips (toggle globally or per region).
 - **Theme-friendly** — include `DockShellStyles.axaml`; override drag/drop brushes via `DockThemeResources`.
 - **MIT** — no dependency on Semi, Crystal, or other UI stacks (Avalonia only).
 
@@ -34,7 +34,7 @@ Full demo (Crystal DI, layout save/load, closable docs): `samples/GOZA.Dock.Demo
 Install the package (**Avalonia 12.0.0+** required in your app):
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.5
+dotnet add package GOZA.Dock --version 1.0.6
 ```
 
 Minimal XAML:
@@ -67,7 +67,7 @@ Tab items implement `IDockTabItem` (`Id`, `Header`, optional `ReuseSurface`, `Is
 |----------|-----|
 | Online docs | https://0use.net/GOZA.Dock/ |
 | Browser demo (WASM) | https://0use.net/GOZA.Dock/demo/ |
-| Release notes | [docs/1.0.5/release-notes.md](docs/1.0.5/release-notes.md) |
+| Release notes | [docs/1.0.6/release-notes.md](docs/1.0.6/release-notes.md) |
 | NuGet publish (maintainers) | [PUBLISHING.md](PUBLISHING.md) |
 
 Build docs locally (requires [DocFX](https://dotnet.github.io/docfx/)):

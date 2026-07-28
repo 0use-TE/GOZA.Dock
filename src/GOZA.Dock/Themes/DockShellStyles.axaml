@@ -33,53 +33,29 @@
   <Style Selector="DockRegion Button.dock-tab-close">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="4,2" />
-    <Setter Property="MinWidth" Value="18" />
-    <Setter Property="MinHeight" Value="18" />
+    <Setter Property="Padding" Value="6,4" />
+    <Setter Property="MinWidth" Value="26" />
+    <Setter Property="MinHeight" Value="26" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="DockRegion Button.dock-tab-close-vertical">
-    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="Padding" Value="6,4" />
     <Setter Property="VerticalAlignment" Value="Bottom" />
   </Style>
 
-  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Left] /template/ TabItem">
-    <Setter Property="MinWidth" Value="28" />
-    <Setter Property="Padding" Value="2,6" />
-  </Style>
-  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Right] /template/ TabItem">
-    <Setter Property="MinWidth" Value="28" />
-    <Setter Property="Padding" Value="2,6" />
-  </Style>
+  <!-- Vertical TabItem dimensions (MinWidth / Padding) are intentionally not set — -->
+  <!-- let the host theme provide reasonable defaults for vertical (Left/Right) tabs. -->
 
-  <Style Selector="DockRegion Button.dock-add-doc">
+  <Style Selector="DockRegion Button.dock-add-doc,
+                 DockRegion Button.dock-tab-strip-options,
+                 DockRegion Button.dock-tab-strip-chrome-btn">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="6,4" />
-    <Setter Property="MinWidth" Value="22" />
-    <Setter Property="MinHeight" Value="22" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
-  </Style>
-  <Style Selector="DockRegion Button.dock-tab-strip-options">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="6,4" />
-    <Setter Property="MinWidth" Value="22" />
-    <Setter Property="MinHeight" Value="22" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
-  </Style>
-  <Style Selector="DockRegion Button.dock-tab-strip-chrome-btn">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="6,4" />
-    <Setter Property="MinWidth" Value="22" />
-    <Setter Property="MinHeight" Value="22" />
+    <Setter Property="Padding" Value="8,6" />
+    <Setter Property="MinWidth" Value="28" />
+    <Setter Property="MinHeight" Value="28" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -95,6 +71,7 @@
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#331878D4" />
           <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#661878D4" />
+          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#CC000000" />
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F2FFFFFF" />
           <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#B0B0B0B0" />
           <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#E6000000" />
@@ -102,6 +79,7 @@
         <ResourceDictionary x:Key="Dark">
           <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#66808080" />
           <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#AA909090" />
+          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#F2FFFFFF" />
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#EE404040" />
           <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AA909090" />
           <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#F2FFFFFF" />

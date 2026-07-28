@@ -2,11 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:GOZA.Dock.Controls"
              xmlns:dock="using:GOZA.Dock"
-             x:Class="GOZA.Dock.Controls.DockRegion"
-             HorizontalAlignment="Stretch"
-             VerticalAlignment="Stretch"
-             MinWidth="20"
-             MinHeight="20">
+              x:Class="GOZA.Dock.Controls.DockRegion"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
   <Grid x:Name="LayoutGrid">
     <Border x:Name="TabStripHost">
       <Grid x:Name="TabStripLayout">

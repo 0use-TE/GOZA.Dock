@@ -89,6 +89,13 @@ public class DockShell : ContentControl, ILayoutExpansionHost
         _expansion.Toggle(region);
     }
 
+    /// <inheritdoc/>
+    public void Collapse()
+    {
+        if (_expansion.IsExpanded)
+            _expansion.Collapse();
+    }
+
     /// <summary>Exits layout expansion when <paramref name="region"/> has no tabs left.</summary>
     internal void CollapseLayoutIfExpanded(DockRegion region)
     {

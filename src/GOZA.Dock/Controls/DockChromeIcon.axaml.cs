@@ -35,7 +35,6 @@ public partial class DockChromeIcon : UserControl
     static DockChromeIcon()
     {
         KindProperty.Changed.AddClassHandler<DockChromeIcon>((icon, _) => icon.ApplyGeometry());
-        ForegroundProperty.Changed.AddClassHandler<DockChromeIcon>((icon, _) => icon.ApplyGeometry());
     }
 
     public DockChromeIcon()

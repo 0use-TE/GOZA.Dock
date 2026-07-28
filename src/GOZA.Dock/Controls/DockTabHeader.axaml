@@ -7,7 +7,7 @@
           ColumnDefinitions="*,Auto"
           IsVisible="{Binding !IsVertical, ElementName=Root}">
       <TextBlock Grid.Column="0"
-                 Margin="8,4"
+                 Margin="8,6"
                  VerticalAlignment="Center"
                  Text="{Binding Header, ElementName=Root}" />
       <Button x:Name="HorizontalCloseButton"
@@ -18,25 +18,14 @@
     </Grid>
 
     <StackPanel x:Name="VerticalPanel"
-                Margin="4,6"
+                Margin="2,6"
                 HorizontalAlignment="Center"
                 Spacing="2"
                 IsVisible="{Binding IsVertical, ElementName=Root}">
-      <ItemsControl ItemsSource="{Binding Letters, ElementName=Root}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <TextBlock HorizontalAlignment="Center"
-                       FontSize="12"
-                       LineHeight="14"
-                       Text="{Binding}" />
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <StackPanel Spacing="1" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-      </ItemsControl>
+      <LayoutTransformControl HorizontalAlignment="Center"
+                              LayoutTransform="rotate(90deg)">
+        <TextBlock Text="{Binding Header, ElementName=Root}" />
+      </LayoutTransformControl>
       <Button x:Name="VerticalCloseButton"
               Margin="0,4,0,0"
               Classes="dock-tab-close dock-tab-close-vertical"

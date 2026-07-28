@@ -4,8 +4,13 @@
   <Button Classes="dock-tab-strip-chrome-btn"
           ToolTip.Tip="Expand this region to fill the shell (click again to restore)"
           Click="OnExpandClick">
-    <TextBlock FontSize="11"
-               FontWeight="SemiBold"
-               Text="⛶" />
+    <Viewbox Width="16" Height="16" Stretch="Uniform">
+      <Path Width="20" Height="20"
+            Stretch="None"
+            Stroke="{DynamicResource DockChromeIconForegroundBrush}"
+            StrokeLineCap="Round"
+            StrokeThickness="1.8"
+            Data="M 5,5 L 15,5 L 15,15 L 5,15 Z" />
+    </Viewbox>
   </Button>
 </UserControl>

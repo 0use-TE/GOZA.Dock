@@ -16,7 +16,7 @@ Diseño de acoplamiento (docking) ligero para [Avalonia](https://avaloniaui.net/
 - **Pestañas cerrables** — `IDockTabItem.IsClosable`; botón opcional "Add Doc" en una región.
 - **Cromo de tira de pestañas** — ubicación predeterminada del shell, menú de ubicación **⋮** opcional, ranura de barra de herramientas final.
 - **Selección automática de pestañas** — se selecciona la primera pestaña cuando `SelectedItem` no está definido (vínculo al restaurar el diseño).
-- **Tiras de pestañas laterales** — encabezados apilados verticalmente en tiras izquierda/derecha (activación global o por región).
+- **Tiras de pestañas laterales** — encabezado completo rotado en tiras izquierda/derecha (activación global o por región).
 - **Compatible con temas** — incluye `DockShellStyles.axaml`; sobrescriba los pinceles de arrastrar/soltar mediante `DockThemeResources`.
 - **MIT** — sin dependencias de Semi, Crystal u otros stacks de UI (solo Avalonia).
 
@@ -33,7 +33,7 @@ Demo completa (Crystal DI, guardado/carga de diseño, documentos cerrables): `sa
 Instale el paquete (**Avalonia 12.0.0+** requerido en su aplicación):
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.5
+dotnet add package GOZA.Dock --version 1.0.6
 ```
 
 XAML mínimo:
@@ -66,7 +66,7 @@ Los elementos de pestaña implementan `IDockTabItem` (`Id`, `Header`, opcionalme
 |----------|-----|
 | Documentación en línea | https://0use.net/GOZA.Dock/ |
 | Demo en navegador (WASM) | https://0use.net/GOZA.Dock/demo/ |
-| Notas de lanzamiento | [docs/1.0.5/release-notes.md](docs/1.0.5/release-notes.md) |
+| Notas de lanzamiento | [docs/1.0.6/release-notes.md](docs/1.0.6/release-notes.md) |
 | Publicación NuGet (mantenedores) | [PUBLISHING.md](PUBLISHING.md) |
 
 Construya la documentación localmente (requiere [DocFX](https://dotnet.github.io/docfx/)):

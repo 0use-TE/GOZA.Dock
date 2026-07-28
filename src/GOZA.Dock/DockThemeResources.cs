@@ -6,6 +6,9 @@ namespace GOZA.Dock;
 /// </summary>
 public static class DockThemeResources
 {
+    /// <summary>Foreground (stroke) for chrome icons (add / close / more).</summary>
+    public const string ChromeIconForegroundBrush = "DockChromeIconForegroundBrush";
+
     /// <summary>Background for the cross-region drop hint overlay on <see cref="Controls.DockRegion"/>.</summary>
     public const string DropHintBackgroundBrush = "DockDropHintBackgroundBrush";
 

@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -24,30 +23,15 @@ public partial class DockTabHeader : UserControl
     public static readonly StyledProperty<object?> CloseContentProperty =
         AvaloniaProperty.Register<DockTabHeader, object?>(nameof(CloseContent));
 
-    public static readonly DirectProperty<DockTabHeader, ReadOnlyObservableCollection<string>> LettersProperty =
-        AvaloniaProperty.RegisterDirect<DockTabHeader, ReadOnlyObservableCollection<string>>(
-            nameof(Letters),
-            header => header.Letters);
-
-    private readonly ObservableCollection<string> _letters = [];
-    private readonly ReadOnlyObservableCollection<string> _lettersView;
     private Button? _horizontalCloseButton;
     private Button? _verticalCloseButton;
     private DockChromeIcon? _defaultCloseIcon;
     private IDisposable? _closeContentBinding;
     private IDisposable? _isVerticalBinding;
 
-    static DockTabHeader()
-    {
-        HeaderProperty.Changed.AddClassHandler<DockTabHeader>((header, e) =>
-            header.RebuildLetters(e.NewValue as string));
-    }
-
     public DockTabHeader()
     {
-        _lettersView = new ReadOnlyObservableCollection<string>(_letters);
         AvaloniaXamlLoader.Load(this);
-        RebuildLetters(Header);
     }
 
     public string? Header
@@ -74,8 +58,6 @@ public partial class DockTabHeader : UserControl
         get => GetValue(CloseContentProperty);
         set => SetValue(CloseContentProperty, value);
     }
-
-    public ReadOnlyObservableCollection<string> Letters => _lettersView;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
@@ -136,18 +118,14 @@ public partial class DockTabHeader : UserControl
             _defaultCloseIcon ??= new DockChromeIcon { Kind = DockChromeIconKind.Close };
             if (_horizontalCloseButton is not null)
             {
-                _defaultCloseIcon.Bind(
-                    DockChromeIcon.ForegroundProperty,
-                    _horizontalCloseButton.GetObservable(Button.ForegroundProperty));
+                // Foreground is now driven by DynamicResource DockChromeIconForegroundBrush
                 _horizontalCloseButton.Content = _defaultCloseIcon;
             }
 
             if (_verticalCloseButton is not null)
             {
                 var verticalIcon = new DockChromeIcon { Kind = DockChromeIconKind.Close };
-                verticalIcon.Bind(
-                    DockChromeIcon.ForegroundProperty,
-                    _verticalCloseButton.GetObservable(Button.ForegroundProperty));
+                // Foreground is now driven by DynamicResource DockChromeIconForegroundBrush
                 _verticalCloseButton.Content = verticalIcon;
             }
 
@@ -167,16 +145,6 @@ public partial class DockTabHeader : UserControl
             _horizontalCloseButton.Content = content;
         if (_verticalCloseButton is not null)
             _verticalCloseButton.Content = content;
-    }
-
-    private void RebuildLetters(string? header)
-    {
-        _letters.Clear();
-        if (string.IsNullOrEmpty(header))
-            return;
-
-        foreach (var ch in header)
-            _letters.Add(ch.ToString());
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs e)

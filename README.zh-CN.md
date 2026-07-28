@@ -16,7 +16,7 @@
 - **可关闭 Tab** — `IDockTabItem.IsClosable`；区域可选 “+” 新建按钮。
 - **Tab 条 chrome** — Shell 默认位置、可选 **⋮** 位置菜单、尾部工具插槽。
 - **自动选中** — 未绑定 `SelectedItem` 时自动选中第一项（布局恢复时建议绑定）。
-- **侧栏 Tab** — 左/右条默认竖排字母标题（可全局或按区域关闭）。
+- **侧栏 Tab** — 左/右条默认旋转完整标题（可全局或按区域关闭）。
 - **主题无关** — Include `DockShellStyles.axaml`；拖拽画刷可通过 `DockThemeResources` 覆盖。
 - **MIT** — 仅依赖 Avalonia。
 
@@ -24,7 +24,7 @@
 
 ```bash
 dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet add package GOZA.Dock --version 1.0.5
+dotnet add package GOZA.Dock --version 1.0.6
 ```
 
 完整 Demo（Crystal、布局存盘、动态文档）：`samples/GOZA.Dock.Demo.Desktop`
@@ -37,7 +37,7 @@ dotnet add package GOZA.Dock --version 1.0.5
 |------|------|
 | 在线文档 | https://0use.net/GOZA.Dock/ |
 | 浏览器 Demo | https://0use.net/GOZA.Dock/demo/ |
-| 发布说明 | [docs/1.0.5/zh-CN/release-notes.md](docs/1.0.5/zh-CN/release-notes.md) |
+| 发布说明 | [docs/1.0.6/zh-CN/release-notes.md](docs/1.0.6/zh-CN/release-notes.md) |
 | NuGet 发布 | [PUBLISHING.md](PUBLISHING.md) |
 
 本地文档：`docfx docfx.json && docfx serve _site --port 8080`

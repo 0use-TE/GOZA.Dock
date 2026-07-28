@@ -10,4 +10,7 @@ public interface ILayoutExpansionHost
 
     /// <summary>Expands the given region to fill the shell, or restores the previous layout if already expanded.</summary>
     void ToggleLayoutExpansion(DockRegion region);
+
+    /// <summary>Collapse if any region in grid has expanded.</summary>
+    void Collapse();
 }
