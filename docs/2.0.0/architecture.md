@@ -51,7 +51,7 @@ The control:
 
 A `sealed GridSplitter` that introspects its `Grid` parent on attach and on every layout-affecting property change. A gutter track is a `GridLength` that is `Auto`, or absolute and `> 0 && <= 32` px. The splitter then picks `ResizeDirection`, sets the matching `:columns` or `:rows` pseudo-class, sets width/height to `DockPaneGap`, and (if needed) extends its row or column span to cover the perpendicular axis.
 
-It exposes a `:dragging` pseudo-class for the duration of a drag — handy for highlight effects you cannot otherwise paint without breaking `ShowsPreview`. Because the control stays a `GridSplitter`, you can use any inherited member (`ShowsPreview`, `DragIncrement`, `KeyboardIncrement`).
+It exposes a `:dragging` pseudo-class for the duration of a drag. The stock theme uses live resizing (`ShowsPreview = false`) so only the actual splitter is highlighted, but because the control stays a `GridSplitter`, you can override inherited members (`ShowsPreview`, `DragIncrement`, `KeyboardIncrement`).
 
 ## Drag pipeline
 

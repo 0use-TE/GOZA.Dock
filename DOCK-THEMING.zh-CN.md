@@ -302,8 +302,8 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
 
 - 常态透明。
 - `pointerover` 只改变鼠标光标，不绘制蓝线。
-- `pressed` 和 `dragging` 时绘制 2px 蓝线。
-- 开启 `ShowsPreview`，拖动期间显示预览位置。
+- `pressed` 和 `dragging` 时在实际 Splitter 位置绘制 2px 蓝线。
+- 默认 `ShowsPreview="False"`，拖动会实时调整相邻 Grid 轨道，不再同时出现原位置和预览位置两条高亮。
 
 相关令牌：
 
@@ -312,9 +312,50 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
 <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
 ```
 
-`DockSplitterHoverBrush` 这个名称为了保持资源 API 简单而保留；默认模板目前只在 pressed、dragging 和拖动预览中使用它。
+`DockSplitterHoverBrush` 这个名称为了保持资源 API 简单而保留；默认模板目前只在 pressed 和 dragging 中使用它。仍可在单个 `DockSplitter` 上显式设置 `ShowsPreview="True"` 恢复 Avalonia 原生预览行为。
 
-## 10. 全部公开尺寸令牌
+## 10. Tab 过多时的滚动
+
+默认 TabStrip 使用无可见滚动条的轴向 `ScrollViewer`：
+
+- Top / Bottom Header：鼠标滚轮、触控板横向手势可水平滚动。
+- Left / Right Header：沿垂直方向滚动。
+- 代码或用户操作改变 `SelectedItem` 时，选中 Header 自动滚入可见区域。
+- Header 右侧的 Add 按钮和 `HeaderContent` 固定不动，只有 Tab 区域滚动。
+
+Header 与内容之间的细分隔线绘制在 TabStrip 下层；选中 Tab 的背景会遮住自己范围内的分隔线。因此选中项与内容视觉连通，而且滚动时缺口自然跟随选中 Header，无需计算偏移坐标。
+
+通过 `ShowHeaderBodySeparator` 可以选择是否保留选中 Header 与 Body 之间的线：
+
+```xml
+<!-- 默认 false：选中 Header 与 Body 连通 -->
+<DockRegion ShowHeaderBodySeparator="False" />
+
+<!-- 显示贯穿整个 Header 的 1px 分隔线 -->
+<DockRegion ShowHeaderBodySeparator="True" />
+```
+
+## 11. DockRegion 最大化
+
+最大化只填满当前 `DockShell`，不会切换操作系统窗口全屏，也不会修改用户 Grid 的行列定义。
+
+```xml
+<DockRegion ShowMaximizeButton="True"
+            CanMaximize="True"
+            DoubleClickHeaderToMaximize="True" />
+```
+
+- `ShowMaximizeButton` 默认 `false`，控制内置最大化/还原按钮。
+- `CanMaximize` 默认 `true`，设为 `false` 会禁用功能，并自动还原已最大化的 Region。
+- `DoubleClickHeaderToMaximize` 默认 `true`；只响应 Header 空白区域，不拦截 Tab、关闭按钮或自定义右侧操作。
+- `IsMaximized` 是只读状态。
+- `Esc` 还原；也可再次双击或点击内置还原按钮。
+- `ToggleMaximize()`、`DockShell.MaximizeRegion(region)`、`RestoreMaximizedRegion()` 可供代码调用。
+
+Shell 移动的是原 `DockRegion` 实例，原位置由占位控件保持；进入和退出最大化都会保留当时的 `SelectedItem`，还原时恢复父 Panel、Children 索引、Grid 行列/跨度、Margin、尺寸和对齐方式。布局持久化无需记录该临时状态。
+为了保持实现简单、可预测，参与最大化的 `DockRegion` 应像推荐布局一样直接放在 `Grid` 或其他 `Panel.Children` 中；不要先包一层 `Border` 或 `ContentControl`。
+
+## 12. 全部公开尺寸令牌
 
 - `DockPaneGap`：卡片间距和 Splitter 布局尺寸，`Double`。
 - `DockTabHeight`：Header 最小高度，`Double`。
@@ -327,7 +368,7 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
 - `DockDragGhostCornerRadius`：Tab 拖动浮层圆角，`CornerRadius`。
 - `DockDragGhostPadding`：Tab 拖动浮层内边距，`Thickness`。
 
-## 11. 全部公开颜色令牌
+## 13. 全部公开颜色令牌
 
 - `DockShellBackgroundBrush`：卡片间距和工作区背景。
 - `DockPaneBackgroundBrush`：卡片内容背景。
@@ -340,7 +381,7 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
 - `DockTabSelectedForegroundBrush`：选中 Tab 前景。
 - `DockAccentBrush`：选中 Tab 指示线。
 - `DockChromeIconForegroundBrush`：添加/关闭图标颜色。
-- `DockSplitterHoverBrush`：Splitter 按下、拖动及 Preview 颜色。
+- `DockSplitterHoverBrush`：Splitter 按下和拖动颜色。
 - `DockDropHintBackgroundBrush`：跨 Region 拖入提示背景。
 - `DockDropHintBorderBrush`：跨 Region 拖入提示边框。
 - `DockDragGhostBackgroundBrush`：Tab 拖动浮层背景。
@@ -349,7 +390,7 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
 
 `DockSplitterBackgroundBrush` 仍是公开资源键，但默认模板常态透明，不读取该颜色。完全替换 Splitter Theme 时可以使用它。
 
-## 12. 完整替换 DockRegion Theme
+## 14. 完整替换 DockRegion Theme
 
 只有资源令牌和 Header 模板不够时，可以给单个 Region 设置完整 `ControlTheme`：
 
@@ -363,11 +404,13 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
 - `PART_ContentHost`，类型 `ContentControl`。
 - `PART_HeaderHost`，任意 `Control`。
 - `PART_ChromeHost`，任意 `Control`。
+- `PART_MaximizeButton`，类型 `DockHeaderButton`。
+- `PART_MaximizeIcon`，类型 `DockChromeIcon`。
 - `PART_DropHint`，类型 `Border`。
 
 如果只是改颜色、间距、圆角、Header 大小或 Header 内容，不建议替换完整模板。优先使用资源令牌、Style、`TabItemTheme` 和 `TabHeaderTemplate`，这样升级成本最低。
 
-## 13. 推荐的定制层级
+## 15. 推荐的定制层级
 
 1. 全局颜色和尺寸：覆盖公开资源令牌。
 2. 单个工作区：使用 `DockShell.Resources`。

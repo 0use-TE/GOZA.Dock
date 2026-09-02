@@ -65,6 +65,7 @@
             <DockSplitter Grid.Row="1" />
 
             <DockRegion Grid.Row="2"
+                        ShowMaximizeButton="True"
                         ItemsSource="{Binding CenterBottomTabs}"
                         SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}">
               <DockRegion.HeaderContent>

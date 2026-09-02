@@ -36,9 +36,12 @@ public sealed class DockShell : ContentControl
 |---|---|---|---|
 | `Content` | `object?` | `null` | 你的布局。必须是 `Panel`（通常是 `Grid`），否则 Parking Lot 无法挂载。 |
 | `EnableViewCache` | `bool` | `true` | 为 `ReuseSurface = true` 的 Tab 启用表面复用。对应 `EnableViewCacheProperty`。 |
+| `MaximizedRegion` | `DockRegion?` | `null` | 当前填满 Shell 的 Region，只读。 |
 | `Background`、`Padding` | — | `DockShellBackgroundBrush`、`DockShellPadding` | 由默认 ControlTheme 决定。 |
 
 `DockShell` 是 `sealed`；通过组合而非继承来扩展行为。
+
+最大化方法：`MaximizeRegion(DockRegion)`、`RestoreMaximizedRegion()` 和 `ToggleMaximize(DockRegion)`。最大化只覆盖当前 Shell，不改变窗口全屏状态。
 
 ### 用法
 
@@ -98,6 +101,11 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 | `HeaderContentTemplate` | `IDataTemplate?` | `null` | 用于呈现 `HeaderContent` 对象或 ViewModel 的模板。 |
 | `TabClosedCommand` | `ICommand?` | `null` | **事后通知**——库已经完成了移除和缓存清理；命令参数是被关闭的 `IDockTabItem`。 |
 | `CanDragTabs` | `bool` | `true` | 设为 `false` 时拆掉手势控制器：仍可选中/关闭，但不能重排和跨区移动。运行时切换会立即重新挂载/拆除。 |
+| `ShowMaximizeButton` | `bool` | `false` | 显示内置最大化/还原按钮。 |
+| `CanMaximize` | `bool` | `true` | 是否允许 Region 填满所属 Shell。 |
+| `DoubleClickHeaderToMaximize` | `bool` | `true` | 双击 Header 空白区域时切换最大化。 |
+| `ShowHeaderBodySeparator` | `bool` | `false` | 是否在选中 Header 与 Body 之间保留完整 1px 分隔线。 |
+| `IsMaximized` | `bool` | `false` | 只读最大化状态。 |
 
 主题默认提供：`Background`（`DockPaneBackgroundBrush`）、`BorderBrush`、`BorderThickness`、`CornerRadius`。
 
@@ -105,6 +113,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
 ```csharp
 public void EvictView(IDockTabItem tab);
+public bool ToggleMaximize();
 ```
 
 从 Shell 的 Parking Lot 中丢弃 Tab 的缓存表面。仅在 `tab.ReuseSurface = true` 时有意义。你自己移除可复用 Tab 时（从集合移除**不会**自动 evict；通过关闭按钮才会）需要显式调用：

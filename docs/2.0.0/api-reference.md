@@ -36,9 +36,12 @@ The workspace root. It is intentionally thin: it themes the background/padding, 
 |---|---|---|---|
 | `Content` | `object?` | `null` | Your layout. Must be a `Panel` (e.g. `Grid`) for the view cache to attach. |
 | `EnableViewCache` | `bool` | `true` | Enables surface reuse for tabs with `ReuseSurface = true`. Backed by `EnableViewCacheProperty`. |
+| `MaximizedRegion` | `DockRegion?` | `null` | Read-only region currently filling the shell. |
 | `Background`, `Padding` | — | `DockShellBackgroundBrush`, `DockShellPadding` | From the default control theme. |
 
 `DockShell` is `sealed`; extend behaviour by composition, not inheritance.
+
+Maximize APIs: `MaximizeRegion(DockRegion)`, `RestoreMaximizedRegion()`, and `ToggleMaximize(DockRegion)`. This fills the shell only; it does not change the OS window state.
 
 ### Usage
 
@@ -98,6 +101,11 @@ One tab region. It owns selection, view realization, tab drag/drop, and close re
 | `HeaderContentTemplate` | `IDataTemplate?` | `null` | Template used to render a `HeaderContent` object or view model. |
 | `TabClosedCommand` | `ICommand?` | `null` | **Notification after the fact.** The library has already removed the tab and evicted its cached view; the command parameter is the closed `IDockTabItem`. |
 | `CanDragTabs` | `bool` | `true` | `false` detaches the gesture controller: tabs can still be selected and closed, but not reordered or moved. Toggling at runtime re-attaches/detaches immediately. |
+| `ShowMaximizeButton` | `bool` | `false` | Shows the built-in maximize/restore button. |
+| `CanMaximize` | `bool` | `true` | Allows the region to fill its containing shell. |
+| `DoubleClickHeaderToMaximize` | `bool` | `true` | Toggles maximize from an empty-header double click. |
+| `ShowHeaderBodySeparator` | `bool` | `false` | Keeps the full one-pixel divider between the selected header and body. |
+| `IsMaximized` | `bool` | `false` | Read-only maximize state. |
 
 Inherited and themed by default: `Background` (`DockPaneBackgroundBrush`), `BorderBrush`, `BorderThickness`, `CornerRadius`.
 
@@ -105,6 +113,7 @@ Inherited and themed by default: `Background` (`DockPaneBackgroundBrush`), `Bord
 
 ```csharp
 public void EvictView(IDockTabItem tab);
+public bool ToggleMaximize();
 ```
 
 Drops the tab's cached surface from the shell's parking lot. Only meaningful when `tab.ReuseSurface` is `true`. Call it when you remove a reusable tab yourself (removing from the collection does **not** evict — closing via the close button does):

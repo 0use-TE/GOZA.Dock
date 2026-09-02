@@ -50,7 +50,7 @@ GOZA.Dock 2.0 把每一个布局决策都交给你。库只提供 lookless、已
 
 `sealed GridSplitter`，在挂载时和每个影响布局的属性变化时自检 `Grid` 父级。Gutter 轨道 = `Auto`，或 `> 0 && <= 32` px 的绝对值。Splitter 接着选定 `ResizeDirection`、设置对应 `:columns` 或 `:rows` 伪类、把宽 / 高设为 `DockPaneGap`，并按需扩展 `Row` / `Column` span 以覆盖垂直方向。
 
-它暴露 `:dragging` 伪类——拖拽期间为 true，方便画一些不影响 `ShowsPreview` 的高亮效果。仍是普通 `GridSplitter`，继承成员照常用（`ShowsPreview`、`DragIncrement`、`KeyboardIncrement`）。
+它在拖拽期间暴露 `:dragging` 伪类。默认主题采用实时调整（`ShowsPreview = false`），因此只高亮实际 Splitter；它仍是普通 `GridSplitter`，可覆盖继承成员（`ShowsPreview`、`DragIncrement`、`KeyboardIncrement`）。
 
 ## 拖拽流水线
 

@@ -7,6 +7,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -22,6 +23,8 @@ namespace GOZA.Dock.Controls;
 [TemplatePart(PartContentHost, typeof(ContentControl), IsRequired = true)]
 [TemplatePart(PartHeaderHost, typeof(Control), IsRequired = true)]
 [TemplatePart(PartChromeHost, typeof(Control), IsRequired = true)]
+[TemplatePart(PartMaximizeButton, typeof(DockHeaderButton), IsRequired = true)]
+[TemplatePart(PartMaximizeIcon, typeof(DockChromeIcon), IsRequired = true)]
 [TemplatePart(PartDropHint, typeof(Border), IsRequired = true)]
 public sealed class DockRegion : TemplatedControl, IDockRegionSession
 {
@@ -29,6 +32,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     internal const string PartContentHost = "PART_ContentHost";
     internal const string PartHeaderHost = "PART_HeaderHost";
     internal const string PartChromeHost = "PART_ChromeHost";
+    internal const string PartMaximizeButton = "PART_MaximizeButton";
+    internal const string PartMaximizeIcon = "PART_MaximizeIcon";
     internal const string PartDropHint = "PART_DropHint";
 
     public static readonly StyledProperty<IEnumerable?> ItemsSourceProperty =
@@ -68,6 +73,26 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     public static readonly StyledProperty<ICommand?> TabClosedCommandProperty =
         AvaloniaProperty.Register<DockRegion, ICommand?>(nameof(TabClosedCommand));
 
+    public static readonly StyledProperty<bool> ShowMaximizeButtonProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowMaximizeButton));
+
+    public static readonly StyledProperty<bool> CanMaximizeProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(CanMaximize), true);
+
+    public static readonly StyledProperty<bool> DoubleClickHeaderToMaximizeProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(DoubleClickHeaderToMaximize), true);
+
+    public static readonly StyledProperty<bool> ShowHeaderBodySeparatorProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowHeaderBodySeparator));
+
+    private static readonly DirectProperty<DockRegion, bool> IsMaximizedPropertyKey =
+        AvaloniaProperty.RegisterDirect<DockRegion, bool>(
+            nameof(IsMaximized),
+            region => region.IsMaximized);
+
+    public static readonly DirectProperty<DockRegion, bool> IsMaximizedProperty =
+        IsMaximizedPropertyKey;
+
     public static readonly StyledProperty<bool> CanDragTabsProperty =
         AvaloniaProperty.Register<DockRegion, bool>(nameof(CanDragTabs), true);
 
@@ -75,10 +100,14 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     private ContentControl? _contentHost;
     private Control? _headerHost;
     private Control? _chromeHost;
+    private DockHeaderButton? _maximizeButton;
+    private DockChromeIcon? _maximizeIcon;
     private Border? _dropHint;
     private TabContainerDragController? _dragController;
     private INotifyCollectionChanged? _itemsNotifier;
     private object? _previousSelected;
+    private bool _headerScrollingAttached;
+    private bool _isMaximized;
 
     static DockRegion()
     {
@@ -92,6 +121,12 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             region.UpdateHeaderState());
         HeaderContentProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateHeaderState());
+        ShowMaximizeButtonProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateHeaderState());
+        CanMaximizeProperty.Changed.AddClassHandler<DockRegion>((region, change) =>
+            region.OnCanMaximizeChanged(change.NewValue is true));
+        ShowHeaderBodySeparatorProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateVisualState());
         CanDragTabsProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.ResetInteraction());
     }
@@ -176,6 +211,44 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         set => SetValue(TabClosedCommandProperty, value);
     }
 
+    /// <summary>Shows the built-in maximize/restore button at the trailing edge of the header.</summary>
+    public bool ShowMaximizeButton
+    {
+        get => GetValue(ShowMaximizeButtonProperty);
+        set => SetValue(ShowMaximizeButtonProperty, value);
+    }
+
+    /// <summary>Allows this region to fill its containing <see cref="DockShell"/>.</summary>
+    public bool CanMaximize
+    {
+        get => GetValue(CanMaximizeProperty);
+        set => SetValue(CanMaximizeProperty, value);
+    }
+
+    /// <summary>Maximizes on a double-click in empty header space. Defaults to true.</summary>
+    public bool DoubleClickHeaderToMaximize
+    {
+        get => GetValue(DoubleClickHeaderToMaximizeProperty);
+        set => SetValue(DoubleClickHeaderToMaximizeProperty, value);
+    }
+
+    /// <summary>
+    /// Keeps the one-pixel header/body divider visible below the selected tab.
+    /// False connects the selected header visually to its body.
+    /// </summary>
+    public bool ShowHeaderBodySeparator
+    {
+        get => GetValue(ShowHeaderBodySeparatorProperty);
+        set => SetValue(ShowHeaderBodySeparatorProperty, value);
+    }
+
+    /// <summary>Whether this region currently fills its containing shell.</summary>
+    public bool IsMaximized
+    {
+        get => _isMaximized;
+        private set => SetAndRaise(IsMaximizedPropertyKey, ref _isMaximized, value);
+    }
+
     /// <summary>Enables reorder and cross-region drag. Defaults to true.</summary>
     public bool CanDragTabs
     {
@@ -188,19 +261,28 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         DetachInteraction();
+        DetachHeaderScrolling();
+        DetachHeaderCommands();
         base.OnApplyTemplate(e);
 
         _tabStrip = e.NameScope.Get<TabStrip>(PartTabStrip);
         _contentHost = e.NameScope.Get<ContentControl>(PartContentHost);
         _headerHost = e.NameScope.Get<Control>(PartHeaderHost);
         _chromeHost = e.NameScope.Get<Control>(PartChromeHost);
+        _maximizeButton = e.NameScope.Get<DockHeaderButton>(PartMaximizeButton);
+        _maximizeIcon = e.NameScope.Get<DockChromeIcon>(PartMaximizeIcon);
         _dropHint = e.NameScope.Get<Border>(PartDropHint);
+
+        AttachHeaderCommands();
 
         UpdateVisualState();
         UpdateHeaderState();
 
         if (IsLoaded)
+        {
+            AttachHeaderScrolling();
             AttachInteraction();
+        }
     }
 
     protected override void OnLoaded(Avalonia.Interactivity.RoutedEventArgs e)
@@ -209,16 +291,25 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         HookItemsSource();
         UpdateVisualState();
         UpdateHeaderState();
+        AttachHeaderScrolling();
         AttachInteraction();
-        EnsureDefaultSelection();
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                if (!IsLoaded)
+                    return;
 
-        if (SelectedItem is not null)
-            OnSelectionChanged(_previousSelected, SelectedItem);
+                EnsureDefaultSelection();
+                if (SelectedItem is not null)
+                    OnSelectionChanged(_previousSelected, SelectedItem);
+            },
+            DispatcherPriority.Background);
     }
 
     protected override void OnUnloaded(Avalonia.Interactivity.RoutedEventArgs e)
     {
         DetachInteraction();
+        DetachHeaderScrolling();
         UnhookItemsSource();
         base.OnUnloaded(e);
     }
@@ -228,6 +319,39 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     {
         if (tab.ReuseSurface)
             ResolveViewHost()?.Evict(tab.Id);
+    }
+
+    /// <summary>Maximizes this region, or restores it when already maximized.</summary>
+    public bool ToggleMaximize()
+    {
+        if (!CanMaximize)
+            return false;
+
+        var shell = this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault();
+        return shell?.ToggleMaximize(this) == true;
+    }
+
+    internal void SetMaximized(bool value)
+    {
+        IsMaximized = value;
+        PseudoClasses.Set(":maximized", value);
+        if (_maximizeIcon is not null)
+        {
+            _maximizeIcon.Kind = value
+                ? DockChromeIconKind.Restore
+                : DockChromeIconKind.Maximize;
+        }
+    }
+
+    private void OnCanMaximizeChanged(bool canMaximize)
+    {
+        if (!canMaximize && IsMaximized)
+        {
+            this.GetVisualAncestors()
+                .OfType<DockShell>()
+                .FirstOrDefault()
+                ?.RestoreMaximizedRegion();
+        }
     }
 
     internal void RequestCloseTab(IDockTabItem tab)
@@ -324,9 +448,24 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     private void OnSelectionChanged(object? oldItem, object? newItem)
     {
+        ScrollHeaderIntoView(newItem);
         Dispatcher.UIThread.Post(
             () => ApplySelectionContent(oldItem, newItem),
             DispatcherPriority.Background);
+    }
+
+    private void ScrollHeaderIntoView(object? item)
+    {
+        if (item is null)
+            return;
+
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                if (_tabStrip is not null && ReferenceEquals(SelectedItem, item))
+                    _tabStrip.ScrollIntoView(item);
+            },
+            DispatcherPriority.Loaded);
     }
 
     private void ApplySelectionContent(object? oldItem, object? newItem)
@@ -400,6 +539,42 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         _dragController = null;
     }
 
+    private void AttachHeaderScrolling()
+    {
+        if (_headerScrollingAttached || _tabStrip is null)
+            return;
+
+        _tabStrip.PointerWheelChanged += OnTabStripPointerWheelChanged;
+        _headerScrollingAttached = true;
+    }
+
+    private void DetachHeaderScrolling()
+    {
+        if (_headerScrollingAttached && _tabStrip is not null)
+            _tabStrip.PointerWheelChanged -= OnTabStripPointerWheelChanged;
+
+        _headerScrollingAttached = false;
+    }
+
+    private void OnTabStripPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (e.Handled || !TabStripPlacement.IsHorizontal() || _tabStrip is null)
+            return;
+
+        var scrollViewer = _tabStrip.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+        if (scrollViewer is null)
+            return;
+
+        var delta = Math.Abs(e.Delta.X) > double.Epsilon ? e.Delta.X : e.Delta.Y;
+        var maximum = Math.Max(0, scrollViewer.Extent.Width - scrollViewer.Viewport.Width);
+        var next = Math.Clamp(scrollViewer.Offset.X - delta * 48, 0, maximum);
+        if (Math.Abs(next - scrollViewer.Offset.X) <= double.Epsilon)
+            return;
+
+        scrollViewer.Offset = new Vector(next, scrollViewer.Offset.Y);
+        e.Handled = true;
+    }
+
     private void UpdateVisualState()
     {
         PseudoClasses.Set(":top", TabStripPlacement == DockTabStripPlacement.Top);
@@ -408,12 +583,13 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         PseudoClasses.Set(":right", TabStripPlacement == DockTabStripPlacement.Right);
         PseudoClasses.Set(":horizontal", TabStripPlacement.IsHorizontal());
         PseudoClasses.Set(":vertical", !TabStripPlacement.IsHorizontal());
+        PseudoClasses.Set(":header-body-separated", ShowHeaderBodySeparator);
     }
 
     private void UpdateHeaderState()
     {
         var hasTabs = GetItemCount() > 0;
-        var hasChrome = ShowAddButton || HeaderContent is not null;
+        var hasChrome = ShowAddButton || ShowMaximizeButton || HeaderContent is not null;
         var showHeader = hasTabs || hasChrome;
 
         PseudoClasses.Set(":empty", !hasTabs);
@@ -426,6 +602,52 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             _chromeHost.IsVisible = hasChrome;
         if (_headerHost is not null)
             _headerHost.IsVisible = showHeader;
+    }
+
+    private void AttachHeaderCommands()
+    {
+        if (_maximizeButton is not null)
+            _maximizeButton.Click += OnMaximizeButtonClick;
+        if (_headerHost is not null)
+            _headerHost.PointerPressed += OnHeaderPointerPressed;
+
+        SetMaximized(IsMaximized);
+    }
+
+    private void DetachHeaderCommands()
+    {
+        if (_maximizeButton is not null)
+            _maximizeButton.Click -= OnMaximizeButtonClick;
+        if (_headerHost is not null)
+            _headerHost.PointerPressed -= OnHeaderPointerPressed;
+    }
+
+    private void OnMaximizeButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        e.Handled = true;
+        ToggleMaximize();
+    }
+
+    private void OnHeaderPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!DoubleClickHeaderToMaximize
+            || !CanMaximize
+            || e.ClickCount != 2
+            || e.GetCurrentPoint(this).Properties.PointerUpdateKind != PointerUpdateKind.LeftButtonPressed
+            || e.Source is not Visual source)
+        {
+            return;
+        }
+
+        if ((_chromeHost is not null
+             && (ReferenceEquals(source, _chromeHost) || _chromeHost.IsVisualAncestorOf(source)))
+            || source is TabStripItem
+            || source.GetVisualAncestors().OfType<TabStripItem>().Any())
+        {
+            return;
+        }
+
+        e.Handled = ToggleMaximize();
     }
 
     private bool ContainsItem(object item) =>

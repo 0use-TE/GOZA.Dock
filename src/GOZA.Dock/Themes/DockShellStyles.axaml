@@ -97,8 +97,12 @@
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
                     Padding="{TemplateBinding Padding}">
-              <ItemsPresenter x:Name="PART_ItemsPresenter"
-                              ItemsPanel="{TemplateBinding ItemsPanel}" />
+              <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Hidden"
+                            BringIntoViewOnFocusChange="True">
+                <ItemsPresenter x:Name="PART_ItemsPresenter"
+                                ItemsPanel="{TemplateBinding ItemsPanel}" />
+              </ScrollViewer>
             </Border>
           </ControlTemplate>
         </Setter>
@@ -190,7 +194,7 @@
 
       <ControlTheme x:Key="{x:Type controls:DockSplitter}"
                     TargetType="controls:DockSplitter">
-        <Setter Property="ShowsPreview" Value="True" />
+        <Setter Property="ShowsPreview" Value="False" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -202,6 +206,7 @@
             </Border>
           </ControlTemplate>
         </Setter>
+        <!-- Kept for explicit per-control ShowsPreview=True overrides; the stock mode is live resize. -->
         <Setter Property="PreviewContent">
           <Template>
             <Border Background="{DynamicResource DockSplitterHoverBrush}" />
@@ -235,10 +240,15 @@
           <ControlTemplate>
             <Border Background="{TemplateBinding Background}"
                     Padding="{TemplateBinding Padding}">
-              <ContentPresenter Content="{TemplateBinding Content}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}"
-                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+              <Grid>
+                <ContentPresenter Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                <Grid x:Name="PART_MaximizedHost"
+                      Background="{TemplateBinding Background}"
+                      IsVisible="False" />
+              </Grid>
             </Border>
           </ControlTemplate>
         </Setter>
@@ -261,11 +271,15 @@
                       CornerRadius="{TemplateBinding CornerRadius}"
                       ClipToBounds="True">
                 <DockPanel LastChildFill="True">
-                <Border x:Name="PART_HeaderHost"
-                        DockPanel.Dock="Top"
-                        Background="{DynamicResource DockTabStripBackgroundBrush}"
-                        BorderBrush="{DynamicResource DockPaneBorderBrush}"
-                        BorderThickness="0,0,0,1">
+                <Grid x:Name="PART_HeaderHost"
+                      DockPanel.Dock="Top"
+                      Background="{DynamicResource DockTabStripBackgroundBrush}">
+                  <Border x:Name="PART_HeaderDivider"
+                          Height="1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Bottom"
+                          Background="{DynamicResource DockPaneBorderBrush}"
+                          IsHitTestVisible="False" />
                   <DockPanel LastChildFill="True">
                     <StackPanel x:Name="PART_ChromeHost"
                                 DockPanel.Dock="Right"
@@ -278,6 +292,14 @@
                       <ContentPresenter Content="{TemplateBinding HeaderContent}"
                                         ContentTemplate="{TemplateBinding HeaderContentTemplate}"
                                         VerticalAlignment="Center" />
+                      <controls:DockHeaderButton x:Name="PART_MaximizeButton"
+                                                 Classes="dock-maximize"
+                                                 ToolTip.Tip="Maximize or restore region"
+                                                 IsEnabled="{TemplateBinding CanMaximize}"
+                                                 IsVisible="{TemplateBinding ShowMaximizeButton}">
+                        <controls:DockChromeIcon x:Name="PART_MaximizeIcon"
+                                                 Kind="Maximize" />
+                      </controls:DockHeaderButton>
                     </StackPanel>
 
                     <TabStrip x:Name="PART_TabStrip"
@@ -290,7 +312,7 @@
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch" />
                   </DockPanel>
-                </Border>
+                </Grid>
 
                 <Grid MinWidth="32" MinHeight="32">
                   <ContentControl x:Name="PART_ContentHost"
@@ -312,17 +334,32 @@
           </ControlTemplate>
         </Setter>
 
-        <Style Selector="^:bottom /template/ Border#PART_HeaderHost">
+        <Style Selector="^:bottom /template/ Grid#PART_HeaderHost">
           <Setter Property="DockPanel.Dock" Value="Bottom" />
-          <Setter Property="BorderThickness" Value="0,1,0,0" />
         </Style>
-        <Style Selector="^:left /template/ Border#PART_HeaderHost">
+        <Style Selector="^:bottom /template/ Border#PART_HeaderDivider">
+          <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style Selector="^:left /template/ Grid#PART_HeaderHost">
           <Setter Property="DockPanel.Dock" Value="Left" />
-          <Setter Property="BorderThickness" Value="0,0,1,0" />
         </Style>
-        <Style Selector="^:right /template/ Border#PART_HeaderHost">
+        <Style Selector="^:left /template/ Border#PART_HeaderDivider">
+          <Setter Property="Width" Value="1" />
+          <Setter Property="Height" Value="NaN" />
+          <Setter Property="HorizontalAlignment" Value="Right" />
+          <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:right /template/ Grid#PART_HeaderHost">
           <Setter Property="DockPanel.Dock" Value="Right" />
-          <Setter Property="BorderThickness" Value="1,0,0,0" />
+        </Style>
+        <Style Selector="^:right /template/ Border#PART_HeaderDivider">
+          <Setter Property="Width" Value="1" />
+          <Setter Property="Height" Value="NaN" />
+          <Setter Property="HorizontalAlignment" Value="Left" />
+          <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:header-body-separated /template/ Border#PART_HeaderDivider">
+          <Setter Property="ZIndex" Value="1" />
         </Style>
         <Style Selector="^:vertical /template/ TabStrip#PART_TabStrip">
           <Setter Property="ItemsPanel" Value="{StaticResource DockVerticalTabPanel}" />
