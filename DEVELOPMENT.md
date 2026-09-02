@@ -1,6 +1,6 @@
 # GOZA.Dock 开发指南
 
-> **English user documentation:** build with DocFX — see [README.md](README.md#documentation). Docs live under `docs/{version}/` (latest `docs/1.0.6/`); API reference is generated from XML comments in `src/GOZA.Dock/`.
+> **English user documentation:** build with DocFX — see [README.md](README.md#documentation). Docs live under `docs/{version}/` (latest `docs/3.0.0/`); API reference is generated from XML comments in `src/GOZA.Dock/`.
 
 本文档面向将 **GOZA.Dock** 迁出 GOZAReframe、作为独立仓库继续开发的场景，涵盖架构、集成方式、交互约定与常见坑。
 
@@ -90,7 +90,7 @@ your-org/GOZA.Dock/
 
 - 为 `GOZA.Dock` 补充 `.gitignore`、`LICENSE`、GitHub Actions CI（`dotnet build` + `dotnet test`）
 - 若发布 NuGet：在 `GOZA.Dock.csproj` 补充 `Version`、`Authors`、`RepositoryUrl`
-- Demo 每 Tab 独立 `*TabView.axaml`；Minimal 仍用共享 `PlainPanel`
+- Demo 每 Tab 独立 `*TabView.axaml`；本地 VS Code 主题在 `samples/GOZA.Dock.Demo/Themes/vscode/`
 
 ---
 
@@ -100,12 +100,15 @@ your-org/GOZA.Dock/
 |---|---|
 | .NET | 10.0 |
 | Avalonia | 12.0.0（库唯一 NuGet 依赖） |
-| GOZA.Dock | 1.0.6 |
+| GOZA.Dock | 3.0.0 |
 | 语言 | C# latest |
 
 ```bash
 # 还原 + 编译
 dotnet build GOZA.Dock.slnx
+
+# 运行极简示例
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop
 
 # 运行 Desktop Demo
 dotnet run --project samples/GOZA.Dock.Demo.Desktop
@@ -306,7 +309,7 @@ XAML 中每个 `DockRegion` 绑定各自的 `ItemsSource` / `SelectedItem`。
 
 库通过 Avalonia `FindDataTemplate(tab)` 解析 View，**无**内容工厂接口。
 
-**原生 Avalonia（Minimal 示例）：** `App.axaml` 注册 `Application.DataTemplates`：
+**原生 Avalonia：** `App.axaml` 注册 `Application.DataTemplates`：
 
 ```xml
 <DataTemplate DataType="vm:PlainTabViewModel">
@@ -464,17 +467,17 @@ Parking Lot 是 `IsVisible=false` 的 `Panel`，挂在用户 Content 根节点�
 
 ```bash
 dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release -o ./artifacts
-dotnet nuget push ./artifacts/GOZA.Dock.1.0.6.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push ./artifacts/GOZA.Dock.3.0.0.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
 ```
 
-当前版本 **1.0.6**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
+当前版本 **3.0.0**，依赖 **Avalonia 12.0.0**。包内含 `README.md`、`package-icon.png`、`GOZA.Dock.dll` 与嵌入主题（`avares://GOZA.Dock/...`）。
 
-发布说明：`docs/1.0.6/release-notes.md`
+发布说明：`docs/3.0.0/release-notes.md`
 
 引用方：
 
 ```xml
-<PackageReference Include="GOZA.Dock" Version="1.0.6" />
+<PackageReference Include="GOZA.Dock" Version="3.0.0" />
 <PackageReference Include="Avalonia" Version="12.0.0" />
 ```
 
@@ -502,9 +505,7 @@ dotnet nuget push ./artifacts/GOZA.Dock.1.0.6.nupkg --api-key YOUR_KEY --source 
 - 四个 `DockRegion` + 三个 `DockSplitter`
 - `DockShell`（Parking Lot 默认开启）
 
-ViewModel 见 `MainViewModel.cs`：构造函数注入各 `IDockTabViewModel`，按 `RegionId` 分区；工具栏保存/加载 JSON 布局（`DockLayoutPersistence`）。`BrowserTabView` + `ReuseSurface` 演示中上 WebView 表面复用。
-
-Minimal 对照：`samples/GOZA.Dock.Minimal/` — 原生 `Application.DataTemplates`，无 Crystal。
+ViewModel 见 `MainViewModel.cs`：构造函数注入各 `IDockTabViewModel`，按 `RegionId` 分区；工具栏保存/加载 JSON 布局（`DockLayoutPersistence`）。`BrowserTabView` + `ReuseSurface` 演示中上 WebView 表面复用。本地 VS Code 主题：`Themes/vscode/` + **查看 → 颜色主题**。
 
 ---
 

@@ -164,8 +164,7 @@ public sealed class MainViewModel
 ## 8. 运行示例
 
 ```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop   # 纯 Avalonia，无 MVVM 工具库
-dotnet run --project samples/GOZA.Dock.Demo.Desktop      # Crystal.Avalonia + 布局持久化 + WebView 复用
+dotnet run --project samples/GOZA.Dock.Demo.Desktop      # Crystal.Avalonia + 布局持久化 + WebView + VS Code 主题
 ```
 
 ## 下一步

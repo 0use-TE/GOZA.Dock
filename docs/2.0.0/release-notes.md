@@ -1,6 +1,10 @@
 # Release notes
 
-## 2.0.0 (latest)
+## 3.0.0 (latest)
+
+VS Code workbench theming as a first-class API. See [docs/3.0.0/release-notes.md](../3.0.0/release-notes.md).
+
+## 2.0.0
 
 A targeted cleanup of the 1.0.x API. No new controls, no new layout topologies — only the inconsistencies that built up during 1.0.x removed.
 

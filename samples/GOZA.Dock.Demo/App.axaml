@@ -4,6 +4,6 @@
              RequestedThemeVariant="Default">
   <Application.Styles>
     <FluentTheme />
-    <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+    <!-- DockShell attaches DockShellStyles itself -->
   </Application.Styles>
 </Application>

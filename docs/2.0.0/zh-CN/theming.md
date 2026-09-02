@@ -1,12 +1,25 @@
 # 主题
 
-默认 ControlTheme 位于 `Themes/DockShellStyles.axaml`。出现在 Dock Chrome 中的每一个 Avalonia 内置控件（`TabStrip`、`TabStripItem`、Chrome `Button`、内容 `ContentControl`）都被显式覆盖为私有 `ControlTheme`，因此 Dock 视觉树不会回退到应用主题。你的 Tab 内容与 Dock 周围的应用控件不受影响——按常规使用 Fluent / Semi 或自定义主题。
+默认 ControlTheme 位于 `Themes/DockShellStyles.axaml`。出现在 Dock Chrome 中的每一个 Avalonia 内置控件（`TabStrip`、`TabStripItem`、Chrome `Button`、内容 `ContentControl`）都被显式覆盖为私有 `ControlTheme`，因此 Dock 视觉树不会回退到应用主题。你的 Tab 内容与 Dock 周围的应用控件不受影响——按常规使用 Fluent / Semi 或自定义主题（Demo 使用 `FluentTheme`）。
+
+颜色键是 **VS Code workbench color ID**（如 `editor.background`、`sash.hoverBorder`）。完整说明与 JSON 加载见仓库根目录 [DOCK-THEMING.zh-CN.md](../../DOCK-THEMING.zh-CN.md)。
+
+- 每个 VS Code 主题本身是明 **或** 暗，不必再为同一主题拆两套。
+- `VsCodeThemeJson.Apply` / `DockColorThemeCatalog.Apply` 会同步 `RequestedThemeVariant`，让 Fluent 明暗跟随；Fluent 的控件色仍由 Fluent 自己决定。
+- Demo 本地包：`samples/GOZA.Dock.Demo/Themes/vscode/`（theme-defaults）。
 
 可从三个层面覆盖，从轻到重：
 
 ## Level 1：资源键
 
-笔刷与尺寸都暴露为 `DynamicResource` 键，因此运行时修改会立即重绘。 [`DockThemeResources`](api-reference.md#dockthemeresources) 上的常量彻底告别拼写错误。
+笔刷与尺寸都暴露为 `DynamicResource` 键，因此运行时修改会立即重绘。颜色优先用 [`VsCodeThemeColors`](../../src/GOZA.Dock/VsCodeThemeColors.cs)；语义别名与度量见 [`DockThemeResources`](api-reference.md#dockthemeresources)。
+
+### 加载 VS Code 主题 JSON
+
+```csharp
+var theme = VsCodeThemeJson.LoadFromFile("dark_modern.json");
+VsCodeThemeJson.Apply(theme);
+```
 
 ### 尺寸
 

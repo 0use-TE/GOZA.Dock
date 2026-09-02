@@ -1,12 +1,25 @@
 # Theming
 
-The default control themes live in `Themes/DockShellStyles.axaml`. Every stock Avalonia control that appears in dock chrome (`TabStrip`, `TabStripItem`, chrome `Button`, content `ContentControl`) gets an explicit private `ControlTheme`, so the dock visual tree does not fall back to the application's host theme. Your tab content and any controls you put around the dock are unaffected — style them with Fluent, Semi, or your own theme as usual.
+The default control themes live in `Themes/DockShellStyles.axaml`. Every stock Avalonia control that appears in dock chrome (`TabStrip`, `TabStripItem`, chrome `Button`, content `ContentControl`) gets an explicit private `ControlTheme`, so the dock visual tree does not fall back to the application's host theme. Your tab content and any controls you put around the dock are unaffected — style them with Fluent, Semi, or your own theme as usual (the Demo uses `FluentTheme`).
+
+Color keys are **VS Code workbench color IDs** (e.g. `editor.background`, `sash.hoverBorder`). See [DOCK-THEMING.zh-CN.md](../../DOCK-THEMING.zh-CN.md) for the full map and JSON loading.
+
+- Each VS Code theme is already light **or** dark — you do not maintain a light/dark pair per theme id.
+- `VsCodeThemeJson.Apply` / `DockColorThemeCatalog.Apply` sync `RequestedThemeVariant` so Fluent follows light/dark; Fluent’s own palette is unchanged.
+- Demo ships `samples/GOZA.Dock.Demo/Themes/vscode/` (theme-defaults).
 
 Override at one of three levels, from cheapest to most invasive.
 
 ## Level 1: resource keys
 
-Both brushes and metrics are exposed as `DynamicResource` keys, so changing them at runtime re-paints immediately. Constants on [`DockThemeResources`](api-reference.md#dockthemeresources) keep the strings typo-proof.
+Both brushes and metrics are exposed as `DynamicResource` keys, so changing them at runtime re-paints immediately. Prefer [`VsCodeThemeColors`](../../src/GOZA.Dock/VsCodeThemeColors.cs) for colors; metrics and aliases live on [`DockThemeResources`](api-reference.md#dockthemeresources).
+
+### Load a VS Code theme JSON
+
+```csharp
+var theme = VsCodeThemeJson.LoadFromFile("dark_modern.json");
+VsCodeThemeJson.Apply(theme);
+```
 
 ### Metrics
 

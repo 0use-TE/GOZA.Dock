@@ -1,27 +1,36 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:dock="using:GOZA.Dock"
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
              x:Class="GOZA.Dock.Demo.Views.MainView"
              x:DataType="vm:MainViewModel"
              ViewModelLocator.AutoWireViewModel="True"
              MinWidth="720" MinHeight="480">
   <Grid RowDefinitions="35,*,22" Background="{DynamicResource titleBar.activeBackground}">
-    <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto">
-      <TextBlock Margin="10,0,12,0" VerticalAlignment="Center" FontSize="16"
-                 Foreground="#23A8F2" Text="◆" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center">
-        <TextBlock Text="文件(F)" /><TextBlock Text="编辑(E)" /><TextBlock Text="选择(S)" />
-        <TextBlock Text="查看(V)" /><TextBlock Text="转到(G)" /><TextBlock Text="运行(R)" />
-        <TextBlock Text="终端(T)" /><TextBlock Text="帮助(H)" />
-      </StackPanel>
-      <Border Grid.Column="2" Width="360" Height="24" HorizontalAlignment="Center"
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+      <Menu Grid.Column="0" Margin="4,0,0,0" Background="Transparent"
+            VerticalAlignment="Center">
+        <MenuItem Header="文件(_F)">
+          <MenuItem Header="保存布局" Command="{Binding SaveLayoutCommand}" />
+          <MenuItem Header="加载布局" Command="{Binding LoadLayoutCommand}" />
+        </MenuItem>
+        <MenuItem Header="编辑(_E)" />
+        <MenuItem Header="选择(_S)" />
+        <MenuItem Header="查看(_V)">
+          <MenuItem x:Name="ColorThemeMenu" Header="颜色主题" />
+        </MenuItem>
+        <MenuItem Header="转到(_G)" />
+        <MenuItem Header="运行(_R)" />
+        <MenuItem Header="终端(_T)" />
+        <MenuItem Header="帮助(_H)" />
+      </Menu>
+      <Border Grid.Column="1" Width="360" Height="24" HorizontalAlignment="Center"
               VerticalAlignment="Center" Background="{DynamicResource toolbar.hoverBackground}"
               BorderBrush="{DynamicResource surface.border}" BorderThickness="1" CornerRadius="6">
         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"
-                   Opacity="0.75" Text="GOZA.Dock  —  vscode-theme-defaults" />
+                   Opacity="0.75"
+                   Text="{Binding ColorThemeDisplayName, StringFormat='GOZA.Dock  —  {0}'}" />
       </Border>
-      <StackPanel Grid.Column="3" Margin="8,0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+      <StackPanel Grid.Column="2" Margin="8,0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
         <TextBlock Text="◧" /><TextBlock Text="◫" /><TextBlock Text="□" />
       </StackPanel>
     </Grid>
@@ -46,7 +55,8 @@
         </Grid>
       </Border>
 
-      <DockShell Grid.Column="1" x:Name="Shell">
+      <DockShell Grid.Column="1" x:Name="Shell"
+                 ColorTheme="{Binding DockColorTheme}">
         <Grid ColumnDefinitions="240,Auto,*,Auto,280">
           <DockRegion Grid.Column="0" ItemsSource="{Binding LeftTabs}"
                       SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />

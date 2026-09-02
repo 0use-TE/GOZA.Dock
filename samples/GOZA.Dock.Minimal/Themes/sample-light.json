@@ -1,0 +1,32 @@
+{
+  "name": "Minimal Sample Light",
+  "type": "light",
+  "colors": {
+    "editor.background": "#EFF1F5",
+    "editor.foreground": "#4C4F69",
+    "editorGroup.border": "#CCD0DA",
+    "editorGroupHeader.tabsBackground": "#E6E9EF",
+    "editorGroupHeader.tabsBorder": "#CCD0DA",
+    "tab.activeBackground": "#EFF1F5",
+    "tab.inactiveBackground": "#E6E9EF",
+    "tab.activeForeground": "#4C4F69",
+    "tab.inactiveForeground": "#8C8FA1",
+    "tab.hoverBackground": "#DCE0E8",
+    "tab.border": "#CCD0DA",
+    "tab.activeBorderTop": "#1E66F5",
+    "panel.background": "#E6E9EF",
+    "panel.border": "#CCD0DA",
+    "sideBar.background": "#E6E9EF",
+    "sideBar.foreground": "#4C4F69",
+    "sideBar.border": "#CCD0DA",
+    "titleBar.activeBackground": "#E6E9EF",
+    "titleBar.activeForeground": "#4C4F69",
+    "titleBar.border": "#CCD0DA",
+    "sash.hoverBorder": "#1E66F5",
+    "focusBorder": "#1E66F5",
+    "foreground": "#4C4F69",
+    "surface.background": "#E6E9EF",
+    "surface.foreground": "#4C4F69",
+    "surface.border": "#CCD0DA"
+  }
+}

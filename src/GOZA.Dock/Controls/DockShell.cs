@@ -4,21 +4,34 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 
 namespace GOZA.Dock.Controls;
 
 /// <summary>
-/// Lightweight root for a user-authored dock grid. The shell owns optional view reuse and
-/// a temporary maximized-region overlay; layout remains ordinary Avalonia XAML.
+/// Lightweight root for a user-authored dock grid. The shell owns optional view reuse,
+/// its own <see cref="ColorTheme"/> brushes, and loads <c>DockShellStyles.axaml</c>
+/// into its <see cref="StyledElement.Styles"/> via compiled XAML (no App <c>StyleInclude</c> required).
 /// </summary>
 [TemplatePart(PartMaximizedHost, typeof(Panel), IsRequired = true)]
-public sealed class DockShell : ContentControl
+public sealed partial class DockShell : ContentControl
 {
     internal const string PartMaximizedHost = "PART_MaximizedHost";
 
     public static readonly StyledProperty<bool> EnableViewCacheProperty =
         AvaloniaProperty.Register<DockShell, bool>(nameof(EnableViewCache), true);
+
+    /// <summary>
+    /// Strongly-typed VS Code color theme. Assigning this property is the <strong>only</strong>
+    /// supported way to apply Dock workbench colors: brushes are written into this shell's
+    /// <see cref="StyledElement.Resources"/> and consumed by descendants via
+    /// <c>DynamicResource</c>. Does <strong>not</strong> change
+    /// <see cref="Application.RequestedThemeVariant"/> — use
+    /// <see cref="VsCodeColorTheme.IsDark"/> in the host if Fluent should follow.
+    /// </summary>
+    public static readonly StyledProperty<VsCodeColorTheme?> ColorThemeProperty =
+        AvaloniaProperty.Register<DockShell, VsCodeColorTheme?>(nameof(ColorTheme));
 
     private static readonly DirectProperty<DockShell, DockRegion?> MaximizedRegionPropertyKey =
         AvaloniaProperty.RegisterDirect<DockShell, DockRegion?>(
@@ -34,6 +47,11 @@ public sealed class DockShell : ContentControl
 
     internal DockViewHost? ViewHost { get; private set; }
 
+    public DockShell()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+
     /// <summary>
     /// Reuses views for tabs whose <see cref="IDockTabItem.ReuseSurface"/> is true.
     /// Disable this when every tab view is cheap to recreate.
@@ -42,6 +60,17 @@ public sealed class DockShell : ContentControl
     {
         get => GetValue(EnableViewCacheProperty);
         set => SetValue(EnableViewCacheProperty, value);
+    }
+
+    /// <summary>
+    /// Active VS Code workbench theme for this shell. Load with
+    /// <see cref="VsCodeThemeJson"/> / <see cref="DockColorThemeCatalog.Create"/>, then assign here
+    /// (or bind in XAML). Do not call static Apply helpers — this property is the apply step.
+    /// </summary>
+    public VsCodeColorTheme? ColorTheme
+    {
+        get => GetValue(ColorThemeProperty);
+        set => SetValue(ColorThemeProperty, value);
     }
 
     /// <summary>The region currently filling this shell, or null while the normal grid is shown.</summary>
@@ -54,6 +83,17 @@ public sealed class DockShell : ContentControl
     static DockShell()
     {
         EnableViewCacheProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.TryAttachViewHost());
+        ColorThemeProperty.Changed.AddClassHandler<DockShell>((shell, e) =>
+            shell.OnColorThemeChanged(e.GetNewValue<VsCodeColorTheme?>()));
+    }
+
+    private void OnColorThemeChanged(VsCodeColorTheme? theme)
+    {
+        if (theme is null)
+            return;
+
+        // Theme lives on this shell — set ColorTheme; do not call static Apply from the host.
+        VsCodeThemeJson.Apply(theme, Resources);
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -62,6 +102,10 @@ public sealed class DockShell : ContentControl
         base.OnApplyTemplate(e);
         _maximizedHost = e.NameScope.Get<Panel>(PartMaximizedHost);
         UpdateMaximizedHostState();
+
+        // Re-apply if the theme was set before the visual tree / Application was ready.
+        if (ColorTheme is not null)
+            OnColorThemeChanged(ColorTheme);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

@@ -22,18 +22,16 @@ Diseño de acoplamiento (docking) ligero para [Avalonia](https://avaloniaui.net/
 
 ## Inicio rápido
 
-Ejecute la muestra mínima:
-
 ```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop
+dotnet run --project samples/GOZA.Dock.Demo.Desktop
 ```
 
-Demo completa (Crystal DI, guardado/carga de diseño, documentos cerrables): `samples/GOZA.Dock.Demo.Desktop`
+Demo completa (Crystal DI, guardado/carga de diseño, documentos cerrables, temas VS Code): `samples/GOZA.Dock.Demo.Desktop`
 
 Instale el paquete (**Avalonia 12.0.0+** requerido en su aplicación):
 
 ```bash
-dotnet add package GOZA.Dock --version 1.0.6
+dotnet add package GOZA.Dock --version 3.0.0
 ```
 
 XAML mínimo:
@@ -66,7 +64,7 @@ Los elementos de pestaña implementan `IDockTabItem` (`Id`, `Header`, opcionalme
 |----------|-----|
 | Documentación en línea | https://0use.net/GOZA.Dock/ |
 | Demo en navegador (WASM) | https://0use.net/GOZA.Dock/demo/ |
-| Notas de lanzamiento | [docs/1.0.6/release-notes.md](docs/1.0.6/release-notes.md) |
+| Notas de lanzamiento | [docs/3.0.0/release-notes.md](docs/3.0.0/release-notes.md) |
 | Publicación NuGet (mantenedores) | [PUBLISHING.md](PUBLISHING.md) |
 
 Construya la documentación localmente (requiere [DocFX](https://dotnet.github.io/docfx/)):

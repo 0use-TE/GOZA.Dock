@@ -1,54 +1,42 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GOZA.Dock.Minimal"
+        xmlns:dock="using:GOZA.Dock"
         x:Class="GOZA.Dock.Minimal.MainWindow"
-        x:DataType="local:MainViewModel"
-        xmlns:local="using:GOZA.Dock.Minimal"
-        Width="1100"
-        Height="720"
-        Title="GOZA.Dock Minimal">
-  <DockPanel>
-    <Border DockPanel.Dock="Top"
-            Padding="12,8"
-            BorderBrush="LightGray"
-            BorderThickness="0,0,0,1">
-      <Grid ColumnDefinitions="*,Auto">
-        <TextBlock Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Opacity="0.8"
-                   Text="Native Avalonia · App.axaml DataTemplates · Parking Lot for ReuseSurface tabs" />
-        <Button Grid.Column="1"
-                MinWidth="72"
-                Content="{Binding ThemeToggleLabel}"
-                Command="{Binding ToggleThemeCommand}" />
-      </Grid>
-    </Border>
+        x:DataType="vm:MainViewModel"
+        Width="960"
+        Height="640">
 
-    <DockShell>
-      <Grid ColumnDefinitions="*,Auto,2*,Auto,*">
-        <DockRegion Grid.Column="0"
-                    ItemsSource="{Binding LeftTabs}"
-                    SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
+  <!-- DockShell 自带 Styles；选中项直接就是 ColorTheme -->
+  <DockShell ColorTheme="{Binding ColorTheme}">
+    <DockPanel>
+      <Border DockPanel.Dock="Top"
+              Padding="8,6"
+              BorderThickness="0,0,0,1"
+              BorderBrush="{DynamicResource surface.border}">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="主题" VerticalAlignment="Center" />
+          <ComboBox Width="140"
+                    ItemsSource="{Binding Themes}"
+                    SelectedItem="{Binding ColorTheme}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="dock:VsCodeColorTheme">
+                <TextBlock Text="{Binding Name}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </Border>
 
-        <DockSplitter Grid.Column="1" />
-
-        <Grid Grid.Column="2" RowDefinitions="2*,Auto,*">
-          <DockRegion Grid.Row="0"
-                      ItemsSource="{Binding CenterTopTabs}"
-                      SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
-
+      <Grid ColumnDefinitions="220,Auto,*">
+        <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
+          <DockRegion Grid.Row="0" ItemsSource="{Binding LeftTopTabs}" />
           <DockSplitter Grid.Row="1" />
-
-          <DockRegion Grid.Row="2"
-                      ItemsSource="{Binding CenterBottomTabs}"
-                      SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
+          <DockRegion Grid.Row="2" ItemsSource="{Binding LeftBottomTabs}" />
         </Grid>
-
-        <DockSplitter Grid.Column="3" />
-
-        <DockRegion Grid.Column="4"
-                    ItemsSource="{Binding RightTabs}"
-                    SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
+        <DockSplitter Grid.Column="1" />
+        <DockRegion Grid.Column="2" ItemsSource="{Binding RightTabs}" />
       </Grid>
-    </DockShell>
-  </DockPanel>
+    </DockPanel>
+  </DockShell>
 </Window>

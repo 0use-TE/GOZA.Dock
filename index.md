@@ -7,15 +7,16 @@ _layout: landing
 An AOT-first Avalonia tab workspace — fixed regions, draggable tabs, lookless controls, and optional view reuse.
 
 ```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet add package GOZA.Dock --version 2.0.0
+dotnet run --project samples/GOZA.Dock.Demo.Desktop
+dotnet add package GOZA.Dock --version 3.0.0
 ```
 
 Use **Version** (package release) and **Lang** in the top navbar.
 
 | Package | Docs |
 |---------|------|
-| **2.0.0** (latest) | [Quick Start](docs/2.0.0/getting-started.md) · [API Reference](docs/2.0.0/api-reference.md) · [Migration](docs/2.0.0/migration.md) |
+| **3.0.0** (latest) | [Quick Start](docs/3.0.0/getting-started.md) · [API Reference](docs/3.0.0/api-reference.md) · [Theming](docs/3.0.0/theming.md) · [Migration](docs/3.0.0/migration.md) |
+| 2.0.0 | [Quick Start](docs/2.0.0/getting-started.md) |
 | 1.0.6 | [Quick Start](docs/1.0.6/getting-started.md) |
 | 1.0.5 | [Quick Start](docs/1.0.5/getting-started.md) |
 | 1.0.4 | [Quick Start](docs/1.0.4/getting-started.md) |

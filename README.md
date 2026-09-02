@@ -21,11 +21,11 @@ An AOT-first tab workspace for Avalonia. Build a fixed IDE layout with ordinary 
 
 ## Quick start
 
-Include the compiled GOZA.Dock themes. An application theme is only needed by controls inside your tab content or elsewhere in the app:
+Include a host theme only if you need it for your own controls. Each `DockShell` loads `DockShellStyles` itself:
 
 ```xml
 <Application.Styles>
-  <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+  <FluentTheme />
 </Application.Styles>
 ```
 
@@ -59,29 +59,30 @@ Map the VM to a view with a normal Avalonia `DataTemplate` or your DI view locat
 
 ## Theme override
 
-Override resources after the GOZA.Dock include. The built-in defaults use a compact VS Code-inspired layout.
+Only apply path: assign [`DockShell.ColorTheme`](src/GOZA.Dock/Controls/DockShell.cs). Loaders return [`VsCodeColorTheme`](src/GOZA.Dock/VsCodeThemeJson.cs); they do not write resources. Guide (ZH): [DOCK-THEMING.zh-CN.md](DOCK-THEMING.zh-CN.md).
 
-```xml
-<Application.Resources>
-  <x:Double x:Key="DockPaneGap">8</x:Double>
-  <x:Double x:Key="DockTabHeight">32</x:Double>
-  <SolidColorBrush x:Key="DockAccentBrush" Color="#C586C0" />
-  <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1E1E1E" />
-</Application.Resources>
+```csharp
+dockShell.ColorTheme = DockColorThemeCatalog.Create(DockColorTheme.DarkModern);
+// or: VsCodeThemeJson.LoadFromFile("themes/dark_modern.json");
+
+Application.Current!.RequestedThemeVariant =
+    dockShell.ColorTheme!.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
 ```
 
-For structural customization, set `DockRegion.Theme`, `TabItemTheme`, or `TabHeaderTemplate`. All color and metric keys are listed in `DockThemeResources`.
+```xml
+<Application.Styles>
+  <FluentTheme />
+</Application.Styles>
+```
 
 ## Samples
 
 ```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet run --project samples/GOZA.Dock.Demo.Desktop
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop   # tiny 3-region layout
+dotnet run --project samples/GOZA.Dock.Demo.Desktop      # full demo
 ```
 
-- Minimal: plain Avalonia `DataTemplate` + VM collections.
-- Demo: Crystal DI, dynamic documents, persistence, WebView, Desktop/Browser/Android/iOS heads.
-- Maintainer publishing: [PUBLISHING.md](PUBLISHING.md)
+Minimal: left top/bottom + right, plain `TextBlock` views. Demo: Crystal DI, layout persistence, WebView, VS Code themes. Publishing: [PUBLISHING.md](PUBLISHING.md).
 
 ## License
 

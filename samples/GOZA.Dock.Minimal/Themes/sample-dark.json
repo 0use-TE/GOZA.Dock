@@ -1,0 +1,32 @@
+{
+  "name": "Minimal Sample Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#1E1E2E",
+    "editor.foreground": "#CDD6F4",
+    "editorGroup.border": "#313244",
+    "editorGroupHeader.tabsBackground": "#181825",
+    "editorGroupHeader.tabsBorder": "#313244",
+    "tab.activeBackground": "#1E1E2E",
+    "tab.inactiveBackground": "#181825",
+    "tab.activeForeground": "#CDD6F4",
+    "tab.inactiveForeground": "#6C7086",
+    "tab.hoverBackground": "#313244",
+    "tab.border": "#313244",
+    "tab.activeBorderTop": "#89B4FA",
+    "panel.background": "#181825",
+    "panel.border": "#313244",
+    "sideBar.background": "#181825",
+    "sideBar.foreground": "#CDD6F4",
+    "sideBar.border": "#313244",
+    "titleBar.activeBackground": "#181825",
+    "titleBar.activeForeground": "#CDD6F4",
+    "titleBar.border": "#313244",
+    "sash.hoverBorder": "#89B4FA",
+    "focusBorder": "#89B4FA",
+    "foreground": "#CDD6F4",
+    "surface.background": "#181825",
+    "surface.foreground": "#CDD6F4",
+    "surface.border": "#313244"
+  }
+}

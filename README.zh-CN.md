@@ -21,11 +21,11 @@
 
 ## 快速开始
 
-只需引入 GOZA.Dock 的编译主题。卡片内容和应用中的普通控件若需要 Fluent 等主题，由应用自行选择：
+只需引入宿主主题（可选）。`DockShell` 会自行挂载 `DockShellStyles`：
 
 ```xml
 <Application.Styles>
-  <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+  <FluentTheme />
 </Application.Styles>
 ```
 
@@ -59,31 +59,30 @@ public sealed record EditorTab(string Id, string Header) : IDockTabItem;
 
 ## 主题适配
 
-默认主题是紧凑的 VS Code 风格。应用在 GOZA.Dock 资源之后覆盖令牌即可：
+**唯一应用入口：** 给 [`DockShell.ColorTheme`](src/GOZA.Dock/Controls/DockShell.cs) 赋值。加载器只返回 [`VsCodeColorTheme`](src/GOZA.Dock/VsCodeThemeJson.cs)，不写资源。详见 [Dock 主题定制指南](DOCK-THEMING.zh-CN.md)。
 
-完整的尺寸、颜色、Header 宽高、垂直 Header 和 ControlTheme 示例见 [Dock 主题定制指南](DOCK-THEMING.zh-CN.md)。
+```csharp
+dockShell.ColorTheme = DockColorThemeCatalog.Create(DockColorTheme.DarkModern);
+// 或：VsCodeThemeJson.LoadFromFile("themes/dark_modern.json");
 
-```xml
-<Application.Resources>
-  <x:Double x:Key="DockPaneGap">8</x:Double>
-  <x:Double x:Key="DockTabHeight">32</x:Double>
-  <SolidColorBrush x:Key="DockAccentBrush" Color="#C586C0" />
-  <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1E1E1E" />
-</Application.Resources>
+Application.Current!.RequestedThemeVariant =
+    dockShell.ColorTheme!.IsDark ? ThemeVariant.Dark : ThemeVariant.Light; // 宿主可选
 ```
 
-需要改结构时，可以设置 `DockRegion.Theme`、`TabItemTheme` 或 `TabHeaderTemplate`。全部颜色与尺寸键都在 `DockThemeResources` 中。
+```xml
+<Application.Styles>
+  <FluentTheme />
+</Application.Styles>
+```
 
 ## 示例
 
 ```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet run --project samples/GOZA.Dock.Demo.Desktop
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop   # 极简三区
+dotnet run --project samples/GOZA.Dock.Demo.Desktop      # 完整 Demo
 ```
 
-- Minimal：纯 Avalonia `DataTemplate` + VM 集合。
-- Demo：Crystal DI、动态文档、布局存储、WebView，以及 Desktop/Browser/Android/iOS 入口。
-- 发布维护：[PUBLISHING.md](PUBLISHING.md)
+Minimal：左上/左下 + 右侧，内容仅为文字。Demo：Crystal DI、布局存储、WebView、VS Code 主题。发布：[PUBLISHING.md](PUBLISHING.md)。
 
 ## 许可证
 

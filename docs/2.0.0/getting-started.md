@@ -164,8 +164,7 @@ Set `CanDragTabs="False"` on a region to pin its tabs.
 ## 8. Run the samples
 
 ```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop   # plain Avalonia, no MVVM toolkit
-dotnet run --project samples/GOZA.Dock.Demo.Desktop      # Crystal.Avalonia + layout persistence + WebView reuse
+dotnet run --project samples/GOZA.Dock.Demo.Desktop      # Crystal.Avalonia + layout persistence + WebView + VS Code themes
 ```
 
 ## Next

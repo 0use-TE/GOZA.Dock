@@ -1,88 +1,107 @@
-# GOZA.Dock 主题（VS Code 色板）
+# GOZA.Dock 主题（VS Code 色板）— 3.0.0
 
-默认结构已对齐最新 VS Code **Modern UI / Floating Panels / Modern Tabs**。颜色资源键使用 **VS Code 官方 workbench color ID**（与主题 JSON 的 `colors` 字段同名），因此可直接套用他人写的 VS Code 主题色。
+默认结构对齐 VS Code **Modern UI / Floating Panels / Modern Tabs**。颜色资源键使用 **VS Code 官方 workbench color ID**（与主题 JSON `colors` 同名）。版本化文档见 [`docs/3.0.0/theming.md`](docs/3.0.0/theming.md) / [`docs/3.0.0/zh-CN/theming.md`](docs/3.0.0/zh-CN/theming.md)。
 
-常量见 [`VsCodeThemeColors`](src/GOZA.Dock/VsCodeThemeColors.cs)；Dock 控件通过这些键绑样式。
+| 类型 | 文件 |
+|------|------|
+| 颜色 ID 常量 | [`VsCodeThemeColors`](src/GOZA.Dock/VsCodeThemeColors.cs) |
+| 强类型主题 | [`VsCodeColorTheme`](src/GOZA.Dock/VsCodeThemeJson.cs) |
+| JSON 加载 | [`VsCodeThemeJson`](src/GOZA.Dock/VsCodeThemeJson.cs) |
+| 名称→明暗表 | [`VsCodeThemeTypeMap`](src/GOZA.Dock/VsCodeThemeTypeMap.cs) |
+| Shell 依赖属性 | [`DockShell.ColorTheme`](src/GOZA.Dock/Controls/DockShell.cs) |
 
-## 如何套用第三方 VS Code 主题
-
-在 `StyleInclude` **之后**覆盖同名资源即可（值来自主题 JSON 的 `colors`）：
-
-```xml
-<Application.Styles>
-  <FluentTheme />
-  <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
-
-  <Styles.Resources>
-    <!-- 从任意 VS Code 主题 colors 段拷贝 -->
-    <SolidColorBrush x:Key="editor.background" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="editorGroup.border" Color="#444444" />
-    <SolidColorBrush x:Key="editorGroupHeader.tabsBackground" Color="#252526" />
-    <SolidColorBrush x:Key="tab.activeBackground" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="tab.inactiveBackground" Color="#2D2D2D" />
-    <SolidColorBrush x:Key="tab.activeForeground" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="tab.inactiveForeground" Color="#FFFFFF80" />
-    <SolidColorBrush x:Key="tab.activeBorderTop" Color="#007ACC" />
-    <SolidColorBrush x:Key="tab.border" Color="#252526" />
-    <SolidColorBrush x:Key="tab.hoverBackground" Color="#2A2D2E" />
-    <SolidColorBrush x:Key="focusBorder" Color="#007ACC" />
-    <SolidColorBrush x:Key="sash.hoverBorder" Color="#007ACC" />
-    <SolidColorBrush x:Key="icon.foreground" Color="#CCCCCC" />
-    <SolidColorBrush x:Key="panel.background" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="sideBar.background" Color="#252526" />
-  </Styles.Resources>
-</Application.Styles>
-```
-
-C# 批量写入示例：
+## 推荐用法：强类型 + `DockShell.ColorTheme`
 
 ```csharp
-DockColorThemeCatalog.ApplyColors(colors, Application.Current!.Resources);
+// 1) 加载 JSON（解析 include；无 type 时查 VsCodeThemeTypeMap）
+var theme = VsCodeThemeJson.LoadFromAsset(
+    new Uri("avares://MyApp/Themes/vscode/dark_plus.json"));
+// 或 LoadFromFile / Load(json, resolveInclude)
+
+// 2) 赋给 DockShell（StyledProperty）——库写入资源键，不改 ThemeVariant
+dockShell.ColorTheme = theme;
+
+// 3) 宿主自己决定 Avalonia Fluent 明暗（可选）
+Application.Current!.RequestedThemeVariant =
+    theme.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
+```
+
+XAML / MVVM：
+
+```xml
+<DockShell ColorTheme="{Binding DockColorTheme}">
+  <!-- regions… -->
+</DockShell>
+```
+
+Demo：`查看 → 颜色主题` → `LoadTheme` → `DockColorTheme` 绑定 → Shell 应用；再按 `IsDark` 设 `RequestedThemeVariant`。
+
+本地 JSON：[`samples/GOZA.Dock.Demo/Themes/vscode/`](samples/GOZA.Dock.Demo/Themes/vscode/)。
+
+## Avalonia 明暗 vs Dock 色板（两套独立）
+
+| | Avalonia `ThemeVariant` | Dock `ColorTheme` |
+|--|-------------------------|-------------------|
+| 管什么 | Fluent 等宿主控件明暗字典 | Tab / Region / sash 等 VS Code 色（写在 **该 DockShell.Resources**） |
+| 谁设置 | **宿主**（`RequestedThemeVariant`） | **`DockShell.ColorTheme`** |
+| 是否联动 | **否**（库绝不自动改 ThemeVariant） | 换色板不自动改 Fluent |
+
+- 已设 `ColorTheme` 后：只切 App 明暗 **不会**改当前 Dock 色。
+- 从未设过 `ColorTheme`：`DockShellStyles` 的 ThemeDictionaries 仍会跟 `ThemeVariant` 走默认 Dark/Light。
+
+## 明暗怎么判断？
+
+1. JSON 有 `"type"` → 用它  
+2. 否则查 [`VsCodeThemeTypeMap`](src/GOZA.Dock/VsCodeThemeTypeMap.cs)（文件名或显示名，如 `Dark+` → `dark`）  
+3. 自有主题：`VsCodeThemeTypeMap.Register("My Theme.json", "dark")`
+
+**不要**给同一主题再拆 Light/Dark 两套 id；换亮色就换一个 light 主题文件。
+
+## 其它接入方式
+
+### 内置色板
+
+```csharp
+dockShell.ColorTheme = DockColorThemeCatalog.Create(DockColorTheme.DarkModern);
+```
+
+### XAML 少量覆盖
+
+在 `StyleInclude` **之后**（或写在该 `DockShell.Resources`）：
+
+```xml
+<SolidColorBrush x:Key="editor.background" Color="#1E1E1E" />
+<SolidColorBrush x:Key="sash.hoverBorder" Color="#007ACC" />
 ```
 
 ## 键 → 控件映射
 
 | VS Code color ID | Dock 用途 |
 |---|---|
-| `editor.background` | Region **body** 内容区 |
-| `surface.background` / `surface.foreground` / `surface.border` | Modern UI 浮动卡片表面与 1px 描边 |
-| `editor.border` | Modern UI 编辑器卡片描边 |
-| `editorGroupHeader.tabsBackground` | **Header** Tab 条背景 |
-| `editorGroupHeader.tabsBorder` | Header / body 分隔线 |
-| `editorGroup.border` | Shell 间隙 / **分隔符** sash 常态 |
-| `sash.hoverBorder` | 分隔符悬停 / 拖动 |
-| `tab.inactiveBackground` | 未选中 Tab |
-| `tab.activeBackground` | 选中 Tab（通常等于 editor.background） |
-| `tab.inactiveForeground` / `tab.activeForeground` | Tab 文字 |
-| `tab.border` | Tab 之间竖线 |
-| `tab.activeBorderTop` | 选中 Tab **顶边强调线**（VS Code） |
-| `tab.hoverBackground` | Tab / Chrome 悬停 |
-| `tab.hoverForeground` | Tab 悬停文字 |
-| `tab.selectedBackground` / `tab.selectedForeground` | 非活动编辑器的选择态 |
-| `tab.unfocused*` | 非活动 Region 的 Tab 状态（预留官方 ID） |
-| `focusBorder` | Drop hint 边框等 |
-| `editorGroup.dropBackground` | 跨区 Drop hint 填充 |
-| `icon.foreground` | Add / Close 图标 |
-| `toolbar.hoverBackground` / `toolbar.activeBackground` | Header action 和关闭按钮的 hover / pressed 背景 |
-| `toolbar.hoverOutline` | Header action 的高对比度 hover 描边 |
-| `modernEditorTab.activeBackground` / `activeForeground` | Modern UI 选中 Tab 胶囊 |
-| `modernEditorTab.inactiveBackground` | Modern UI 未选中 Tab（默认透明） |
-| `modernEditorTab.hoverBackground` / `hoverForeground` | Modern UI Tab hover |
-| `modernEditorTab.*ActionBackground` | Modern UI Tab 关闭按钮覆盖层 |
-| `panel.*` / `sideBar.*` | 可选：按 Region 自行绑定工具窗 |
+| `editor.background` | Region body |
+| `surface.*` / `editor.border` | Modern UI 卡片表面 / 描边 |
+| `editorGroupHeader.tabsBackground` | Tab 条背景 |
+| `editorGroup.border` | sash 常态 / 间隙 |
+| `sash.hoverBorder` | sash 悬停 / 拖动 |
+| `tab.*` / `modernEditorTab.*` | Tab 状态（老主题缺省时由加载器补） |
+| `focusBorder` / `editorGroup.dropBackground` | Drop hint |
+| `icon.foreground` / `toolbar.*` | Chrome 图标与按钮 |
 
-## 结构度量（仍为 Dock*）
+## 结构度量（`Dock*`）
 
 | Key | 默认 | 说明 |
 |---|---|---|
-| `DockPaneGap` | `4` | Floating Panels 卡片间距，同时也是 sash 命中宽度；hover/拖动铺满 `sash.hoverBorder` |
-| `DockShellPadding` | `4` | 卡片组与 Shell 外缘的间距 |
-| `DockPaneBorderThickness` | `1` | Modern UI 卡片描边 |
-| `DockPaneCornerRadius` | `8` | VS Code `cornerRadius.large` |
-| `DockTabHeight` | `32` | Modern Tab 总命中高度 |
-| `DockTabPillHeight` | `24` | Modern Tab 内部胶囊高度 |
-| `DockChromeButtonSize` | `28` | 按钮基准宽 |
-| `DockTabPadding` | `8,0,4,0` | 胶囊内部标题内边距 |
-| `DockTabCornerRadius*` | `4` | VS Code `cornerRadius.small` |
+| `DockPaneGap` | `4` | 卡片间距 / sash 宽度 |
+| `DockShellPadding` | `4` | Shell 外缘内边距 |
+| `DockPaneCornerRadius` | `8` | 卡片圆角 |
+| `DockTabHeight` / `DockTabPillHeight` | `32` / `24` | Modern Tab |
+| `DockDragGhost*` | — | 拖拽幽灵（无 VS Code ID） |
 
-拖拽幽灵仍用 `DockDragGhost*`（VS Code 无对应 ID）。
+## 人工测试清单（Demo）
+
+1. 启动默认 **Dark Modern**，Dock + Fluent 均为暗色。  
+2. **查看 → 颜色主题 → Light Modern**：Dock 变亮，Fluent 变 Light，标题显示主题名。  
+3. 切 **Dark+**（JSON 无 `type`）：依赖 `VsCodeThemeTypeMap`，应变暗。  
+4. 切 **2026 Light / High Contrast**：明暗与标题正确。  
+5. 只改系统/调试器 ThemeVariant（若可）：Dock 色应保持上次 `ColorTheme`，不跟跑。  
+6. 保存/加载布局与主题切换互不干扰。

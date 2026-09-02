@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using Avalonia.Styling;
 
 namespace GOZA.Dock;
 
@@ -54,45 +53,55 @@ public static class DockColorThemeCatalog
         theme is DockColorTheme.DarkModern or DockColorTheme.VisualStudioDark;
 
     /// <summary>
-    /// Writes theme brushes into <paramref name="target"/> and optionally syncs
-    /// <see cref="Application.RequestedThemeVariant"/>.
+    /// Builds a <see cref="VsCodeColorTheme"/> from a built-in palette.
+    /// Assign the result to <c>DockShell.ColorTheme</c> (do not call Apply helpers).
+    /// Color strings use VS Code <c>#RRGGBB</c> / <c>#RRGGBBAA</c> form.
     /// </summary>
-    public static void Apply(DockColorTheme theme, IResourceDictionary? target = null, bool syncThemeVariant = true)
+    public static VsCodeColorTheme Create(DockColorTheme theme)
     {
-        ApplyColors(GetColors(theme), target);
+        var source = GetColors(theme);
+        var colors = new Dictionary<string, string>(source.Count, StringComparer.Ordinal);
+        foreach (var (key, color) in source)
+            colors[key] = ToVsCodeHex(color);
 
-        if (syncThemeVariant && Application.Current is Application app)
-            app.RequestedThemeVariant = IsDark(theme) ? ThemeVariant.Dark : ThemeVariant.Light;
+        return new VsCodeColorTheme(
+            GetDisplayName(theme),
+            IsDark(theme) ? "dark" : "light",
+            colors,
+            sourcePath: $"builtin:{theme}");
     }
 
+    /// <summary>Formats Avalonia <see cref="Color"/> as VS Code workbench hex.</summary>
+    public static string ToVsCodeHex(Color color) =>
+        color.A == 255
+            ? $"#{color.R:X2}{color.G:X2}{color.B:X2}"
+            : $"#{color.R:X2}{color.G:X2}{color.B:X2}{color.A:X2}";
+
     /// <summary>
-    /// Applies a VS Code theme's <c>colors</c> map directly as Avalonia resources.
-    /// Unknown IDs are intentionally preserved so application controls can consume the
-    /// same theme dictionary as GOZA.Dock.
+    /// Applies a VS Code theme's <c>colors</c> map as Avalonia brushes into <paramref name="target"/>.
+    /// Used by <c>DockShell.ColorTheme</c>; hosts should not call this.
     /// </summary>
-    public static void ApplyColors(
+    internal static void ApplyColors(
         IReadOnlyDictionary<string, Color> colors,
-        IResourceDictionary? target = null)
+        IResourceDictionary target)
     {
         ArgumentNullException.ThrowIfNull(colors);
-        target ??= Application.Current?.Resources
-            ?? throw new InvalidOperationException("No Application.Current; pass an explicit ResourceDictionary.");
+        ArgumentNullException.ThrowIfNull(target);
 
         foreach (var (key, color) in colors)
             target[key] = new SolidColorBrush(color);
     }
 
     /// <summary>
-    /// Applies the raw <c>colors</c> object from a VS Code theme JSON. VS Code writes
-    /// eight-digit colors as #RRGGBBAA, while Avalonia expects #AARRGGBB.
+    /// Applies raw VS Code color strings (<c>#RRGGBB</c> / <c>#RRGGBBAA</c>) into <paramref name="target"/>.
+    /// Used by <c>DockShell.ColorTheme</c>; hosts should not call this.
     /// </summary>
-    public static void ApplyColors(
+    internal static void ApplyColors(
         IReadOnlyDictionary<string, string> colors,
-        IResourceDictionary? target = null)
+        IResourceDictionary target)
     {
         ArgumentNullException.ThrowIfNull(colors);
-        target ??= Application.Current?.Resources
-            ?? throw new InvalidOperationException("No Application.Current; pass an explicit ResourceDictionary.");
+        ArgumentNullException.ThrowIfNull(target);
 
         foreach (var (key, value) in colors)
             target[key] = new SolidColorBrush(ParseVsCodeColor(value));

@@ -1,0 +1,11 @@
+<ContentControl xmlns="https://github.com/avaloniaui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                x:Class="GOZA.Dock.Controls.DockShell">
+  <!--
+    Compiled StyleInclude (AOT-safe). Each DockShell owns this chrome for its subtree.
+    App.axaml StyleInclude is optional / redundant.
+  -->
+  <ContentControl.Styles>
+    <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+  </ContentControl.Styles>
+</ContentControl>

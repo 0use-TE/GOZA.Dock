@@ -1,9 +1,12 @@
+using Avalonia;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GOZA.Dock;
 using GOZA.Dock.Demo.Models;
 using GOZA.Dock.Demo.Services;
+using GOZA.Dock.Demo.Themes;
 using System.Collections.ObjectModel;
 
 namespace GOZA.Dock.Demo.ViewModels;
@@ -38,6 +41,9 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<IDockTabItem> CenterBottomTabs { get; } = new();
     public ObservableCollection<IDockTabItem> RightTabs { get; } = new();
 
+    /// <summary>Local VS Code theme-defaults entries under Themes/vscode/.</summary>
+    public ObservableCollection<DemoColorThemeItem> ColorThemes { get; }
+
     [ObservableProperty]
     private IDockTabItem? _leftSelected;
 
@@ -51,7 +57,11 @@ public partial class MainViewModel : ObservableObject
     private IDockTabItem? _rightSelected;
 
     [ObservableProperty]
-    private DockColorTheme _colorTheme = DockColorTheme.DarkModern;
+    private DemoColorThemeItem? _selectedColorTheme;
+
+    /// <summary>Strongly-typed theme bound to <c>DockShell.ColorTheme</c>.</summary>
+    [ObservableProperty]
+    private VsCodeColorTheme? _dockColorTheme;
 
     [ObservableProperty]
     private bool _isNotificationVisible;
@@ -92,7 +102,15 @@ public partial class MainViewModel : ObservableObject
             guide,
         ];
 
-        DockColorThemeCatalog.Apply(ColorTheme);
+        ColorThemes = DemoVsCodeThemePack.LoadCatalog();
+        foreach (var theme in ColorThemes)
+            theme.SelectAction = SetColorTheme;
+
+        SelectedColorTheme = ColorThemes.FirstOrDefault(t => t.Id == "dark_modern")
+            ?? ColorThemes.FirstOrDefault();
+
+        if (SelectedColorTheme is not null)
+            ApplySelectedTheme(SelectedColorTheme);
 
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
             ApplySnapshot(saved);
@@ -100,22 +118,39 @@ public partial class MainViewModel : ObservableObject
             ApplyDefaultLayout();
     }
 
-    public bool IsDarkModernTheme => ColorTheme == DockColorTheme.DarkModern;
-    public bool IsLightModernTheme => ColorTheme == DockColorTheme.LightModern;
-    public bool IsVisualStudioDarkTheme => ColorTheme == DockColorTheme.VisualStudioDark;
-    public bool IsVisualStudioLightTheme => ColorTheme == DockColorTheme.VisualStudioLight;
+    public string ColorThemeDisplayName =>
+        DockColorTheme?.Name ?? SelectedColorTheme?.DisplayName ?? "theme";
 
-    partial void OnColorThemeChanged(DockColorTheme value)
+    partial void OnSelectedColorThemeChanged(DemoColorThemeItem? value)
     {
-        DockColorThemeCatalog.Apply(value);
-        OnPropertyChanged(nameof(IsDarkModernTheme));
-        OnPropertyChanged(nameof(IsLightModernTheme));
-        OnPropertyChanged(nameof(IsVisualStudioDarkTheme));
-        OnPropertyChanged(nameof(IsVisualStudioLightTheme));
+        if (value is null)
+            return;
+
+        ApplySelectedTheme(value);
+        OnPropertyChanged(nameof(ColorThemeDisplayName));
     }
 
     [RelayCommand]
-    private void SetColorTheme(DockColorTheme theme) => ColorTheme = theme;
+    private void SetColorTheme(DemoColorThemeItem? theme)
+    {
+        if (theme is not null)
+            SelectedColorTheme = theme;
+    }
+
+    private void ApplySelectedTheme(DemoColorThemeItem theme)
+    {
+        // Load once → assign strong type to DockShell via binding (no static Apply in UI code).
+        DockColorTheme = DemoVsCodeThemePack.LoadTheme(theme);
+
+        // Host decides Avalonia Fluent light/dark (library never touches ThemeVariant).
+        if (Application.Current is Application app)
+            app.RequestedThemeVariant = DockColorTheme.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
+
+        foreach (var item in ColorThemes)
+            item.IsSelected = ReferenceEquals(item, theme);
+
+        OnPropertyChanged(nameof(ColorThemeDisplayName));
+    }
 
     [RelayCommand]
     private void SaveLayout()

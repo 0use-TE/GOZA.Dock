@@ -1,24 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net10.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-	</PropertyGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\src\GOZA.Dock\wwwroot\GOZA.ico</ApplicationIcon>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
-		<PublishAot>true</PublishAot>
-	</PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Avalonia.Desktop" />
-		<PackageReference Include="Avalonia.Fonts.Inter" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+  </ItemGroup>
 
-
-	<ItemGroup>
-		<ProjectReference Include="..\GOZA.Dock.Minimal\GOZA.Dock.Minimal.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GOZA.Dock.Minimal\GOZA.Dock.Minimal.csproj" />
+  </ItemGroup>
 
 </Project>

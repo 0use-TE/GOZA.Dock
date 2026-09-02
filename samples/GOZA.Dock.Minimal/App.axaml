@@ -1,19 +1,19 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:GOZA.Dock.Minimal.ViewModels"
-             xmlns:views="using:GOZA.Dock.Minimal.Views"
+             xmlns:local="using:GOZA.Dock.Minimal"
              x:Class="GOZA.Dock.Minimal.App"
-             RequestedThemeVariant="Default">
-    <Application.DataTemplates>
-        <DataTemplate DataType="vm:PlainTabViewModel">
-            <views:PlainPanel />
-        </DataTemplate>
-        <DataTemplate DataType="vm:BrowserTabViewModel">
-            <views:BrowserPanel />
-        </DataTemplate>
-    </Application.DataTemplates>
-    <Application.Styles>
-        <StyleInclude Source="/Themes/MinimalHostStyles.axaml" />
-        <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
-    </Application.Styles>
+             RequestedThemeVariant="Dark">
+  <Application.Styles>
+    <FluentTheme />
+  </Application.Styles>
+
+  <Application.DataTemplates>
+    <DataTemplate DataType="local:PlainTab">
+      <TextBlock Text="{Binding Text}"
+                 FontSize="20"
+                 Margin="16"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Center" />
+    </DataTemplate>
+  </Application.DataTemplates>
 </Application>

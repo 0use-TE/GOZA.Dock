@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\src\GOZA.Dock\GOZA.Dock.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AvaloniaResource Include="Themes\vscode\**\*" />
+  </ItemGroup>
+
 </Project>

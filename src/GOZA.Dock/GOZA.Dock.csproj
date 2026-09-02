@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -9,10 +9,10 @@
 		<LangVersion>latest</LangVersion>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IsAotCompatible>true</IsAotCompatible>
-		<Version>2.0.2</Version>
-		<AssemblyVersion>2.0.0.0</AssemblyVersion>
-		<FileVersion>2.0.0.0</FileVersion>
-		<InformationalVersion>2.0.0</InformationalVersion>
+		<Version>3.0.0</Version>
+		<AssemblyVersion>3.0.0.0</AssemblyVersion>
+		<FileVersion>3.0.0.0</FileVersion>
+		<InformationalVersion>3.0.0</InformationalVersion>
 
 		<Title>GOZA.Dock</Title>
 		<Description>Cross-platform, AOT-first Avalonia tab workspace with fixed regions, draggable tabs, self-contained Dock chrome, and optional view reuse.</Description>
@@ -25,14 +25,13 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>package-icon.png</PackageIcon>
-		<PackageReleaseNotes>VS Code workbench color IDs as theme resource keys (Dark/Light Modern defaults), square tabs with tab.activeBorderTop, 1px editorGroup.border sash. Requires Avalonia 12.0.0.</PackageReleaseNotes>
+		<PackageReleaseNotes>3.0.0: DockShell.ColorTheme is the only theme apply API (shell Resources). Load via VsCodeThemeJson / DockColorThemeCatalog.Create. Host sets ThemeVariant. Avalonia 12.0.0.</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
-		<None Include="wwwroot\package-icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>

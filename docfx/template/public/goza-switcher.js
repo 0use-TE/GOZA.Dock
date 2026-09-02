@@ -8,9 +8,13 @@
 
   /** @type {{ default: string, versions: { id: string, label: string }[], pages: string[] }} */
   let config = {
-    default: '1.0.4',
+    default: '3.0.0',
     versions: [
-      { id: '1.0.4', label: '1.0.4 (latest)' },
+      { id: '3.0.0', label: '3.0.0 (latest)' },
+      { id: '2.0.0', label: '2.0.0' },
+      { id: '1.0.6', label: '1.0.6' },
+      { id: '1.0.5', label: '1.0.5' },
+      { id: '1.0.4', label: '1.0.4' },
       { id: '1.0.3', label: '1.0.3' },
       { id: '1.0.2', label: '1.0.2' },
       { id: '1.0.1', label: '1.0.1' },
@@ -18,11 +22,14 @@
     ],
     pages: [
       'getting-started',
-      'crystal-avalonia',
-      'architecture',
-      'aot-compatibility',
+      'api-reference',
       'recipes',
+      'theming',
+      'architecture',
+      'migration',
       'release-notes',
+      'crystal-avalonia',
+      'aot-compatibility',
       'introduction',
       'index',
     ],

@@ -1,0 +1,15 @@
+{
+  "source": "microsoft/vscode extensions/theme-defaults",
+  "themes": [
+    { "id": "dark_modern", "file": "dark_modern.json", "uiTheme": "vs-dark" },
+    { "id": "light_modern", "file": "light_modern.json", "uiTheme": "vs" },
+    { "id": "dark_plus", "file": "dark_plus.json", "uiTheme": "vs-dark" },
+    { "id": "light_plus", "file": "light_plus.json", "uiTheme": "vs" },
+    { "id": "dark_vs", "file": "dark_vs.json", "uiTheme": "vs-dark" },
+    { "id": "light_vs", "file": "light_vs.json", "uiTheme": "vs" },
+    { "id": "2026_dark", "file": "2026-dark.json", "uiTheme": "vs-dark" },
+    { "id": "2026_light", "file": "2026-light.json", "uiTheme": "vs" },
+    { "id": "hc_black", "file": "hc_black.json", "uiTheme": "hc-black" },
+    { "id": "hc_light", "file": "hc_light.json", "uiTheme": "hc-light" }
+  ]
+}
