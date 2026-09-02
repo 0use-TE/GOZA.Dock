@@ -1,8 +1,17 @@
 - name: Quick Start
   href: getting-started.md
-- name: Architecture
-  href: architecture.md
+- name: API Reference
+  href: api-reference.md
+- name: Recipes
+  href: recipes.md
 - name: Theming
   href: theming.md
+- name: Architecture
+  href: architecture.md
+- name: Migration
+  href: migration.md
+- name: Release notes
+  href: release-notes.md
 - name: 简体中文
-  href: zh-CN/getting-started.md
+  href: zh-CN/
+  topicHref: zh-CN/getting-started.md

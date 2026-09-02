@@ -247,19 +247,54 @@ VM 仍然只需要实现 `IDockTabItem`。通过 `TabHeaderTemplate` 可以增�
             AddTabCommand="{Binding AddDocumentCommand}" />
 ```
 
-`HeaderContent` 可以在 Tab 条尾部放应用自定义内容：
+`HeaderContent` 可以在 Tab 条尾部放应用自定义内容。标题栏按钮使用公开的
+`DockHeaderButton`，它与内置新增、关闭按钮共享同一套 GOZA.Dock 主题，
+不依赖应用的 `Button` 主题：
 
 ```xml
 <DockRegion ItemsSource="{Binding Documents}">
   <DockRegion.HeaderContent>
-    <TextBlock Margin="8,0"
-               VerticalAlignment="Center"
-               Text="{Binding DocumentStatus}" />
+    <StackPanel Orientation="Horizontal">
+      <DockHeaderButton Content="↻"
+                        ToolTip.Tip="刷新"
+                        Command="{Binding RefreshCommand}" />
+      <DockHeaderButton Content="⋯"
+                        FontSize="18"
+                        ToolTip.Tip="更多操作"
+                        Command="{Binding ShowMenuCommand}" />
+    </StackPanel>
   </DockRegion.HeaderContent>
 </DockRegion>
 ```
 
-`HeaderContent` 属于应用内容，不会被 GOZA.Dock 强制套用 Button/TextBox 主题。
+`DockHeaderButton` 继承 `Button`，因此照常支持 `Content`、`Command`、
+`CommandParameter`、`IsEnabled` 和 `ToolTip.Tip`。默认宽高取自
+`DockChromeButtonSize`，背景、前景和 pointerover/pressed 状态全部由 Dock 主题提供。
+
+内置按钮 API 保持独立：
+
+- `ShowAddButton` + `AddTabCommand`：显示和驱动默认新增按钮。
+- `IDockTabItem.IsClosable`：控制每个 Tab 的默认关闭按钮。
+- `TabClosedCommand`：默认关闭流程完成后的通知命令。
+
+这些默认按钮内部同样使用 `DockHeaderButton`，所以自定义按钮不会与新增/关闭按钮
+产生尺寸或交互风格差异。
+
+如果 Header 内容来自对象或 ViewModel，可设置 `HeaderContentTemplate`：
+
+```xml
+<DockRegion HeaderContent="{Binding HeaderAction}">
+  <DockRegion.HeaderContentTemplate>
+    <DataTemplate>
+      <DockHeaderButton Content="⋯"
+                        Command="{Binding OpenCommand}" />
+    </DataTemplate>
+  </DockRegion.HeaderContentTemplate>
+</DockRegion>
+```
+
+`HeaderContent` 中的其他控件仍然属于应用内容；只有显式使用
+`DockHeaderButton` 的按钮才使用 GOZA.Dock 的独立按钮主题。
 
 ## 9. Splitter 外观
 

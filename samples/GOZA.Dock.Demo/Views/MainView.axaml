@@ -66,7 +66,14 @@
 
             <DockRegion Grid.Row="2"
                         ItemsSource="{Binding CenterBottomTabs}"
-                        SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
+                        SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}">
+              <DockRegion.HeaderContent>
+                <DockHeaderButton Content="⋯"
+                                  FontSize="18"
+                                  ToolTip.Tip="Region actions"
+                                  Command="{Binding ShowRegionActionsCommand}" />
+              </DockRegion.HeaderContent>
+            </DockRegion>
           </Grid>
 
           <DockSplitter Grid.Column="3" />

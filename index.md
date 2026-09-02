@@ -15,7 +15,7 @@ Use **Version** (package release) and **Lang** in the top navbar.
 
 | Package | Docs |
 |---------|------|
-| **2.0.0** (latest) | [Quick Start](docs/2.0.0/getting-started.md) |
+| **2.0.0** (latest) | [Quick Start](docs/2.0.0/getting-started.md) · [API Reference](docs/2.0.0/api-reference.md) · [Migration](docs/2.0.0/migration.md) |
 | 1.0.6 | [Quick Start](docs/1.0.6/getting-started.md) |
 | 1.0.5 | [Quick Start](docs/1.0.5/getting-started.md) |
 | 1.0.4 | [Quick Start](docs/1.0.4/getting-started.md) |

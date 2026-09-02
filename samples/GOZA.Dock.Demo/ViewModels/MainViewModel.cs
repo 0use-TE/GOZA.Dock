@@ -159,6 +159,10 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ShowRegionActions() =>
+        Notify("Header actions", "This DockHeaderButton is supplied by the application.");
+
+    [RelayCommand]
     private void OpenTab(IDockTabViewModel tab)
     {
         if (TryFindOpenRegionId(tab, out var openRegionId))

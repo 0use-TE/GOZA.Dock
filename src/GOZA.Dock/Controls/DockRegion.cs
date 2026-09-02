@@ -62,6 +62,9 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     public static readonly StyledProperty<object?> HeaderContentProperty =
         AvaloniaProperty.Register<DockRegion, object?>(nameof(HeaderContent));
 
+    public static readonly StyledProperty<IDataTemplate?> HeaderContentTemplateProperty =
+        AvaloniaProperty.Register<DockRegion, IDataTemplate?>(nameof(HeaderContentTemplate));
+
     public static readonly StyledProperty<ICommand?> TabClosedCommandProperty =
         AvaloniaProperty.Register<DockRegion, ICommand?>(nameof(TabClosedCommand));
 
@@ -149,11 +152,21 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         set => SetValue(ShowAddButtonProperty, value);
     }
 
-    /// <summary>Optional content placed after the tabs and add button.</summary>
+    /// <summary>
+    /// Optional application-defined content placed at the trailing edge of the header,
+    /// after the built-in add button.
+    /// </summary>
     public object? HeaderContent
     {
         get => GetValue(HeaderContentProperty);
         set => SetValue(HeaderContentProperty, value);
+    }
+
+    /// <summary>Optional template used to render <see cref="HeaderContent"/>.</summary>
+    public IDataTemplate? HeaderContentTemplate
+    {
+        get => GetValue(HeaderContentTemplateProperty);
+        set => SetValue(HeaderContentTemplateProperty, value);
     }
 
     /// <summary>Notification command invoked after the library removes a closed tab.</summary>

@@ -1,46 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>GOZA.Dock</RootNamespace>
-    <AssemblyName>GOZA.Dock</AssemblyName>
-    <LangVersion>latest</LangVersion>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>GOZA.Dock</RootNamespace>
+		<AssemblyName>GOZA.Dock</AssemblyName>
+		<LangVersion>latest</LangVersion>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<IsAotCompatible>true</IsAotCompatible>
+		<Version>2.0.0</Version>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<FileVersion>2.0.0.0</FileVersion>
+		<InformationalVersion>2.0.0</InformationalVersion>
 
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
-    <InformationalVersion>2.0.0</InformationalVersion>
+		<Title>GOZA.Dock</Title>
+		<Description>Cross-platform, AOT-first Avalonia tab workspace with fixed regions, draggable tabs, self-contained Dock chrome, and optional view reuse.</Description>
+		<PackageId>GOZA.Dock</PackageId>
+		<Authors>GOZA</Authors>
+		<PackageTags>Avalonia;Dock;Layout;Tabs;IDE</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/0use-TE/GOZA.Dock</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/0use-TE/GOZA.Dock</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>package-icon.png</PackageIcon>
+		<PackageReleaseNotes>Lookless DockRegion and DockTabHeader, built-in TabStrip, VS Code-inspired resource theme, Auto gutter splitters, AOT-first control loading, and a smaller API. Requires Avalonia 12.0.0.</PackageReleaseNotes>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
 
-    <Title>GOZA.Dock</Title>
-    <Description>Cross-platform, AOT-first Avalonia tab workspace with fixed regions, draggable tabs, self-contained Dock chrome, and optional view reuse.</Description>
-    <PackageId>GOZA.Dock</PackageId>
-    <Authors>GOZA</Authors>
-    <PackageTags>Avalonia;Dock;Layout;Tabs;IDE</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/0use-TE/GOZA.Dock</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/0use-TE/GOZA.Dock</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Lookless DockRegion and DockTabHeader, built-in TabStrip, VS Code-inspired resource theme, Auto gutter splitters, AOT-first control loading, and a smaller API. Requires Avalonia 12.0.0.</PackageReleaseNotes>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
-  </PropertyGroup>
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+		<None Include="wwwroot\package-icon.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
-    <None Include="wwwroot\package-icon.png" Pack="true" PackagePath="\" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Avalonia" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AvaloniaResource Include="Themes\**\*.axaml" />
-  </ItemGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="Themes\**\*.axaml" />
+	</ItemGroup>
 
 </Project>
