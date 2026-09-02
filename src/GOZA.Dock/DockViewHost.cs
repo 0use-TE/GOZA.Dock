@@ -40,7 +40,7 @@ public sealed class DockViewHost
         control.IsHitTestVisible = true;
 
         Detach(control);
-        host.Content = control;
+        host.SetCurrentValue(ContentControl.ContentProperty, control);
         return control;
     }
 
@@ -63,7 +63,7 @@ public sealed class DockViewHost
         if (!IsSurfaceForTab(surface, tab))
             return;
 
-        host.Content = null;
+        host.SetCurrentValue(ContentControl.ContentProperty, null);
 
         if (tab.ReuseSurface)
             Park(surface);
@@ -104,7 +104,7 @@ public sealed class DockViewHost
                 panel.Children.Remove(control);
                 break;
             case ContentControl contentHost when ReferenceEquals(contentHost.Content, control):
-                contentHost.Content = null;
+                contentHost.SetCurrentValue(ContentControl.ContentProperty, null);
                 break;
             case Decorator decorator when ReferenceEquals(decorator.Child, control):
                 decorator.Child = null;

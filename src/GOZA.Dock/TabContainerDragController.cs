@@ -615,7 +615,7 @@ public sealed class TabContainerDragController : IDisposable
         list.RemoveAt(oldIndex);
         newIndex = Math.Clamp(newIndex, 0, list.Count);
         list.Insert(newIndex, item);
-        _tabSelector.SelectedItem = item;
+        _region.SetCurrentValue(DockRegion.SelectedItemProperty, item);
     }
 
     private bool TryCrossRegionDrop(
@@ -641,8 +641,6 @@ public sealed class TabContainerDragController : IDisposable
 
         if (!targetList.Contains(draggedItem))
             targetList.Insert(Math.Clamp(insertIndex, 0, targetList.Count), draggedItem);
-
-        targetTab.SelectedItem = draggedItem;
 
         DockRegionDragCoordinator.NotifyCrossContainerDrop(
             _tabSelector,
@@ -672,7 +670,7 @@ public sealed class TabContainerDragController : IDisposable
                 : sourceList[index > 0 ? index - 1 : 0];
         }
 
-        _region.SelectedItem = next;
+        _region.SetCurrentValue(DockRegion.SelectedItemProperty, next);
     }
 
     private bool IsTabStripHit(object? source)

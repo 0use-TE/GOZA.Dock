@@ -362,9 +362,9 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         if (ReferenceEquals(SelectedItem, tab))
         {
             var index = list.IndexOf(tab);
-            SelectedItem = index + 1 < list.Count
+            SetCurrentValue(SelectedItemProperty, index + 1 < list.Count
                 ? list[index + 1]
-                : index > 0 ? list[index - 1] : null;
+                : index > 0 ? list[index - 1] : null);
         }
 
         list.Remove(tab);
@@ -378,9 +378,11 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     public void OnTabDraggedAway(object item)
     {
+        ReleaseDraggedContent(item);
+
         if (GetItemCount() == 0)
         {
-            SelectedItem = null;
+            SetCurrentValue(SelectedItemProperty, null);
             return;
         }
 
@@ -388,15 +390,32 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             Dispatcher.UIThread.Post(EnsureDefaultSelection, DispatcherPriority.Background);
     }
 
+    private void ReleaseDraggedContent(object item)
+    {
+        if (!ReferenceEquals(_previousSelected, item) || _contentHost is null)
+            return;
+
+        if (item is IDockTabItem tab && tab.ReuseSurface)
+            ResolveViewHost()?.Release(tab, _contentHost);
+
+        _contentHost.SetCurrentValue(ContentControl.ContentProperty, null);
+        ActiveContent = null;
+        _previousSelected = null;
+    }
+
     public void OnTabReceived(object item)
     {
         if (!ContainsItem(item))
             return;
 
-        if (!ReferenceEquals(SelectedItem, item))
-            SelectedItem = item;
-        else
-            RefreshContent();
+        SetCurrentValue(SelectedItemProperty, item);
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                if (ContainsItem(item) && ReferenceEquals(SelectedItem, item))
+                    ApplySelectionContent(_previousSelected, item);
+            },
+            DispatcherPriority.Background);
     }
 
     internal static Control CreateDefaultContent(IDockTabItem tab) =>
@@ -413,7 +432,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         UpdateHeaderState();
 
         if (GetItemCount(source) == 0)
-            SelectedItem = null;
+            SetCurrentValue(SelectedItemProperty, null);
         else
             Dispatcher.UIThread.Post(EnsureDefaultSelection, DispatcherPriority.Background);
     }
@@ -441,7 +460,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     {
         UpdateHeaderState();
         if (GetItemCount() == 0)
-            SelectedItem = null;
+            SetCurrentValue(SelectedItemProperty, null);
         else
             Dispatcher.UIThread.Post(EnsureDefaultSelection, DispatcherPriority.Background);
     }
@@ -504,14 +523,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         if (SelectedItem is not null && ContainsItem(SelectedItem))
             return;
 
-        SelectedItem = ItemsSource?.Cast<object>().FirstOrDefault();
-    }
-
-    private void RefreshContent()
-    {
-        var current = SelectedItem;
-        SelectedItem = null;
-        SelectedItem = current;
+        SetCurrentValue(SelectedItemProperty, ItemsSource?.Cast<object>().FirstOrDefault());
     }
 
     private void ResetInteraction()
