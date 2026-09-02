@@ -24,34 +24,28 @@
     </Border>
 
     <DockShell>
-      <Grid ColumnDefinitions="*,8,*,8,*">
+      <Grid ColumnDefinitions="*,Auto,2*,Auto,*">
         <DockRegion Grid.Column="0"
-                    TabStripPlacement="Left"
                     ItemsSource="{Binding LeftTabs}"
                     SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
 
-        <DockSplitter Grid.Column="1"
-                      ShowsPreview="True" />
+        <DockSplitter Grid.Column="1" />
 
-        <Grid Grid.Column="2" RowDefinitions="*,8,*">
+        <Grid Grid.Column="2" RowDefinitions="2*,Auto,*">
           <DockRegion Grid.Row="0"
                       ItemsSource="{Binding CenterTopTabs}"
                       SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
 
-          <DockSplitter Grid.Row="1"
-                        ShowsPreview="True" />
+          <DockSplitter Grid.Row="1" />
 
           <DockRegion Grid.Row="2"
-                      TabStripPlacement="Bottom"
                       ItemsSource="{Binding CenterBottomTabs}"
                       SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
         </Grid>
 
-        <DockSplitter Grid.Column="3"
-                      ShowsPreview="True" />
+        <DockSplitter Grid.Column="3" />
 
         <DockRegion Grid.Column="4"
-                    TabStripPlacement="Right"
                     ItemsSource="{Binding RightTabs}"
                     SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
       </Grid>

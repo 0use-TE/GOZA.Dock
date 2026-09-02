@@ -6,6 +6,20 @@ namespace GOZA.Dock;
 
 internal static class DockThemeBrushHelper
 {
+    public static T ResolveValue<T>(string key, T fallback)
+    {
+        if (Application.Current is not Application app)
+            return fallback;
+
+        if (app.TryGetResource(key, app.ActualThemeVariant, out var value) && value is T themed)
+            return themed;
+
+        if (app.TryGetResource(key, null, out value) && value is T anyTheme)
+            return anyTheme;
+
+        return fallback;
+    }
+
     public static IBrush Resolve(string key, IBrush fallback)
     {
         if (Application.Current is not Application app)

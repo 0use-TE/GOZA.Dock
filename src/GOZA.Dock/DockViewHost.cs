@@ -5,7 +5,7 @@ namespace GOZA.Dock;
 
 /// <summary>
 /// Parking lot for reusable control surfaces (WebView, media, etc.).
-/// Activated when <see cref="Controls.DockShell.EnableParkingLot"/> is true.
+/// Activated when <see cref="Controls.DockShell.EnableViewCache"/> is true.
 /// </summary>
 public sealed class DockViewHost
 {

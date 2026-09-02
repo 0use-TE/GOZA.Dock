@@ -1,0 +1,8 @@
+- name: Quick Start
+  href: getting-started.md
+- name: Architecture
+  href: architecture.md
+- name: Theming
+  href: theming.md
+- name: 简体中文
+  href: zh-CN/getting-started.md

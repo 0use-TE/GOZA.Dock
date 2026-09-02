@@ -24,7 +24,7 @@ public sealed partial class GuideTabViewModel : ObservableObject, IDockTabViewMo
 
     [ObservableProperty]
     private string _intro =
-        "GOZA.Dock is a tab-docking library for Avalonia. This demo shows multi-region tabs, drag-and-drop, close, layout persistence, and Crystal MVVM.";
+        "GOZA.Dock is an AOT-first tab workspace for Avalonia. This demo shows fixed regions, draggable tabs, close, layout persistence, and Crystal MVVM.";
 
     [ObservableProperty]
     private string _basicsTitle = "Basics";
@@ -32,12 +32,12 @@ public sealed partial class GuideTabViewModel : ObservableObject, IDockTabViewMo
     [ObservableProperty]
     private string _basics =
         "• View menu: open document tabs\n" +
-        "• Center-top region: + add doc, ⋮ placement menu, ⛶ expand\n" +
-        "• TabStripPlacement: set per region, or omit to inherit DockShell.DefaultTabStripPlacement\n" +
+        "• Center region: + adds a document\n" +
+        "• TabStripPlacement: optional Top / Bottom / Left / Right per region\n" +
         "• × on a tab: close closable documents\n" +
         "• Drag tabs: reorder or move across DockRegions\n" +
-        "• Layout menu: save / load / reset layout\n" +
-        "• TabStripTrailingContent: optional custom chrome (demo on center-top only)";
+        "• Auto gutters: DockSplitter infers rows and columns\n" +
+        "• Layout menu: save / load / reset tab placement";
 
     [ObservableProperty]
     private string _integrationTitle = "Integration (short)";

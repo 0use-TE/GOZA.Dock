@@ -14,10 +14,10 @@ public interface IDockTabItem
     /// <summary>
     /// When true, the control surface is cached in <see cref="DockViewHost"/> instead of recreated on each selection.
     /// </summary>
-    bool ReuseSurface { get; }
+    bool ReuseSurface => false;
 
     /// <summary>
     /// When true, a close button is shown and the tab can be removed from the region collection when closed.
     /// </summary>
-    bool IsClosable { get; }
+    bool IsClosable => false;
 }

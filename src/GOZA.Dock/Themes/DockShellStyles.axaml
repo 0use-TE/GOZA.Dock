@@ -1,90 +1,416 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- DockSplitter uses GridSplitter styling; gutter line is drawn in OnRender to keep ShowsPreview working -->
-  <Style Selector=":is(GridSplitter)">
-    <Setter Property="ShowsPreview" Value="True" />
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="MinWidth" Value="10" />
-    <Setter Property="MinHeight" Value="10" />
-  </Style>
-
-  <!-- DockRegion: TabControl is header-only; real content lives in ContentHost -->
-  <Style Selector="DockRegion TabControl#TabStrip">
-    <Setter Property="VerticalAlignment" Value="Stretch" />
-    <Setter Property="HorizontalAlignment" Value="Stretch" />
-    <Setter Property="Background" Value="Transparent" />
-  </Style>
-  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Left]">
-    <Setter Property="VerticalAlignment" Value="Stretch" />
-  </Style>
-  <Style Selector="DockRegion TabControl#TabStrip[TabStripPlacement=Right]">
-    <Setter Property="VerticalAlignment" Value="Stretch" />
-  </Style>
-  <Style Selector="DockRegion TabControl#TabStrip /template/ ContentPresenter#PART_SelectedContentHost">
-    <Setter Property="IsVisible" Value="False" />
-    <Setter Property="Height" Value="0" />
-    <Setter Property="MinHeight" Value="0" />
-  </Style>
-  <!-- Semi (and similar themes) draw TabControl#PART_BorderSeparator; DockRegion uses TabStripHost border instead -->
-  <Style Selector="DockRegion TabControl#TabStrip /template/ Border#PART_BorderSeparator">
-    <Setter Property="IsVisible" Value="False" />
-  </Style>
-
-  <Style Selector="DockRegion Button.dock-tab-close">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="6,4" />
-    <Setter Property="MinWidth" Value="26" />
-    <Setter Property="MinHeight" Value="26" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
-  </Style>
-  <Style Selector="DockRegion Button.dock-tab-close-vertical">
-    <Setter Property="Padding" Value="6,4" />
-    <Setter Property="VerticalAlignment" Value="Bottom" />
-  </Style>
-
-  <!-- Vertical TabItem dimensions (MinWidth / Padding) are intentionally not set — -->
-  <!-- let the host theme provide reasonable defaults for vertical (Left/Right) tabs. -->
-
-  <Style Selector="DockRegion Button.dock-add-doc,
-                 DockRegion Button.dock-tab-strip-options,
-                 DockRegion Button.dock-tab-strip-chrome-btn">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="8,6" />
-    <Setter Property="MinWidth" Value="28" />
-    <Setter Property="MinHeight" Value="28" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
-  </Style>
-  <Style Selector="DockRegion StackPanel.dock-tab-strip-chrome">
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="HorizontalAlignment" Value="Center" />
-  </Style>
-  <!-- Keys match GOZA.Dock.DockThemeResources — override in app styles after this include -->
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:GOZA.Dock.Controls"
+        xmlns:dock="using:GOZA.Dock">
   <Styles.Resources>
     <ResourceDictionary>
+      <!-- Structural metrics. Applications may override any key after this include. -->
+      <!-- Empty workspace between independent rounded panes. -->
+      <x:Double x:Key="DockPaneGap">6</x:Double>
+      <x:Double x:Key="DockTabHeight">34</x:Double>
+      <x:Double x:Key="DockChromeButtonSize">28</x:Double>
+      <Thickness x:Key="DockShellPadding">0</Thickness>
+      <Thickness x:Key="DockPaneBorderThickness">1</Thickness>
+      <Thickness x:Key="DockTabPadding">10,0,6,0</Thickness>
+      <CornerRadius x:Key="DockPaneCornerRadius">3</CornerRadius>
+      <Thickness x:Key="DockDragGhostBorderThickness">1</Thickness>
+      <CornerRadius x:Key="DockDragGhostCornerRadius">2</CornerRadius>
+      <Thickness x:Key="DockDragGhostPadding">8,4</Thickness>
+
       <ResourceDictionary.ThemeDictionaries>
-        <ResourceDictionary x:Key="Light">
-          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#331878D4" />
-          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#661878D4" />
-          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#CC000000" />
-          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F2FFFFFF" />
-          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#B0B0B0B0" />
-          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#E6000000" />
+        <ResourceDictionary x:Key="Default">
+          <SolidColorBrush x:Key="DockShellBackgroundBrush" Color="#181818" />
+          <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="DockPaneBorderBrush" Color="#3A3A3A" />
+          <SolidColorBrush x:Key="DockTabStripBackgroundBrush" Color="#181818" />
+          <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="Transparent" />
+          <SolidColorBrush x:Key="DockTabHoverBackgroundBrush" Color="#2A2D2E" />
+          <SolidColorBrush x:Key="DockTabSelectedBackgroundBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="DockTabForegroundBrush" Color="#B8B8B8" />
+          <SolidColorBrush x:Key="DockTabSelectedForegroundBrush" Color="#F0F0F0" />
+          <SolidColorBrush x:Key="DockAccentBrush" Color="#007ACC" />
+          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="DockSplitterBackgroundBrush" Color="#3A3A3A" />
+          <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33007ACC" />
+          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#99007ACC" />
+          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F01F1F1F" />
+          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#7F808080" />
+          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#F0F0F0" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#66808080" />
-          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#AA909090" />
-          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#F2FFFFFF" />
-          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#EE404040" />
-          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AA909090" />
-          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#F2FFFFFF" />
+          <SolidColorBrush x:Key="DockShellBackgroundBrush" Color="#181818" />
+          <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="DockPaneBorderBrush" Color="#3A3A3A" />
+          <SolidColorBrush x:Key="DockTabStripBackgroundBrush" Color="#181818" />
+          <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="Transparent" />
+          <SolidColorBrush x:Key="DockTabHoverBackgroundBrush" Color="#2A2D2E" />
+          <SolidColorBrush x:Key="DockTabSelectedBackgroundBrush" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="DockTabForegroundBrush" Color="#B8B8B8" />
+          <SolidColorBrush x:Key="DockTabSelectedForegroundBrush" Color="#F0F0F0" />
+          <SolidColorBrush x:Key="DockAccentBrush" Color="#007ACC" />
+          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="DockSplitterBackgroundBrush" Color="#3A3A3A" />
+          <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33007ACC" />
+          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#99007ACC" />
+          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F01F1F1F" />
+          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#7F808080" />
+          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#F0F0F0" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="DockShellBackgroundBrush" Color="#E8E8E8" />
+          <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="DockPaneBorderBrush" Color="#C8C8C8" />
+          <SolidColorBrush x:Key="DockTabStripBackgroundBrush" Color="#ECECEC" />
+          <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="Transparent" />
+          <SolidColorBrush x:Key="DockTabHoverBackgroundBrush" Color="#E2E2E2" />
+          <SolidColorBrush x:Key="DockTabSelectedBackgroundBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="DockTabForegroundBrush" Color="#555555" />
+          <SolidColorBrush x:Key="DockTabSelectedForegroundBrush" Color="#202020" />
+          <SolidColorBrush x:Key="DockAccentBrush" Color="#007ACC" />
+          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#555555" />
+          <SolidColorBrush x:Key="DockSplitterBackgroundBrush" Color="#C8C8C8" />
+          <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33007ACC" />
+          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#99007ACC" />
+          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F0FFFFFF" />
+          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#7F808080" />
+          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#202020" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
+
+      <ItemsPanelTemplate x:Key="DockHorizontalTabPanel">
+        <StackPanel Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+      <ItemsPanelTemplate x:Key="DockVerticalTabPanel">
+        <StackPanel Orientation="Vertical" />
+      </ItemsPanelTemplate>
+
+      <!-- Private themes for every stock Avalonia control used by Dock chrome. -->
+      <ControlTheme x:Key="DockTabStripTheme" TargetType="TabStrip">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Padding="{TemplateBinding Padding}">
+              <ItemsPresenter x:Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+
+      <ControlTheme x:Key="DockChromeButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Background="{TemplateBinding Background}"
+                              BorderBrush="{TemplateBinding BorderBrush}"
+                              BorderThickness="{TemplateBinding BorderThickness}"
+                              CornerRadius="2"
+                              Padding="{TemplateBinding Padding}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Background" Value="{DynamicResource DockTabHoverBackgroundBrush}" />
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Background" Value="{DynamicResource DockTabSelectedBackgroundBrush}" />
+        </Style>
+      </ControlTheme>
+
+      <ControlTheme x:Key="DockContentHostTheme" TargetType="ContentControl">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+
+      <DataTemplate x:Key="DockDefaultTabHeaderTemplate" x:DataType="dock:IDockTabItem">
+        <controls:DockTabHeader Header="{Binding Header}"
+                                IsClosable="{Binding IsClosable}" />
+      </DataTemplate>
+
+      <ControlTheme x:Key="DockTabStripItemTheme" TargetType="TabStripItem">
+        <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="{DynamicResource DockTabBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource DockTabForegroundBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover">
+          <Setter Property="Background" Value="{DynamicResource DockTabHoverBackgroundBrush}" />
+        </Style>
+        <Style Selector="^:selected">
+          <Setter Property="Background" Value="{DynamicResource DockTabSelectedBackgroundBrush}" />
+          <Setter Property="Foreground" Value="{DynamicResource DockTabSelectedForegroundBrush}" />
+        </Style>
+      </ControlTheme>
+
+      <ControlTheme x:Key="{x:Type controls:DockSplitter}"
+                    TargetType="controls:DockSplitter">
+        <Setter Property="ShowsPreview" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="Transparent">
+              <Border x:Name="PART_Highlight"
+                      Background="Transparent" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+        <Setter Property="PreviewContent">
+          <Template>
+            <Border Background="{DynamicResource DockSplitterHoverBrush}" />
+          </Template>
+        </Setter>
+        <Style Selector="^:columns /template/ Border#PART_Highlight">
+          <Setter Property="Width" Value="2" />
+          <Setter Property="HorizontalAlignment" Value="Center" />
+          <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="^:rows /template/ Border#PART_Highlight">
+          <Setter Property="Height" Value="2" />
+          <Setter Property="HorizontalAlignment" Value="Stretch" />
+          <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^:pressed /template/ Border#PART_Highlight">
+          <Setter Property="Background" Value="{DynamicResource DockSplitterHoverBrush}" />
+        </Style>
+        <Style Selector="^:dragging /template/ Border#PART_Highlight">
+          <Setter Property="Background" Value="{DynamicResource DockSplitterHoverBrush}" />
+        </Style>
+      </ControlTheme>
+
+      <ControlTheme x:Key="{x:Type controls:DockShell}"
+                    TargetType="controls:DockShell">
+        <Setter Property="Background" Value="{DynamicResource DockShellBackgroundBrush}" />
+        <Setter Property="Padding" Value="{DynamicResource DockShellPadding}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="{TemplateBinding Background}"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+
+      <ControlTheme x:Key="{x:Type controls:DockRegion}"
+                    TargetType="controls:DockRegion">
+        <Setter Property="Background" Value="{DynamicResource DockPaneBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DockPaneBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource DockPaneBorderThickness}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource DockPaneCornerRadius}" />
+        <Setter Property="TabHeaderTemplate" Value="{StaticResource DockDefaultTabHeaderTemplate}" />
+        <Setter Property="TabItemTheme" Value="{StaticResource DockTabStripItemTheme}" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}">
+              <Border Background="{TemplateBinding Background}"
+                      CornerRadius="{TemplateBinding CornerRadius}"
+                      ClipToBounds="True">
+                <DockPanel LastChildFill="True">
+                <Border x:Name="PART_HeaderHost"
+                        DockPanel.Dock="Top"
+                        Background="{DynamicResource DockTabStripBackgroundBrush}"
+                        BorderBrush="{DynamicResource DockPaneBorderBrush}"
+                        BorderThickness="0,0,0,1">
+                  <DockPanel LastChildFill="True">
+                    <StackPanel x:Name="PART_ChromeHost"
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal">
+                      <Button Classes="dock-add-tab"
+                              Theme="{StaticResource DockChromeButtonTheme}"
+                              Width="{DynamicResource DockChromeButtonSize}"
+                              Height="{DynamicResource DockChromeButtonSize}"
+                              Command="{TemplateBinding AddTabCommand}"
+                              IsVisible="{TemplateBinding ShowAddButton}">
+                        <controls:DockChromeIcon Kind="Add" />
+                      </Button>
+                      <ContentPresenter Content="{TemplateBinding HeaderContent}"
+                                        VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TabStrip x:Name="PART_TabStrip"
+                              Theme="{StaticResource DockTabStripTheme}"
+                              ItemsSource="{TemplateBinding ItemsSource}"
+                              ItemTemplate="{TemplateBinding TabHeaderTemplate}"
+                              ItemContainerTheme="{TemplateBinding TabItemTheme}"
+                              ItemsPanel="{StaticResource DockHorizontalTabPanel}"
+                              SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch" />
+                  </DockPanel>
+                </Border>
+
+                <Grid MinWidth="32" MinHeight="32">
+                  <ContentControl x:Name="PART_ContentHost"
+                                  Theme="{StaticResource DockContentHostTheme}"
+                                  Content="{TemplateBinding ActiveContent}"
+                                  HorizontalContentAlignment="Stretch"
+                                  VerticalContentAlignment="Stretch" />
+                  <Border x:Name="PART_DropHint"
+                          Background="{DynamicResource DockDropHintBackgroundBrush}"
+                          BorderBrush="{DynamicResource DockDropHintBorderBrush}"
+                          BorderThickness="1"
+                          CornerRadius="{DynamicResource DockPaneCornerRadius}"
+                          IsVisible="False"
+                          IsHitTestVisible="False" />
+                </Grid>
+                </DockPanel>
+              </Border>
+            </Border>
+          </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:bottom /template/ Border#PART_HeaderHost">
+          <Setter Property="DockPanel.Dock" Value="Bottom" />
+          <Setter Property="BorderThickness" Value="0,1,0,0" />
+        </Style>
+        <Style Selector="^:left /template/ Border#PART_HeaderHost">
+          <Setter Property="DockPanel.Dock" Value="Left" />
+          <Setter Property="BorderThickness" Value="0,0,1,0" />
+        </Style>
+        <Style Selector="^:right /template/ Border#PART_HeaderHost">
+          <Setter Property="DockPanel.Dock" Value="Right" />
+          <Setter Property="BorderThickness" Value="1,0,0,0" />
+        </Style>
+        <Style Selector="^:vertical /template/ TabStrip#PART_TabStrip">
+          <Setter Property="ItemsPanel" Value="{StaticResource DockVerticalTabPanel}" />
+        </Style>
+        <Style Selector="^:vertical /template/ StackPanel#PART_ChromeHost">
+          <Setter Property="DockPanel.Dock" Value="Bottom" />
+          <Setter Property="Orientation" Value="Vertical" />
+        </Style>
+      </ControlTheme>
+
+      <ControlTheme x:Key="{x:Type controls:DockTabHeader}"
+                    TargetType="controls:DockTabHeader">
+        <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <LayoutTransformControl x:Name="PART_HeaderTransform">
+              <Grid ColumnDefinitions="*,Auto"
+                    Background="Transparent">
+                <TextBlock Margin="{DynamicResource DockTabPadding}"
+                           VerticalAlignment="Center"
+                           Foreground="{TemplateBinding Foreground}"
+                           Text="{TemplateBinding Header}"
+                           TextTrimming="CharacterEllipsis" />
+                <Button x:Name="PART_CloseButton"
+                        Theme="{StaticResource DockChromeButtonTheme}"
+                        Grid.Column="1"
+                        Classes="dock-tab-close"
+                        Width="{DynamicResource DockChromeButtonSize}"
+                        Height="{DynamicResource DockChromeButtonSize}"
+                        VerticalAlignment="Center">
+                  <controls:DockChromeIcon Kind="Close" />
+                </Button>
+              </Grid>
+            </LayoutTransformControl>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+
+      <ControlTheme x:Key="{x:Type controls:DockChromeIcon}"
+                    TargetType="controls:DockChromeIcon">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Viewbox Stretch="Uniform">
+              <Path x:Name="PART_Icon"
+                    Width="20"
+                    Height="20"
+                    Stretch="None"
+                    Stroke="{DynamicResource DockChromeIconForegroundBrush}"
+                    StrokeLineCap="Round"
+                    StrokeThickness="1.8" />
+            </Viewbox>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
     </ResourceDictionary>
   </Styles.Resources>
+
+  <Style Selector="controls|DockRegion TabStrip">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="controls|DockRegion:horizontal TabStripItem">
+    <Setter Property="Height" Value="{DynamicResource DockTabHeight}" />
+  </Style>
+  <Style Selector="controls|DockRegion:vertical TabStripItem">
+    <Setter Property="Width" Value="{DynamicResource DockTabHeight}" />
+  </Style>
+  <Style Selector="controls|DockRegion:top TabStripItem:selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+  <Style Selector="controls|DockRegion:bottom TabStripItem:selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style Selector="controls|DockRegion:left TabStripItem:selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
+    <Setter Property="BorderThickness" Value="1,0,0,0" />
+  </Style>
+  <Style Selector="controls|DockRegion:right TabStripItem:selected">
+    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+  </Style>
+  <Style Selector="controls|DockRegion:left controls|DockTabHeader /template/ LayoutTransformControl#PART_HeaderTransform">
+    <Setter Property="LayoutTransform">
+      <RotateTransform Angle="-90" />
+    </Setter>
+  </Style>
+  <Style Selector="controls|DockRegion:right controls|DockTabHeader /template/ LayoutTransformControl#PART_HeaderTransform">
+    <Setter Property="LayoutTransform">
+      <RotateTransform Angle="90" />
+    </Setter>
+  </Style>
+
 </Styles>

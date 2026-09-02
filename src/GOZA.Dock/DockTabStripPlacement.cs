@@ -16,19 +16,9 @@ public enum DockTabStripPlacement
     Right,
 }
 
-/// <summary>Internal helpers for placement and Avalonia <see cref="Avalonia.Controls.Dock"/> mapping.</summary>
+/// <summary>Internal placement helpers.</summary>
 internal static class DockTabStripPlacementExtensions
 {
-    /// <summary>Maps to <see cref="Avalonia.Controls.TabControl.TabStripPlacement"/>.</summary>
-    internal static Avalonia.Controls.Dock ToAvaloniaDock(this DockTabStripPlacement placement) =>
-        placement switch
-        {
-            DockTabStripPlacement.Bottom => Avalonia.Controls.Dock.Bottom,
-            DockTabStripPlacement.Left => Avalonia.Controls.Dock.Left,
-            DockTabStripPlacement.Right => Avalonia.Controls.Dock.Right,
-            _ => Avalonia.Controls.Dock.Top,
-        };
-
     /// <summary>True when in-strip reorder uses horizontal pointer delta (top or bottom strip).</summary>
     internal static bool IsHorizontal(this DockTabStripPlacement placement) =>
         placement is DockTabStripPlacement.Top or DockTabStripPlacement.Bottom;

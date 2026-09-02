@@ -16,7 +16,7 @@ namespace GOZA.Dock;
 
 /// <summary>
 /// Handles tab-strip pointer gestures: click to select, drag to reorder or move across regions,
-/// long-press to start drag, double-click to toggle layout expansion.
+/// and long-press to start drag on touch devices.
 /// </summary>
 public sealed class TabContainerDragController : IDisposable
 {
@@ -46,13 +46,10 @@ public sealed class TabContainerDragController : IDisposable
     private bool _pressPending;
     private bool _visualDragActive;
     private bool _attached;
-    private long _lastReleaseTick;
-    private string? _lastReleaseTabId;
     private TopLevel? _subscribedTopLevel;
 
     private const double DragStartThreshold = 6.0;
     private const int LongPressMs = 450;
-    private const int DoubleTapWindowMs = 500;
 
     private TabContainerDragController(Control host, SelectingItemsControl tabSelector, DockRegion region)
     {
@@ -203,17 +200,6 @@ public sealed class TabContainerDragController : IDisposable
 
         if (!IsTabStripHit(e.Source))
             return;
-
-        if (e.ClickCount >= 2)
-        {
-            AbortInteraction();
-            var tabId = e.Source is Visual dblClickVisual ? GetTabId(dblClickVisual) : null;
-            if (tabId is not null && tabId == _lastReleaseTabId)
-                ApplyLayoutToggle(e);
-
-            ResetDoubleTapState();
-            return;
-        }
 
         AbortInteraction();
 
@@ -458,7 +444,7 @@ public sealed class TabContainerDragController : IDisposable
     }
 
     private bool IsHorizontalTabStrip =>
-        _region.EffectiveTabStripPlacement.IsHorizontal();
+        _region.TabStripPlacement.IsHorizontal();
 
     private void UpdateDropTargetHighlight(
         TopLevel? topLevel,
@@ -511,26 +497,6 @@ public sealed class TabContainerDragController : IDisposable
         {
             _pressPending = false;
             CleanupVisuals();
-
-            if (IsTabStripHit(e.Source))
-            {
-                var tabId = e.Source is Visual visual ? GetTabId(visual) : null;
-                var now = Environment.TickCount64;
-                if (tabId is not null
-                    && tabId == _lastReleaseTabId
-                    && _lastReleaseTick != 0
-                    && now - _lastReleaseTick <= DoubleTapWindowMs)
-                {
-                    ResetDoubleTapState();
-                    ApplyLayoutToggle(e);
-                }
-                else
-                {
-                    _lastReleaseTick = now;
-                    _lastReleaseTabId = tabId;
-                }
-            }
-
             return;
         }
 
@@ -662,7 +628,6 @@ public sealed class TabContainerDragController : IDisposable
             || targetTab is null
             || targetTab == _tabSelector
             || draggedItem is null
-            || DockDragInteractionGuard.IsCrossRegionDropSuppressed()
             || _tabSelector.ItemsSource is not IList sourceList
             || targetTab.ItemsSource is not IList targetList)
         {
@@ -688,7 +653,7 @@ public sealed class TabContainerDragController : IDisposable
     }
 
     /// <summary>
-    /// Clears or moves selection before <see cref="IList.Remove"/> so TabControl does not index a removed item.
+    /// Clears or moves selection before <see cref="IList.Remove"/> so the tab selector does not index a removed item.
     /// </summary>
     private void PrepareSourceSelectionBeforeRemove(IList sourceList, object draggedItem)
     {
@@ -708,40 +673,6 @@ public sealed class TabContainerDragController : IDisposable
         }
 
         _region.SelectedItem = next;
-    }
-
-    private void ResetDoubleTapState()
-    {
-        _lastReleaseTick = 0;
-        _lastReleaseTabId = null;
-    }
-
-    private string? GetTabId(Visual source)
-    {
-        var container = FindTabHeaderContainer(source);
-        return container?.DataContext is IDockTabItem tab ? tab.Id : null;
-    }
-
-    private void ApplyLayoutToggle(RoutedEventArgs e)
-    {
-        var host = LayoutExpansionHostLocator.Find(_host);
-        if (host is null)
-            return;
-
-        if (host.IsLayoutExpanded)
-        {
-            DockDragInteractionGuard.OnLayoutCollapseGesture();
-            var region = _region;
-            Dispatcher.UIThread.Post(
-                () => host.ToggleLayoutExpansion(region),
-                DispatcherPriority.Input);
-        }
-        else
-        {
-            host.ToggleLayoutExpansion(_region);
-        }
-
-        e.Handled = true;
     }
 
     private bool IsTabStripHit(object? source)
@@ -864,7 +795,7 @@ public sealed class TabContainerDragController : IDisposable
         }
 
         _draggedWidth = EstimateHorizontalGhostWidth(dragItem?.Header);
-        _draggedHeight = 28;
+        _draggedHeight = DockThemeBrushHelper.ResolveValue(DockThemeResources.TabHeight, 34d);
     }
 
     private static double EstimateHorizontalGhostWidth(string? header)
@@ -889,12 +820,18 @@ public sealed class TabContainerDragController : IDisposable
             BorderBrush = DockThemeBrushHelper.Resolve(
                 DockThemeResources.DragGhostBorderBrush,
                 DockThemeBrushHelper.DragGhostBorderFallback()),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(2),
+            BorderThickness = DockThemeBrushHelper.ResolveValue(
+                DockThemeResources.DragGhostBorderThickness,
+                new Thickness(1)),
+            CornerRadius = DockThemeBrushHelper.ResolveValue(
+                DockThemeResources.DragGhostCornerRadius,
+                new CornerRadius(2)),
             IsHitTestVisible = false,
             Child = new TextBlock
             {
-                Margin = new Thickness(8, 4),
+                Margin = DockThemeBrushHelper.ResolveValue(
+                    DockThemeResources.DragGhostPadding,
+                    new Thickness(8, 4)),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 TextAlignment = forceHorizontal ? TextAlignment.Center : TextAlignment.Left,

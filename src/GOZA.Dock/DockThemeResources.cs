@@ -1,11 +1,32 @@
 namespace GOZA.Dock;
 
 /// <summary>
-/// Resource keys for dock drag visuals defined in <c>Themes/DockShellStyles.axaml</c>.
-/// Override brushes in your <c>Application.Styles</c> after the GOZA.Dock style include.
+/// Public resource keys used by the default control themes.
+/// Override them after the GOZA.Dock style include to skin every dock surface.
 /// </summary>
 public static class DockThemeResources
 {
+    public const string ShellBackgroundBrush = "DockShellBackgroundBrush";
+    public const string PaneBackgroundBrush = "DockPaneBackgroundBrush";
+    public const string PaneBorderBrush = "DockPaneBorderBrush";
+    public const string TabStripBackgroundBrush = "DockTabStripBackgroundBrush";
+    public const string TabBackgroundBrush = "DockTabBackgroundBrush";
+    public const string TabHoverBackgroundBrush = "DockTabHoverBackgroundBrush";
+    public const string TabSelectedBackgroundBrush = "DockTabSelectedBackgroundBrush";
+    public const string TabForegroundBrush = "DockTabForegroundBrush";
+    public const string TabSelectedForegroundBrush = "DockTabSelectedForegroundBrush";
+    public const string AccentBrush = "DockAccentBrush";
+    public const string SplitterBackgroundBrush = "DockSplitterBackgroundBrush";
+    public const string SplitterHoverBrush = "DockSplitterHoverBrush";
+
+    public const string PaneGap = "DockPaneGap";
+    public const string TabHeight = "DockTabHeight";
+    public const string ChromeButtonSize = "DockChromeButtonSize";
+    public const string ShellPadding = "DockShellPadding";
+    public const string PaneBorderThickness = "DockPaneBorderThickness";
+    public const string TabPadding = "DockTabPadding";
+    public const string PaneCornerRadius = "DockPaneCornerRadius";
+
     /// <summary>Foreground (stroke) for chrome icons (add / close / more).</summary>
     public const string ChromeIconForegroundBrush = "DockChromeIconForegroundBrush";
 
@@ -23,4 +44,8 @@ public static class DockThemeResources
 
     /// <summary>Foreground (header text) for the tab drag ghost.</summary>
     public const string DragGhostForegroundBrush = "DockDragGhostForegroundBrush";
+
+    public const string DragGhostBorderThickness = "DockDragGhostBorderThickness";
+    public const string DragGhostCornerRadius = "DockDragGhostCornerRadius";
+    public const string DragGhostPadding = "DockDragGhostPadding";
 }

@@ -6,45 +6,84 @@
 
 # GOZA.Dock
 
-[Avalonia](https://avaloniaui.net/) 停靠布局库 — 用 `Grid`、`DockRegion`、`DockSplitter` 组合面板，支持桌面与 WebAssembly。
+面向 AOT 的 Avalonia Tab 工作区。用普通 `Grid`、`DockRegion` 和 `DockSplitter` 写固定 IDE 布局，View 与 ViewModel 始终由应用自己控制。
 
-## 特性
+## 设计目标
 
-- **自由布局** — 任意 Grid 拓扑，无固定象限。
-- **Tab 拖拽** — 条内排序、跨区域移动、双击区域最大化。
-- **Parking Lot** — 按 Tab `Id` 复用视图表面（WebView 等）。
-- **可关闭 Tab** — `IDockTabItem.IsClosable`；区域可选 “+” 新建按钮。
-- **Tab 条 chrome** — Shell 默认位置、可选 **⋮** 位置菜单、尾部工具插槽。
-- **自动选中** — 未绑定 `SelectedItem` 时自动选中第一项（布局恢复时建议绑定）。
-- **侧栏 Tab** — 左/右条默认旋转完整标题（可全局或按区域关闭）。
-- **主题无关** — Include `DockShellStyles.axaml`；拖拽画刷可通过 `DockThemeResources` 覆盖。
-- **MIT** — 仅依赖 Avalonia。
+- **AXAML 极简** — 没有布局树、反射、浮动子窗口或平台专用宿主。
+- **完全模板化** — `DockRegion`、Tab Item、Header 与 Chrome 都可以通过 Avalonia `ControlTheme` 替换。
+- **不依赖宿主主题** — Dock 自己为内部 `TabStrip`、按钮、内容宿主和分隔器提供私有主题；Fluent、Semi 或其他应用主题均为可选。
+- **内置 `TabStrip`** — 标题选择与内容创建、视图缓存彻底分离。
+- **只保留实用拖拽** — Tab 条内排序、固定区域之间移动。
+- **自动分隔器** — `DockSplitter` 放进 `Auto` 行或列，会自动判断调整方向。
+- **AOT + 全平台** — 库只使用编译期 AXAML，支持 Desktop、Browser、Android、iOS。
+- **极小 VM 契约** — 默认只实现 `Id`、`Header`；关闭和视图复用按需覆盖。
 
 ## 快速开始
 
-```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop
-dotnet add package GOZA.Dock --version 1.0.6
+只需引入 GOZA.Dock 的编译主题。卡片内容和应用中的普通控件若需要 Fluent 等主题，由应用自行选择：
+
+```xml
+<Application.Styles>
+  <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+</Application.Styles>
 ```
 
-完整 Demo（Crystal、布局存盘、动态文档）：`samples/GOZA.Dock.Demo.Desktop`
+使用普通 Avalonia Grid 编写工作区：
 
-应用需引用 **Avalonia 12.0.0+**。Tab 实现 `IDockTabItem`，用 `DataTemplate` 或 DI 映射视图。
+```xml
+<DockShell>
+  <Grid ColumnDefinitions="*,Auto,2*">
+    <DockRegion Grid.Column="0"
+                ItemsSource="{Binding ToolTabs}"
+                SelectedItem="{Binding SelectedTool}" />
 
-## 文档与 Demo
+    <DockSplitter Grid.Column="1" />
 
-| 资源 | 链接 |
-|------|------|
-| 在线文档 | https://0use.net/GOZA.Dock/ |
-| 浏览器 Demo | https://0use.net/GOZA.Dock/demo/ |
-| 发布说明 | [docs/1.0.6/zh-CN/release-notes.md](docs/1.0.6/zh-CN/release-notes.md) |
-| NuGet 发布 | [PUBLISHING.md](PUBLISHING.md) |
+    <DockRegion Grid.Column="2"
+                ItemsSource="{Binding Documents}"
+                SelectedItem="{Binding SelectedDocument}"
+                ShowAddButton="True"
+                AddTabCommand="{Binding AddDocumentCommand}" />
+  </Grid>
+</DockShell>
+```
 
-本地文档：`docfx docfx.json && docfx serve _site --port 8080`
+最小 Tab VM 只需两个成员：
 
-推送到 `master` 会通过 [GitHub Actions](.github/workflows/docs.yml) 发布 Pages（文档 + WASM Demo）。
+```csharp
+public sealed record EditorTab(string Id, string Header) : IDockTabItem;
+```
 
-开发说明：[DEVELOPMENT.md](DEVELOPMENT.md)
+然后用普通 Avalonia `DataTemplate` 或 DI ViewLocator 把 VM 映射到 View。`DockRegion` 会自动选中第一项。
+
+## 主题适配
+
+默认主题是紧凑的 VS Code 风格。应用在 GOZA.Dock 资源之后覆盖令牌即可：
+
+完整的尺寸、颜色、Header 宽高、垂直 Header 和 ControlTheme 示例见 [Dock 主题定制指南](DOCK-THEMING.zh-CN.md)。
+
+```xml
+<Application.Resources>
+  <x:Double x:Key="DockPaneGap">8</x:Double>
+  <x:Double x:Key="DockTabHeight">32</x:Double>
+  <SolidColorBrush x:Key="DockAccentBrush" Color="#C586C0" />
+  <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1E1E1E" />
+</Application.Resources>
+```
+
+需要改结构时，可以设置 `DockRegion.Theme`、`TabItemTheme` 或 `TabHeaderTemplate`。全部颜色与尺寸键都在 `DockThemeResources` 中。
+
+## 示例
+
+```bash
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop
+dotnet run --project samples/GOZA.Dock.Demo.Desktop
+```
+
+- Minimal：纯 Avalonia `DataTemplate` + VM 集合。
+- Demo：Crystal DI、动态文档、布局存储、WebView，以及 Desktop/Browser/Android/iOS 入口。
+- 发布维护：[PUBLISHING.md](PUBLISHING.md)
 
 ## 许可证
 

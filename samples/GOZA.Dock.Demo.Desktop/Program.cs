@@ -14,7 +14,7 @@ internal sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             #if DEBUG
-            .WithDeveloperTools()
+        .WithOuseDevTools()
             #endif
             .WithInterFont()
             .LogToTrace();

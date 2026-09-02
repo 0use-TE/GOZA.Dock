@@ -1,4 +1,3 @@
-
 English | [简体中文](README.zh-CN.md)
 
 <p align="center">
@@ -7,80 +6,82 @@ English | [简体中文](README.zh-CN.md)
 
 # GOZA.Dock
 
-Lightweight docking layout for [Avalonia](https://avaloniaui.net/) — compose panels with `Grid`, `DockRegion`, and `DockSplitter`. Works on desktop and WebAssembly.
+An AOT-first tab workspace for Avalonia. Build a fixed IDE layout with ordinary `Grid`, `DockRegion`, and `DockSplitter`; keep every view and view model under application control.
 
-## Features
+## Design
 
-- **Flexible layout** — any grid topology; no fixed quadrants or slot enums.
-- **Tab drag & drop** — reorder in the strip, move across regions, double-click to maximize a region.
-- **Parking lot** — optional view surface reuse by tab `Id` (WebView, heavy controls).
-- **Closable tabs** — `IDockTabItem.IsClosable`; optional Add Doc button on a region.
-- **Tab strip chrome** — shell default placement, optional **⋮** placement menu, trailing toolbar slot.
-- **Auto tab selection** — first tab selected when `SelectedItem` is unset (bind when restoring layout).
-- **Side tab strips** — rotated full-header labels on left/right strips (toggle globally or per region).
-- **Theme-friendly** — include `DockShellStyles.axaml`; override drag/drop brushes via `DockThemeResources`.
-- **MIT** — no dependency on Semi, Crystal, or other UI stacks (Avalonia only).
+- **Simple XAML** — no layout model, reflection, floating windows, or platform-specific host.
+- **Lookless controls** — `DockRegion`, tab items, headers, and chrome can be replaced with Avalonia `ControlTheme` resources.
+- **Host-theme independent** — Dock chrome supplies private themes for its own `TabStrip`, buttons, content host, and splitter; Fluent, Semi, or another app theme is optional.
+- **Built-in `TabStrip`** — selection is separate from content creation and view caching.
+- **Useful drag only** — reorder tabs or move them between fixed regions.
+- **Automatic gutters** — put `DockSplitter` in an `Auto` row or column; it infers the direction.
+- **AOT and cross-platform** — the library uses compiled AXAML and runs on Desktop, Browser, Android, and iOS.
+- **One tiny VM contract** — implement `Id` and `Header`; closing and view reuse are optional defaults.
 
 ## Quick start
 
-Run the minimal sample:
+Include the compiled GOZA.Dock themes. An application theme is only needed by controls inside your tab content or elsewhere in the app:
 
-```bash
-dotnet run --project samples/GOZA.Dock.Minimal.Desktop
+```xml
+<Application.Styles>
+  <StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+</Application.Styles>
 ```
 
-Full demo (Crystal DI, layout save/load, closable docs): `samples/GOZA.Dock.Demo.Desktop`
-
-Install the package (**Avalonia 12.0.0+** required in your app):
-
-```bash
-dotnet add package GOZA.Dock --version 1.0.6
-```
-
-Minimal XAML:
+Create the workspace with ordinary Avalonia layout:
 
 ```xml
 <DockShell>
-  <Grid ColumnDefinitions="*,8,*">
+  <Grid ColumnDefinitions="*,Auto,2*">
     <DockRegion Grid.Column="0"
-                ItemsSource="{Binding LeftTabs}" />
-    <DockSplitter Grid.Column="1" ShowsPreview="True" />
+                ItemsSource="{Binding ToolTabs}"
+                SelectedItem="{Binding SelectedTool}" />
+
+    <DockSplitter Grid.Column="1" />
+
     <DockRegion Grid.Column="2"
-                ItemsSource="{Binding RightTabs}" />
+                ItemsSource="{Binding Documents}"
+                SelectedItem="{Binding SelectedDocument}"
+                ShowAddButton="True"
+                AddTabCommand="{Binding AddDocumentCommand}" />
   </Grid>
 </DockShell>
 ```
 
-`DockRegion` auto-selects the first tab when `SelectedItem` is not bound. Bind `SelectedItem` for layout restore or explicit selection (Demo).
+A minimal tab view model only needs two members:
 
-Include library styles in `App.axaml`:
+```csharp
+public sealed record EditorTab(string Id, string Header) : IDockTabItem;
+```
+
+Map the VM to a view with a normal Avalonia `DataTemplate` or your DI view locator. `DockRegion` selects the first item automatically.
+
+## Theme override
+
+Override resources after the GOZA.Dock include. The built-in defaults use a compact VS Code-inspired layout.
 
 ```xml
-<StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+<Application.Resources>
+  <x:Double x:Key="DockPaneGap">8</x:Double>
+  <x:Double x:Key="DockTabHeight">32</x:Double>
+  <SolidColorBrush x:Key="DockAccentBrush" Color="#C586C0" />
+  <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1E1E1E" />
+</Application.Resources>
 ```
 
-Tab items implement `IDockTabItem` (`Id`, `Header`, optional `ReuseSurface`, `IsClosable`). Map each tab ViewModel to a view with `DataTemplate` or your DI/view locator.
+For structural customization, set `DockRegion.Theme`, `TabItemTheme`, or `TabHeaderTemplate`. All color and metric keys are listed in `DockThemeResources`.
 
-## Documentation & demos
-
-| Resource | URL |
-|----------|-----|
-| Online docs | https://0use.net/GOZA.Dock/ |
-| Browser demo (WASM) | https://0use.net/GOZA.Dock/demo/ |
-| Release notes | [docs/1.0.6/release-notes.md](docs/1.0.6/release-notes.md) |
-| NuGet publish (maintainers) | [PUBLISHING.md](PUBLISHING.md) |
-
-Build docs locally (requires [DocFX](https://dotnet.github.io/docfx/)):
+## Samples
 
 ```bash
-docfx docfx.json && docfx serve _site --port 8080
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop
+dotnet run --project samples/GOZA.Dock.Demo.Desktop
 ```
 
-Pushing to `master` triggers [GitHub Pages](.github/workflows/docs.yml) (DocFX site + WASM demo).
-
-## Contributing
-
-Issues and pull requests are welcome. Developer notes: [DEVELOPMENT.md](DEVELOPMENT.md).
+- Minimal: plain Avalonia `DataTemplate` + VM collections.
+- Demo: Crystal DI, dynamic documents, persistence, WebView, Desktop/Browser/Android/iOS heads.
+- Maintainer publishing: [PUBLISHING.md](PUBLISHING.md)
 
 ## License
 
