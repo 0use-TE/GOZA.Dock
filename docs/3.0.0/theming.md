@@ -2,7 +2,7 @@
 
 **One apply API:** assign [`DockShell.ColorTheme`](../../src/GOZA.Dock/Controls/DockShell.cs).
 
-Loaders only produce a [`VsCodeColorTheme`](../../src/GOZA.Dock/VsCodeThemeJson.cs); they do **not** write resources.
+Each `DockShell` already includes `DockShellStyles` on itself. Loaders only produce a [`VsCodeColorTheme`](../../src/GOZA.Dock/VsCodeThemeJson.cs); they do **not** write resources.
 
 ```csharp
 // Built-in

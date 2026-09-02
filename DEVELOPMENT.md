@@ -181,13 +181,13 @@ dotnet run --project samples/GOZA.Dock.Demo.Browser
 | `IsLayoutExpanded` | 是否处于全屏展开 |
 | `ToggleLayoutExpansion(DockRegion)` | 切换指定区域全屏 |
 
-样式加载两种方式（二选一或同时存在均可）：
-
-1. `DockShell` 挂载到视觉树时自动 `StyleInclude`
-2. 在 `App.axaml` 中手动引入：
+样式：每个 `DockShell` 在自身 `Styles` 中编译挂载 `DockShellStyles.axaml`（不必再在 App 里 `StyleInclude`）。颜色通过 `DockShell.ColorTheme`。
 
 ```xml
-<StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+<!-- 可选：仅宿主 Fluent 等 -->
+<Application.Styles>
+  <FluentTheme />
+</Application.Styles>
 ```
 
 ### 6.3 DockRegion

@@ -95,7 +95,7 @@ Coordinator 是进程级注册表，所以跨区拖拽能跨嵌套 `Grid`、`Use
 
 ## AOT 与剪裁保障
 
-- 每个 `StyleInclude` 都是编译型 AXAML。默认主题随程序集以 `Themes/DockShellStyles.axaml` 形式发布，通过 `avares://` 解析。
+- 每个 `DockShell` 在自身 XAML 中编译挂载 `DockShellStyles.axaml`（AOT 安全）。App 级 `StyleInclude` 可选。
 - 无反射、无 `Assembly.GetType`、无 `Activator.CreateInstance`。内容通过 `Control.FindDataTemplate` 解析。
 - 无 `XamlReader.Load`、无运行时 AXAML。
 - 库不持有 XML 序列化对象——布局持久化是应用的工作；推荐用 source-generated `JsonSerializerContext` 以保证剪裁安全。

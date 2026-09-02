@@ -166,6 +166,7 @@ Set `CanDragTabs="False"` on a region to pin its tabs.
 ## 8. Run the samples
 
 ```bash
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop   # tiny 3-region + ColorTheme switch
 dotnet run --project samples/GOZA.Dock.Demo.Desktop      # Crystal.Avalonia + layout persistence + WebView + VS Code themes
 ```
 

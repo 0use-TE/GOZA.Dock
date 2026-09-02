@@ -134,6 +134,6 @@ public sealed class DockSplitter : GridSplitter
     private static bool IsGutter(GridLength length) =>
         length.IsAuto || length.IsAbsolute && length.Value is > 0 and <= 32;
 
-    private static double ResolveGap() =>
-        Math.Max(1, DockThemeBrushHelper.ResolveValue(DockThemeResources.PaneGap, 1d));
+    private double ResolveGap() =>
+        Math.Max(1, DockThemeBrushHelper.ResolveValue(DockThemeResources.PaneGap, 4d, this));
 }

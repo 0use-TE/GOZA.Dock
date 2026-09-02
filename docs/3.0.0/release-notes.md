@@ -17,7 +17,8 @@ VS Code workbench theming as a first-class API: strong-typed themes on `DockShel
 
 - Dock chrome resource keys are VS Code IDs (via `DockThemeResources` aliases), not a separate GOZA-only palette.
 - **Library never sets `Application.RequestedThemeVariant`.** Hosts use `theme.IsDark` if Fluent should follow.
-- Avalonia ThemeVariant and Dock `ColorTheme` are independent after a theme is applied.
+- **`DockShell`** auto-loads `DockShellStyles` (compiled XAML on the shell).
+- Metrics like `DockPaneGap` resolve from the shell subtree (VS Code sash = 4px).
 
 ### Unchanged
 

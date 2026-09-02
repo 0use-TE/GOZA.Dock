@@ -96,7 +96,7 @@ The cache intentionally only manages controls. View-model state is your responsi
 
 ## AOT and trimming guarantees
 
-- Every `StyleInclude` is compiled AXAML. The default theme is shipped as `Themes/DockShellStyles.axaml` inside the assembly and resolved by `avares://`.
+- Each `DockShell` compiles in `DockShellStyles.axaml` via its own XAML `StyleInclude` (AOT-safe). App-level include is optional.
 - No reflection, no `Assembly.GetType`, no `Activator.CreateInstance`. Content resolution goes through `Control.FindDataTemplate`.
 - No `XamlReader.Load` or runtime AXAML.
 - No XML doc-only serialization (the library owns none). Persisted layout is the application's job; the recommended pattern uses a source-generated `JsonSerializerContext` for trimming safety.

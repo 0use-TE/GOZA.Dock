@@ -166,6 +166,7 @@ public sealed class MainViewModel
 ## 8. 运行示例
 
 ```bash
+dotnet run --project samples/GOZA.Dock.Minimal.Desktop   # 极简三区 + ColorTheme 切换
 dotnet run --project samples/GOZA.Dock.Demo.Desktop      # Crystal.Avalonia + 布局持久化 + WebView + VS Code 主题
 ```
 

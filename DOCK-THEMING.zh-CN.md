@@ -67,11 +67,13 @@ dockShell.ColorTheme = DockColorThemeCatalog.Create(DockColorTheme.DarkModern);
 
 ### XAML 少量覆盖
 
-在 `StyleInclude` **之后**（或写在该 `DockShell.Resources`）：
+写在该 `DockShell.Resources`（或宿主资源，需能被 Shell 子树解析到）：
 
 ```xml
-<SolidColorBrush x:Key="editor.background" Color="#1E1E1E" />
-<SolidColorBrush x:Key="sash.hoverBorder" Color="#007ACC" />
+<DockShell.Resources>
+  <SolidColorBrush x:Key="editor.background" Color="#1E1E1E" />
+  <SolidColorBrush x:Key="sash.hoverBorder" Color="#007ACC" />
+</DockShell.Resources>
 ```
 
 ## 键 → 控件映射

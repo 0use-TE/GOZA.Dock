@@ -293,7 +293,7 @@ public sealed class TabContainerDragController : IDisposable
         _visualDragActive = true;
 
         UpdateDragMetrics();
-        _dragGhost = CreateDragGhost(_draggedWidth, _draggedHeight, dragItem);
+        _dragGhost = CreateDragGhost(_draggedWidth, _draggedHeight, dragItem, _host);
         // Ghost may grow to fit the full header; keep grab/reorder metrics in sync.
         _draggedWidth = _dragGhost.Width;
         _draggedHeight = _dragGhost.Height;
@@ -784,7 +784,7 @@ public sealed class TabContainerDragController : IDisposable
         if (_draggedContainer is null)
             return;
 
-        var tabHeight = DockThemeBrushHelper.ResolveValue(DockThemeResources.TabHeight, 35d);
+        var tabHeight = DockThemeBrushHelper.ResolveValue(DockThemeResources.TabHeight, 35d, _host);
 
         if (IsHorizontalTabStrip)
         {
@@ -801,11 +801,13 @@ public sealed class TabContainerDragController : IDisposable
     private static Border CreateDragGhost(
         double minWidth,
         double minHeight,
-        IDockTabItem dragItem)
+        IDockTabItem dragItem,
+        StyledElement relativeTo)
     {
         var padding = DockThemeBrushHelper.ResolveValue(
             DockThemeResources.DragGhostPadding,
-            new Thickness(8, 4));
+            new Thickness(8, 4),
+            relativeTo);
 
         var text = new TextBlock
         {
@@ -816,7 +818,8 @@ public sealed class TabContainerDragController : IDisposable
             TextTrimming = TextTrimming.None,
             Foreground = DockThemeBrushHelper.Resolve(
                 DockThemeResources.DragGhostForegroundBrush,
-                DockThemeBrushHelper.DragGhostForegroundFallback()),
+                DockThemeBrushHelper.DragGhostForegroundFallback(),
+                relativeTo),
             Text = dragItem.Header ?? string.Empty,
         };
 
@@ -827,16 +830,20 @@ public sealed class TabContainerDragController : IDisposable
             Padding = padding,
             Background = DockThemeBrushHelper.Resolve(
                 DockThemeResources.DragGhostBackgroundBrush,
-                DockThemeBrushHelper.DragGhostBackgroundFallback()),
+                DockThemeBrushHelper.DragGhostBackgroundFallback(),
+                relativeTo),
             BorderBrush = DockThemeBrushHelper.Resolve(
                 DockThemeResources.DragGhostBorderBrush,
-                DockThemeBrushHelper.DragGhostBorderFallback()),
+                DockThemeBrushHelper.DragGhostBorderFallback(),
+                relativeTo),
             BorderThickness = DockThemeBrushHelper.ResolveValue(
                 DockThemeResources.DragGhostBorderThickness,
-                new Thickness(1)),
+                new Thickness(1),
+                relativeTo),
             CornerRadius = DockThemeBrushHelper.ResolveValue(
                 DockThemeResources.DragGhostCornerRadius,
-                new CornerRadius(2)),
+                new CornerRadius(2),
+                relativeTo),
             ClipToBounds = true,
             IsHitTestVisible = false,
             Child = text,

@@ -2,7 +2,7 @@
 
 **唯一应用入口：** 给 [`DockShell.ColorTheme`](../../../src/GOZA.Dock/Controls/DockShell.cs) 赋值。
 
-加载器只返回 [`VsCodeColorTheme`](../../../src/GOZA.Dock/VsCodeThemeJson.cs)，**不**写资源。
+每个 `DockShell` 已自带 `DockShellStyles`。加载器只返回 [`VsCodeColorTheme`](../../../src/GOZA.Dock/VsCodeThemeJson.cs)，**不**写资源。
 
 ```csharp
 // 内置

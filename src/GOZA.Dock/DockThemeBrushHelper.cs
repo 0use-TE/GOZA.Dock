@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Styling;
 
@@ -6,32 +7,59 @@ namespace GOZA.Dock;
 
 internal static class DockThemeBrushHelper
 {
-    public static T ResolveValue<T>(string key, T fallback)
+    /// <summary>
+    /// Resolves a resource from <paramref name="relativeTo"/> (e.g. a <c>DockShell</c> subtree)
+    /// first, then <see cref="Application.Current"/>.
+    /// </summary>
+    public static T ResolveValue<T>(string key, T fallback, StyledElement? relativeTo = null)
     {
-        if (Application.Current is not Application app)
-            return fallback;
+        if (TryFrom(relativeTo, key, out T local))
+            return local;
 
-        if (app.TryGetResource(key, app.ActualThemeVariant, out var value) && value is T themed)
-            return themed;
-
-        if (app.TryGetResource(key, null, out value) && value is T anyTheme)
-            return anyTheme;
+        if (Application.Current is Application app && TryFrom(app, key, app.ActualThemeVariant, out T appValue))
+            return appValue;
 
         return fallback;
     }
 
-    public static IBrush Resolve(string key, IBrush fallback)
+    public static IBrush Resolve(string key, IBrush fallback, StyledElement? relativeTo = null)
     {
-        if (Application.Current is not Application app)
-            return fallback;
+        if (TryFrom(relativeTo, key, out IBrush local))
+            return local;
 
-        if (app.TryGetResource(key, app.ActualThemeVariant, out var value) && value is IBrush brush)
-            return brush;
-
-        if (app.TryGetResource(key, null, out value) && value is IBrush anyBrush)
-            return anyBrush;
+        if (Application.Current is Application app && TryFrom(app, key, app.ActualThemeVariant, out IBrush appBrush))
+            return appBrush;
 
         return fallback;
+    }
+
+    private static bool TryFrom<T>(StyledElement? element, string key, out T value)
+    {
+        value = default!;
+        if (element is null)
+            return false;
+
+        return TryFrom(element, key, element.ActualThemeVariant, out value);
+    }
+
+    private static bool TryFrom<T>(IResourceHost host, string key, ThemeVariant? variant, out T value)
+    {
+        value = default!;
+        if (host.TryGetResource(key, variant, out var raw) && raw is T typed)
+        {
+            value = typed;
+            return true;
+        }
+
+        if (variant is not null
+            && host.TryGetResource(key, null, out raw)
+            && raw is T unthemed)
+        {
+            value = unthemed;
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

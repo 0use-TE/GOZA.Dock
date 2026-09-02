@@ -17,7 +17,8 @@
 
 - Dock chrome 资源键为 VS Code ID。
 - **库绝不设置 `RequestedThemeVariant`**；宿主按 `theme.IsDark` 自行决定。
-- 已应用 `ColorTheme` 后，只切 App 明暗不会改 Dock 色板。
+- **`DockShell`** 自动挂载 `DockShellStyles`（Shell 上的编译型 XAML）。
+- `DockPaneGap` 等度量从 Shell 子树解析（对齐 VS Code sash = 4px）。
 
 ### 迁移
 

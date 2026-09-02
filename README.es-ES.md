@@ -50,11 +50,15 @@ XAML mínimo:
 
 `DockRegion` selecciona automáticamente la primera pestaña cuando `SelectedItem` no está vinculado. Vincule `SelectedItem` para restaurar el diseño o para una selección explícita (Demo).
 
-Incluya los estilos de la librería en `App.axaml`:
+Incluya un tema de host solo si lo necesita. Cada `DockShell` carga `DockShellStyles` por sí mismo:
 
 ```xml
-<StyleInclude Source="avares://GOZA.Dock/Themes/DockShellStyles.axaml" />
+<Application.Styles>
+  <FluentTheme />
+</Application.Styles>
 ```
+
+Temas de color: asigne `DockShell.ColorTheme` (por ejemplo `VsCodeThemeJson.LoadFromFile(...)`).
 
 Los elementos de pestaña implementan `IDockTabItem` (`Id`, `Header`, opcionalmente `ReuseSurface`, `IsClosable`). Mapee cada ViewModel de pestaña a una vista con `DataTemplate` o su localizador de vistas/DI.
 

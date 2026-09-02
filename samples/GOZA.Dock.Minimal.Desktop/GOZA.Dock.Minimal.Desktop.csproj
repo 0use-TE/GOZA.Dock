@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -8,7 +8,6 @@
     <ApplicationIcon>..\..\src\GOZA.Dock\wwwroot\GOZA.ico</ApplicationIcon>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <PublishAot>true</PublishAot>
   </PropertyGroup>
@@ -16,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="StaticLink.Avalonia" />
   </ItemGroup>
 
   <ItemGroup>

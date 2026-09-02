@@ -7,36 +7,36 @@
         Width="960"
         Height="640">
 
-  <!-- DockShell 自带 Styles；选中项直接就是 ColorTheme -->
-  <DockShell ColorTheme="{Binding ColorTheme}">
     <DockPanel>
-      <Border DockPanel.Dock="Top"
-              Padding="8,6"
-              BorderThickness="0,0,0,1"
-              BorderBrush="{DynamicResource surface.border}">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <TextBlock Text="主题" VerticalAlignment="Center" />
-          <ComboBox Width="140"
-                    ItemsSource="{Binding Themes}"
-                    SelectedItem="{Binding ColorTheme}">
-            <ComboBox.ItemTemplate>
-              <DataTemplate x:DataType="dock:VsCodeColorTheme">
-                <TextBlock Text="{Binding Name}" />
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-        </StackPanel>
-      </Border>
+        <Border DockPanel.Dock="Top"
+                Padding="8,6"
+                BorderThickness="0"
+                BorderBrush="{DynamicResource surface.border}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="主题" VerticalAlignment="Center" />
+                <ComboBox Width="140"
+                          ItemsSource="{Binding Themes}"
+                          SelectedItem="{Binding ColorTheme}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="dock:VsCodeColorTheme">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+        </Border>
 
-      <Grid ColumnDefinitions="220,Auto,*">
-        <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
-          <DockRegion Grid.Row="0" ItemsSource="{Binding LeftTopTabs}" />
-          <DockSplitter Grid.Row="1" />
-          <DockRegion Grid.Row="2" ItemsSource="{Binding LeftBottomTabs}" />
-        </Grid>
-        <DockSplitter Grid.Column="1" />
-        <DockRegion Grid.Column="2" ItemsSource="{Binding RightTabs}" />
-      </Grid>
+        <DockShell ColorTheme="{Binding ColorTheme}">
+            <Grid ColumnDefinitions="220,Auto,*">
+                <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
+                    <DockRegion Grid.Row="0" ItemsSource="{Binding LeftTopTabs}" />
+                    <DockSplitter Grid.Row="1" />
+                    <DockRegion Grid.Row="2" ItemsSource="{Binding LeftBottomTabs}" />
+                </Grid>
+                <DockSplitter Grid.Column="1" />
+                <DockRegion Grid.Column="2" ItemsSource="{Binding RightTabs}" />
+            </Grid>
+            </DockShell>
     </DockPanel>
-  </DockShell>
+
 </Window>
