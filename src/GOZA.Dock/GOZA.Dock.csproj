@@ -25,7 +25,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>package-icon.png</PackageIcon>
-		<PackageReleaseNotes>Lookless DockRegion and DockTabHeader, built-in TabStrip, VS Code-inspired resource theme, Auto gutter splitters, AOT-first control loading, and a smaller API. Requires Avalonia 12.0.0.</PackageReleaseNotes>
+		<PackageReleaseNotes>VS Code workbench color IDs as theme resource keys (Dark/Light Modern defaults), square tabs with tab.activeBorderTop, 1px editorGroup.border sash. Requires Avalonia 12.0.0.</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>

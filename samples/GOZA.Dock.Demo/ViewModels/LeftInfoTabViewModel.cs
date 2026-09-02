@@ -5,7 +5,7 @@ namespace GOZA.Dock.Demo.ViewModels;
 public sealed class LeftInfoTabViewModel : DockTabViewModelBase
 {
     public LeftInfoTabViewModel()
-        : base("left-info", "Info", DockRegionIds.Left)
+        : base("left-info", "搜索", DockRegionIds.Left)
     {
     }
 }

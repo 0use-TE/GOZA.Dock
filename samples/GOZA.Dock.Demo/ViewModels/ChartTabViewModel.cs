@@ -5,7 +5,7 @@ namespace GOZA.Dock.Demo.ViewModels;
 public sealed class ChartTabViewModel : DockTabViewModelBase
 {
     public ChartTabViewModel()
-        : base("ct-chart", "Chart", DockRegionIds.CenterTop)
+        : base("ct-chart", "MainView.axaml", DockRegionIds.CenterTop)
     {
     }
 }

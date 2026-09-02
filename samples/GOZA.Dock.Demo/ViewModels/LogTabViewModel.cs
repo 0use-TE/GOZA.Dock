@@ -5,7 +5,7 @@ namespace GOZA.Dock.Demo.ViewModels;
 public sealed class LogTabViewModel : DockTabViewModelBase
 {
     public LogTabViewModel()
-        : base("cb-log", "Log", DockRegionIds.CenterBottom, selectOnStartup: true)
+        : base("cb-log", "终端", DockRegionIds.CenterBottom, selectOnStartup: true)
     {
     }
 }

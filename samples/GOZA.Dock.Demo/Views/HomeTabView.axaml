@@ -3,8 +3,17 @@
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
              x:Class="GOZA.Dock.Demo.Views.HomeTabView"
              x:DataType="vm:HomeTabViewModel">
-    <TextBlock FontSize="20"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Text="{Binding Header}" />
+    <StackPanel Margin="10,8" Spacing="6">
+      <TextBlock Margin="4,2,0,8" FontSize="11" FontWeight="SemiBold" Text="GOZA.DOCK" />
+      <TextBlock Text="⌄  GOZA.Dock" />
+      <TextBlock Margin="16,0,0,0" Text="⌄  src" />
+      <TextBlock Margin="32,0,0,0" Text="⌄  GOZA.Dock" />
+      <TextBlock Margin="48,0,0,0" Foreground="#C586C0" Text="C#  DockThemeResources.cs" />
+      <TextBlock Margin="48,0,0,0" Foreground="#4EC9B0" Text="◇  Themes" />
+      <TextBlock Margin="64,0,0,0" Foreground="#CE9178" Text="&lt;&gt;  DockShellStyles.axaml" />
+      <TextBlock Margin="16,0,0,0" Text="›  samples" />
+      <TextBlock Margin="16,0,0,0" Text="›  docs" />
+      <TextBlock Margin="16,0,0,0" Foreground="#D7BA7D" Text="▤  GOZA.Dock.slnx" />
+      <TextBlock Margin="16,0,0,0" Foreground="#519ABA" Text="ⓘ  README.md" />
+    </StackPanel>
 </UserControl>

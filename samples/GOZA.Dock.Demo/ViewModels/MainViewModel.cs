@@ -1,5 +1,3 @@
-using Avalonia;
-using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -53,7 +51,7 @@ public partial class MainViewModel : ObservableObject
     private IDockTabItem? _rightSelected;
 
     [ObservableProperty]
-    private string _themeToggleLabel = "Dark";
+    private DockColorTheme _colorTheme = DockColorTheme.DarkModern;
 
     [ObservableProperty]
     private bool _isNotificationVisible;
@@ -94,13 +92,30 @@ public partial class MainViewModel : ObservableObject
             guide,
         ];
 
-        ThemeToggleLabel = GetThemeToggleLabel();
+        DockColorThemeCatalog.Apply(ColorTheme);
 
         if (DockLayoutPersistence.TryLoad(out var saved) && saved is not null)
             ApplySnapshot(saved);
         else
             ApplyDefaultLayout();
     }
+
+    public bool IsDarkModernTheme => ColorTheme == DockColorTheme.DarkModern;
+    public bool IsLightModernTheme => ColorTheme == DockColorTheme.LightModern;
+    public bool IsVisualStudioDarkTheme => ColorTheme == DockColorTheme.VisualStudioDark;
+    public bool IsVisualStudioLightTheme => ColorTheme == DockColorTheme.VisualStudioLight;
+
+    partial void OnColorThemeChanged(DockColorTheme value)
+    {
+        DockColorThemeCatalog.Apply(value);
+        OnPropertyChanged(nameof(IsDarkModernTheme));
+        OnPropertyChanged(nameof(IsLightModernTheme));
+        OnPropertyChanged(nameof(IsVisualStudioDarkTheme));
+        OnPropertyChanged(nameof(IsVisualStudioLightTheme));
+    }
+
+    [RelayCommand]
+    private void SetColorTheme(DockColorTheme theme) => ColorTheme = theme;
 
     [RelayCommand]
     private void SaveLayout()
@@ -145,17 +160,6 @@ public partial class MainViewModel : ObservableObject
         _dynamicTabs.Add(tab);
         OpenTab(tab, tab.RegionId, select: true);
         Notify("Notice", $"Added \"{header}\".");
-    }
-
-    [RelayCommand]
-    private void ToggleTheme()
-    {
-        if (Application.Current is not Application app)
-            return;
-
-        var useDark = app.ActualThemeVariant != ThemeVariant.Dark;
-        app.RequestedThemeVariant = useDark ? ThemeVariant.Dark : ThemeVariant.Light;
-        ThemeToggleLabel = useDark ? "Light" : "Dark";
     }
 
     [RelayCommand]
@@ -212,9 +216,6 @@ public partial class MainViewModel : ObservableObject
         _notificationTimer?.Stop();
         IsNotificationVisible = false;
     }
-
-    private static string GetThemeToggleLabel() =>
-        Application.Current?.ActualThemeVariant == ThemeVariant.Dark ? "Light" : "Dark";
 
     private static string FormatRegionName(string regionId) =>
         regionId switch

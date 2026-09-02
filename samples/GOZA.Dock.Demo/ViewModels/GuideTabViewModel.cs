@@ -17,10 +17,10 @@ public sealed partial class GuideTabViewModel : ObservableObject, IDockTabViewMo
     public bool ReuseSurface => false;
 
     [ObservableProperty]
-    private string _header = "Guide";
+    private string _header = "DockShellStyles.axaml";
 
     [ObservableProperty]
-    private string _title = "GOZA.Dock — Getting Started";
+    private string _title = "DockShellStyles.axaml";
 
     [ObservableProperty]
     private string _intro =

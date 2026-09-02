@@ -10,7 +10,7 @@ public sealed class BrowserTabViewModel : DockTabViewModelBase
     public static Uri DefaultUri { get; } = new(DefaultUrl);
 
     public BrowserTabViewModel()
-        : base("ct-browser", "Browser", DockRegionIds.CenterTop, selectOnStartup: true, reuseSurface: true)
+        : base("ct-browser", "README.md", DockRegionIds.CenterTop, reuseSurface: true)
     {
     }
 

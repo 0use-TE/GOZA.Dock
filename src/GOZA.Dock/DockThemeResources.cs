@@ -2,50 +2,54 @@ namespace GOZA.Dock;
 
 /// <summary>
 /// Public resource keys used by the default control themes.
-/// Override them after the GOZA.Dock style include to skin every dock surface.
+/// Brush keys resolve to <see cref="VsCodeThemeColors"/> IDs so VS Code theme JSON
+/// <c>colors</c> maps can drive the dock without a separate GOZA palette.
+/// Structural metrics (<see cref="PaneGap"/>, <see cref="TabHeight"/>, …) remain Dock-prefixed.
 /// </summary>
 public static class DockThemeResources
 {
-    public const string ShellBackgroundBrush = "DockShellBackgroundBrush";
-    public const string PaneBackgroundBrush = "DockPaneBackgroundBrush";
-    public const string PaneBorderBrush = "DockPaneBorderBrush";
-    public const string TabStripBackgroundBrush = "DockTabStripBackgroundBrush";
-    public const string TabBackgroundBrush = "DockTabBackgroundBrush";
-    public const string TabHoverBackgroundBrush = "DockTabHoverBackgroundBrush";
-    public const string TabSelectedBackgroundBrush = "DockTabSelectedBackgroundBrush";
-    public const string TabForegroundBrush = "DockTabForegroundBrush";
-    public const string TabSelectedForegroundBrush = "DockTabSelectedForegroundBrush";
-    public const string AccentBrush = "DockAccentBrush";
-    public const string SplitterBackgroundBrush = "DockSplitterBackgroundBrush";
-    public const string SplitterHoverBrush = "DockSplitterHoverBrush";
+    // --- Surfaces (VS Code workbench colors) ---
+    public const string ShellBackgroundBrush = VsCodeThemeColors.EditorGroupBorder;
+    public const string PaneBackgroundBrush = VsCodeThemeColors.SurfaceBackground;
+    public const string PaneBorderBrush = VsCodeThemeColors.SurfaceBorder;
+    public const string TabStripBackgroundBrush = VsCodeThemeColors.EditorGroupHeaderTabsBackground;
+    public const string TabBackgroundBrush = VsCodeThemeColors.ModernEditorTabInactiveBackground;
+    public const string TabHoverBackgroundBrush = VsCodeThemeColors.ModernEditorTabHoverBackground;
+    public const string TabSelectedBackgroundBrush = VsCodeThemeColors.ModernEditorTabActiveBackground;
+    public const string TabSelectedBorderBrush = VsCodeThemeColors.ModernEditorTabActiveBackground;
+    public const string TabSeparatorBrush = VsCodeThemeColors.TabBorder;
+    public const string TabForegroundBrush = VsCodeThemeColors.TabInactiveForeground;
+    public const string TabSelectedForegroundBrush = VsCodeThemeColors.ModernEditorTabActiveForeground;
+    public const string AccentBrush = VsCodeThemeColors.FocusBorder;
+    public const string SplitterBackgroundBrush = VsCodeThemeColors.EditorGroupBorder;
+    public const string SplitterHoverBrush = VsCodeThemeColors.SashHoverBorder;
+    public const string ChromeIconForegroundBrush = VsCodeThemeColors.IconForeground;
+    public const string ChromeHoverBackgroundBrush = VsCodeThemeColors.ToolbarHoverBackground;
+    public const string ChromeHoverOutlineBrush = VsCodeThemeColors.ToolbarHoverOutline;
+    public const string ChromePressedBackgroundBrush = VsCodeThemeColors.ToolbarActiveBackground;
+    public const string DropHintBackgroundBrush = VsCodeThemeColors.EditorGroupDropBackground;
+    public const string DropHintBorderBrush = VsCodeThemeColors.FocusBorder;
 
+    // --- Drag ghost (not in VS Code; Dock-specific overlays) ---
+    public const string DragGhostBackgroundBrush = "DockDragGhostBackgroundBrush";
+    public const string DragGhostBorderBrush = "DockDragGhostBorderBrush";
+    public const string DragGhostForegroundBrush = "DockDragGhostForegroundBrush";
+    public const string DragGhostBorderThickness = "DockDragGhostBorderThickness";
+    public const string DragGhostCornerRadius = "DockDragGhostCornerRadius";
+    public const string DragGhostPadding = "DockDragGhostPadding";
+
+    // --- Metrics ---
     public const string PaneGap = "DockPaneGap";
     public const string TabHeight = "DockTabHeight";
+    public const string TabPillHeight = "DockTabPillHeight";
     public const string ChromeButtonSize = "DockChromeButtonSize";
     public const string ShellPadding = "DockShellPadding";
     public const string PaneBorderThickness = "DockPaneBorderThickness";
     public const string TabPadding = "DockTabPadding";
     public const string PaneCornerRadius = "DockPaneCornerRadius";
-
-    /// <summary>Foreground (stroke) for chrome icons (add / close / more).</summary>
-    public const string ChromeIconForegroundBrush = "DockChromeIconForegroundBrush";
-
-    /// <summary>Background for the cross-region drop hint overlay on <see cref="Controls.DockRegion"/>.</summary>
-    public const string DropHintBackgroundBrush = "DockDropHintBackgroundBrush";
-
-    /// <summary>Border for the cross-region drop hint overlay.</summary>
-    public const string DropHintBorderBrush = "DockDropHintBorderBrush";
-
-    /// <summary>Background for the tab drag ghost shown during reorder / cross-region moves.</summary>
-    public const string DragGhostBackgroundBrush = "DockDragGhostBackgroundBrush";
-
-    /// <summary>Border for the tab drag ghost.</summary>
-    public const string DragGhostBorderBrush = "DockDragGhostBorderBrush";
-
-    /// <summary>Foreground (header text) for the tab drag ghost.</summary>
-    public const string DragGhostForegroundBrush = "DockDragGhostForegroundBrush";
-
-    public const string DragGhostBorderThickness = "DockDragGhostBorderThickness";
-    public const string DragGhostCornerRadius = "DockDragGhostCornerRadius";
-    public const string DragGhostPadding = "DockDragGhostPadding";
+    public const string TabCornerRadius = "DockTabCornerRadius";
+    public const string TabCornerRadiusTop = "DockTabCornerRadiusTop";
+    public const string TabCornerRadiusBottom = "DockTabCornerRadiusBottom";
+    public const string TabCornerRadiusLeft = "DockTabCornerRadiusLeft";
+    public const string TabCornerRadiusRight = "DockTabCornerRadiusRight";
 }

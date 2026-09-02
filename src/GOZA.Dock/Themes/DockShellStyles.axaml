@@ -5,86 +5,239 @@
   <Styles.Resources>
     <ResourceDictionary>
       <!-- Structural metrics. Applications may override any key after this include. -->
-      <!-- Empty workspace between independent rounded panes. -->
-      <x:Double x:Key="DockPaneGap">6</x:Double>
-      <x:Double x:Key="DockTabHeight">34</x:Double>
+      <!-- VS Code workbench.sash.size default (desktop). -->
+      <x:Double x:Key="DockPaneGap">4</x:Double>
+      <!-- Modern UI: 24px pill + 4px transparent hit gutter on each side. -->
+      <x:Double x:Key="DockTabHeight">32</x:Double>
+      <x:Double x:Key="DockTabPillHeight">24</x:Double>
       <x:Double x:Key="DockChromeButtonSize">28</x:Double>
-      <Thickness x:Key="DockShellPadding">0</Thickness>
+      <Thickness x:Key="DockShellPadding">4</Thickness>
       <Thickness x:Key="DockPaneBorderThickness">1</Thickness>
-      <Thickness x:Key="DockTabPadding">10,0,6,0</Thickness>
-      <CornerRadius x:Key="DockPaneCornerRadius">3</CornerRadius>
+      <Thickness x:Key="DockTabPadding">8,0,4,0</Thickness>
+      <CornerRadius x:Key="DockPaneCornerRadius">8</CornerRadius>
+      <CornerRadius x:Key="DockTabCornerRadius">4</CornerRadius>
+      <CornerRadius x:Key="DockTabCornerRadiusTop">4</CornerRadius>
+      <CornerRadius x:Key="DockTabCornerRadiusBottom">4</CornerRadius>
+      <CornerRadius x:Key="DockTabCornerRadiusLeft">4</CornerRadius>
+      <CornerRadius x:Key="DockTabCornerRadiusRight">4</CornerRadius>
       <Thickness x:Key="DockDragGhostBorderThickness">1</Thickness>
-      <CornerRadius x:Key="DockDragGhostCornerRadius">2</CornerRadius>
+      <CornerRadius x:Key="DockDragGhostCornerRadius">0</CornerRadius>
       <Thickness x:Key="DockDragGhostPadding">8,4</Thickness>
 
+      <!--
+        Workbench colors use official VS Code color IDs (theme JSON "colors" keys).
+        Override any of these after StyleInclude to apply a third-party VS Code theme.
+        Defaults = Dark Modern / Light Modern from vscode theme-defaults.
+      -->
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Default">
-          <SolidColorBrush x:Key="DockShellBackgroundBrush" Color="#181818" />
-          <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1F1F1F" />
-          <SolidColorBrush x:Key="DockPaneBorderBrush" Color="#3A3A3A" />
-          <SolidColorBrush x:Key="DockTabStripBackgroundBrush" Color="#181818" />
-          <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="Transparent" />
-          <SolidColorBrush x:Key="DockTabHoverBackgroundBrush" Color="#2A2D2E" />
-          <SolidColorBrush x:Key="DockTabSelectedBackgroundBrush" Color="#1F1F1F" />
-          <SolidColorBrush x:Key="DockTabForegroundBrush" Color="#B8B8B8" />
-          <SolidColorBrush x:Key="DockTabSelectedForegroundBrush" Color="#F0F0F0" />
-          <SolidColorBrush x:Key="DockAccentBrush" Color="#007ACC" />
-          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#CCCCCC" />
-          <SolidColorBrush x:Key="DockSplitterBackgroundBrush" Color="#3A3A3A" />
-          <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
-          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33007ACC" />
-          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#99007ACC" />
+          <SolidColorBrush x:Key="editor.background" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="editor.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="editorGroup.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="editorGroup.dropBackground" Color="#8053595D" />
+          <SolidColorBrush x:Key="editorGroupHeader.tabsBackground" Color="#181818" />
+          <SolidColorBrush x:Key="editorGroupHeader.tabsBorder" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="editor.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="surface.background" Color="#181818" />
+          <SolidColorBrush x:Key="surface.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="surface.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="modernEditorTab.activeBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.activeForeground" Color="#EDEDED" />
+          <SolidColorBrush x:Key="modernEditorTab.inactiveBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverBackground" Color="#14FFFFFF" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverForeground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="modernEditorTab.activeHoverBackground" Color="#14FFFFFF" />
+          <SolidColorBrush x:Key="modernEditorTab.activeActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.activeHoverActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.selectedActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="tab.activeBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.inactiveBackground" Color="#181818" />
+          <SolidColorBrush x:Key="tab.activeForeground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.inactiveForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="tab.selectedBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.selectedForeground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.hoverBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.hoverForeground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="tab.activeBorder" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.activeBorderTop" Color="#0078D4" />
+          <SolidColorBrush x:Key="tab.selectedBorderTop" Color="#6CADDF" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="tab.unfocusedInactiveBackground" Color="#181818" />
+          <SolidColorBrush x:Key="tab.unfocusedInactiveForeground" Color="#6B6B6B" />
+          <SolidColorBrush x:Key="tab.unfocusedHoverBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.unfocusedHoverForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBorder" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBorderTop" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="panel.background" Color="#181818" />
+          <SolidColorBrush x:Key="panel.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="panelTitle.activeForeground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="panelTitle.inactiveForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="panelTitle.activeBorder" Color="#0078D4" />
+          <SolidColorBrush x:Key="sideBar.background" Color="#181818" />
+          <SolidColorBrush x:Key="sideBar.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sideBar.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="sideBarTitle.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.background" Color="#181818" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="focusBorder" Color="#0078D4" />
+          <SolidColorBrush x:Key="foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="icon.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sash.hoverBorder" Color="#0078D4" />
+          <SolidColorBrush x:Key="toolbar.hoverBackground" Color="#505A5D5E" />
+          <SolidColorBrush x:Key="toolbar.hoverOutline" Color="Transparent" />
+          <SolidColorBrush x:Key="toolbar.activeBackground" Color="#805A5D5E" />
+          <SolidColorBrush x:Key="titleBar.activeBackground" Color="#181818" />
+          <SolidColorBrush x:Key="titleBar.activeForeground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="titleBar.border" Color="#2B2B2B" />
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F01F1F1F" />
-          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#7F808080" />
-          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#F0F0F0" />
+          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AA2B2B2B" />
+          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#FFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-          <SolidColorBrush x:Key="DockShellBackgroundBrush" Color="#181818" />
-          <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#1F1F1F" />
-          <SolidColorBrush x:Key="DockPaneBorderBrush" Color="#3A3A3A" />
-          <SolidColorBrush x:Key="DockTabStripBackgroundBrush" Color="#181818" />
-          <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="Transparent" />
-          <SolidColorBrush x:Key="DockTabHoverBackgroundBrush" Color="#2A2D2E" />
-          <SolidColorBrush x:Key="DockTabSelectedBackgroundBrush" Color="#1F1F1F" />
-          <SolidColorBrush x:Key="DockTabForegroundBrush" Color="#B8B8B8" />
-          <SolidColorBrush x:Key="DockTabSelectedForegroundBrush" Color="#F0F0F0" />
-          <SolidColorBrush x:Key="DockAccentBrush" Color="#007ACC" />
-          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#CCCCCC" />
-          <SolidColorBrush x:Key="DockSplitterBackgroundBrush" Color="#3A3A3A" />
-          <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
-          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33007ACC" />
-          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#99007ACC" />
+          <SolidColorBrush x:Key="editor.background" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="editor.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="editorGroup.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="editorGroup.dropBackground" Color="#8053595D" />
+          <SolidColorBrush x:Key="editorGroupHeader.tabsBackground" Color="#181818" />
+          <SolidColorBrush x:Key="editorGroupHeader.tabsBorder" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="editor.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="surface.background" Color="#181818" />
+          <SolidColorBrush x:Key="surface.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="surface.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="modernEditorTab.activeBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.activeForeground" Color="#EDEDED" />
+          <SolidColorBrush x:Key="modernEditorTab.inactiveBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverBackground" Color="#14FFFFFF" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverForeground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="modernEditorTab.activeHoverBackground" Color="#14FFFFFF" />
+          <SolidColorBrush x:Key="modernEditorTab.activeActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.activeHoverActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="modernEditorTab.selectedActionBackground" Color="#2C2D2E" />
+          <SolidColorBrush x:Key="tab.activeBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.inactiveBackground" Color="#181818" />
+          <SolidColorBrush x:Key="tab.activeForeground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.inactiveForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="tab.selectedBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.selectedForeground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.hoverBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.hoverForeground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="tab.activeBorder" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.activeBorderTop" Color="#0078D4" />
+          <SolidColorBrush x:Key="tab.selectedBorderTop" Color="#6CADDF" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="tab.unfocusedInactiveBackground" Color="#181818" />
+          <SolidColorBrush x:Key="tab.unfocusedInactiveForeground" Color="#6B6B6B" />
+          <SolidColorBrush x:Key="tab.unfocusedHoverBackground" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.unfocusedHoverForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBorder" Color="#1F1F1F" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBorderTop" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="panel.background" Color="#181818" />
+          <SolidColorBrush x:Key="panel.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="panelTitle.activeForeground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="panelTitle.inactiveForeground" Color="#9D9D9D" />
+          <SolidColorBrush x:Key="panelTitle.activeBorder" Color="#0078D4" />
+          <SolidColorBrush x:Key="sideBar.background" Color="#181818" />
+          <SolidColorBrush x:Key="sideBar.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sideBar.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="sideBarTitle.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.background" Color="#181818" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.border" Color="#2B2B2B" />
+          <SolidColorBrush x:Key="focusBorder" Color="#0078D4" />
+          <SolidColorBrush x:Key="foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="icon.foreground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="sash.hoverBorder" Color="#0078D4" />
+          <SolidColorBrush x:Key="toolbar.hoverBackground" Color="#505A5D5E" />
+          <SolidColorBrush x:Key="toolbar.hoverOutline" Color="Transparent" />
+          <SolidColorBrush x:Key="toolbar.activeBackground" Color="#805A5D5E" />
+          <SolidColorBrush x:Key="titleBar.activeBackground" Color="#181818" />
+          <SolidColorBrush x:Key="titleBar.activeForeground" Color="#CCCCCC" />
+          <SolidColorBrush x:Key="titleBar.border" Color="#2B2B2B" />
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F01F1F1F" />
-          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#7F808080" />
-          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#F0F0F0" />
+          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AA2B2B2B" />
+          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#FFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-          <SolidColorBrush x:Key="DockShellBackgroundBrush" Color="#E8E8E8" />
-          <SolidColorBrush x:Key="DockPaneBackgroundBrush" Color="#FFFFFF" />
-          <SolidColorBrush x:Key="DockPaneBorderBrush" Color="#C8C8C8" />
-          <SolidColorBrush x:Key="DockTabStripBackgroundBrush" Color="#ECECEC" />
-          <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="Transparent" />
-          <SolidColorBrush x:Key="DockTabHoverBackgroundBrush" Color="#E2E2E2" />
-          <SolidColorBrush x:Key="DockTabSelectedBackgroundBrush" Color="#FFFFFF" />
-          <SolidColorBrush x:Key="DockTabForegroundBrush" Color="#555555" />
-          <SolidColorBrush x:Key="DockTabSelectedForegroundBrush" Color="#202020" />
-          <SolidColorBrush x:Key="DockAccentBrush" Color="#007ACC" />
-          <SolidColorBrush x:Key="DockChromeIconForegroundBrush" Color="#555555" />
-          <SolidColorBrush x:Key="DockSplitterBackgroundBrush" Color="#C8C8C8" />
-          <SolidColorBrush x:Key="DockSplitterHoverBrush" Color="#007ACC" />
-          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33007ACC" />
-          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#99007ACC" />
-          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F0FFFFFF" />
-          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#7F808080" />
-          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#202020" />
+          <SolidColorBrush x:Key="editor.background" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="editor.foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="editorGroup.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="editorGroup.dropBackground" Color="#2E2677CB" />
+          <SolidColorBrush x:Key="editorGroupHeader.tabsBackground" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="editorGroupHeader.tabsBorder" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="editor.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="surface.background" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="surface.foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="surface.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="modernEditorTab.activeBackground" Color="#99DADADA" />
+          <SolidColorBrush x:Key="modernEditorTab.activeForeground" Color="#202020" />
+          <SolidColorBrush x:Key="modernEditorTab.inactiveBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverBackground" Color="#14000000" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverForeground" Color="#202020" />
+          <SolidColorBrush x:Key="modernEditorTab.activeHoverBackground" Color="#14000000" />
+          <SolidColorBrush x:Key="modernEditorTab.activeActionBackground" Color="#E2E2E2" />
+          <SolidColorBrush x:Key="modernEditorTab.hoverActionBackground" Color="#E8E8E8" />
+          <SolidColorBrush x:Key="modernEditorTab.activeHoverActionBackground" Color="#E2E2E2" />
+          <SolidColorBrush x:Key="modernEditorTab.selectedActionBackground" Color="#E2E2E2" />
+          <SolidColorBrush x:Key="tab.activeBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.inactiveBackground" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="tab.activeForeground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="tab.inactiveForeground" Color="#868686" />
+          <SolidColorBrush x:Key="tab.selectedBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.selectedForeground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="tab.hoverBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.hoverForeground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="tab.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="tab.activeBorder" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="tab.activeBorderTop" Color="#005FB8" />
+          <SolidColorBrush x:Key="tab.selectedBorderTop" Color="#68A3DA" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBackground" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveForeground" Color="#868686" />
+          <SolidColorBrush x:Key="tab.unfocusedInactiveBackground" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="tab.unfocusedInactiveForeground" Color="#B5B5B5" />
+          <SolidColorBrush x:Key="tab.unfocusedHoverBackground" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="tab.unfocusedHoverForeground" Color="#868686" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBorder" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="tab.unfocusedActiveBorderTop" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="panel.background" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="panel.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="panelTitle.activeForeground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="panelTitle.inactiveForeground" Color="#868686" />
+          <SolidColorBrush x:Key="panelTitle.activeBorder" Color="#005FB8" />
+          <SolidColorBrush x:Key="sideBar.background" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="sideBar.foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="sideBar.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="sideBarTitle.foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.background" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="sideBarSectionHeader.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="focusBorder" Color="#005FB8" />
+          <SolidColorBrush x:Key="foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="icon.foreground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="sash.hoverBorder" Color="#005FB8" />
+          <SolidColorBrush x:Key="toolbar.hoverBackground" Color="#50B8B8B8" />
+          <SolidColorBrush x:Key="toolbar.hoverOutline" Color="Transparent" />
+          <SolidColorBrush x:Key="toolbar.activeBackground" Color="#80B8B8B8" />
+          <SolidColorBrush x:Key="titleBar.activeBackground" Color="#F8F8F8" />
+          <SolidColorBrush x:Key="titleBar.activeForeground" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="titleBar.border" Color="#E5E5E5" />
+          <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F2FFFFFF" />
+          <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AAE5E5E5" />
+          <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#3B3B3B" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
 
       <ItemsPanelTemplate x:Key="DockHorizontalTabPanel">
-        <StackPanel Orientation="Horizontal" />
+        <StackPanel Orientation="Horizontal" Spacing="0" />
       </ItemsPanelTemplate>
       <ItemsPanelTemplate x:Key="DockVerticalTabPanel">
-        <StackPanel Orientation="Vertical" />
+        <StackPanel Orientation="Vertical" Spacing="0" />
       </ItemsPanelTemplate>
 
       <!-- Private themes for every stock Avalonia control used by Dock chrome. -->
@@ -113,16 +266,16 @@
         <Setter Property="Width" Value="{DynamicResource DockChromeButtonSize}" />
         <Setter Property="Height" Value="{DynamicResource DockChromeButtonSize}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource toolbar.hoverOutline}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{DynamicResource DockChromeIconForegroundBrush}" />
-        <Setter Property="Padding" Value="4" />
+        <Setter Property="Foreground" Value="{DynamicResource icon.foreground}" />
+        <Setter Property="Padding" Value="2" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
           <ControlTemplate>
-            <ContentPresenter x:Name="PART_ContentPresenter"
-                              Background="{TemplateBinding Background}"
+            <ContentPresenter x:Name="PART_DockHeaderButtonSurface"
+                              Background="Transparent"
                               BorderBrush="{TemplateBinding BorderBrush}"
                               BorderThickness="{TemplateBinding BorderThickness}"
                               CornerRadius="2"
@@ -133,11 +286,11 @@
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
           </ControlTemplate>
         </Setter>
-        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-          <Setter Property="Background" Value="{DynamicResource DockTabHoverBackgroundBrush}" />
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+          <Setter Property="Background" Value="{DynamicResource toolbar.hoverBackground}" />
         </Style>
-        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-          <Setter Property="Background" Value="{DynamicResource DockTabSelectedBackgroundBrush}" />
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+          <Setter Property="Background" Value="{DynamicResource toolbar.activeBackground}" />
         </Style>
         <Style Selector="^:disabled">
           <Setter Property="Opacity" Value="0.45" />
@@ -163,18 +316,29 @@
       </DataTemplate>
 
       <ControlTheme x:Key="DockTabStripItemTheme" TargetType="TabStripItem">
+        <!-- Fully own focus rendering; never inherit the host FluentTheme accent fill. -->
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
         <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
+        <Setter Property="Margin" Value="0" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Background" Value="{DynamicResource DockTabBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource DockTabForegroundBrush}" />
+        <!-- The visible surface is explicitly owned by this theme and resolves through
+             VS Code workbench color resources. -->
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource tab.inactiveForeground}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadius}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
           <ControlTemplate>
-            <Border Background="{TemplateBinding Background}"
+            <Border x:Name="PART_DockTabSurface"
+                    Margin="2,4"
+                    Background="{DynamicResource modernEditorTab.inactiveBackground}"
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    ClipToBounds="True"
                     Padding="{TemplateBinding Padding}">
               <ContentPresenter Content="{TemplateBinding Content}"
                                 ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -183,56 +347,95 @@
             </Border>
           </ControlTemplate>
         </Setter>
+        <Style Selector="^:pointerover /template/ Border#PART_DockTabSurface">
+          <Setter Property="Background" Value="{DynamicResource modernEditorTab.hoverBackground}" />
+        </Style>
+        <Style Selector="^:selected /template/ Border#PART_DockTabSurface">
+          <Setter Property="Background" Value="{DynamicResource modernEditorTab.activeBackground}" />
+        </Style>
+        <Style Selector="^:selected:pointerover /template/ Border#PART_DockTabSurface">
+          <Setter Property="Background" Value="{DynamicResource modernEditorTab.activeHoverBackground}" />
+        </Style>
         <Style Selector="^:pointerover">
-          <Setter Property="Background" Value="{DynamicResource DockTabHoverBackgroundBrush}" />
+          <Setter Property="Foreground" Value="{DynamicResource modernEditorTab.hoverForeground}" />
         </Style>
         <Style Selector="^:selected">
-          <Setter Property="Background" Value="{DynamicResource DockTabSelectedBackgroundBrush}" />
-          <Setter Property="Foreground" Value="{DynamicResource DockTabSelectedForegroundBrush}" />
+          <Setter Property="Foreground" Value="{DynamicResource modernEditorTab.activeForeground}" />
+          <Setter Property="ZIndex" Value="1" />
+        </Style>
+        <Style Selector="^:focus">
+          <Setter Property="Foreground" Value="{DynamicResource modernEditorTab.hoverForeground}" />
+        </Style>
+        <Style Selector="^:focus-visible">
+          <Setter Property="Foreground" Value="{DynamicResource modernEditorTab.hoverForeground}" />
+        </Style>
+        <Style Selector="^:selected:focus">
+          <Setter Property="Foreground" Value="{DynamicResource modernEditorTab.activeForeground}" />
+        </Style>
+        <Style Selector="^:selected:focus-visible">
+          <Setter Property="Foreground" Value="{DynamicResource modernEditorTab.activeForeground}" />
         </Style>
       </ControlTheme>
 
       <ControlTheme x:Key="{x:Type controls:DockSplitter}"
                     TargetType="controls:DockSplitter">
+        <!-- VS Code sash: live resize only (no drag-preview bar). -->
         <Setter Property="ShowsPreview" Value="False" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
           <ControlTemplate>
-            <Border Background="Transparent">
+            <Border Background="{TemplateBinding Background}">
               <Border x:Name="PART_Highlight"
-                      Background="Transparent" />
+                      Background="{DynamicResource editorGroup.border}" />
             </Border>
           </ControlTemplate>
         </Setter>
-        <!-- Kept for explicit per-control ShowsPreview=True overrides; the stock mode is live resize. -->
-        <Setter Property="PreviewContent">
-          <Template>
-            <Border Background="{DynamicResource DockSplitterHoverBrush}" />
-          </Template>
-        </Setter>
+        <!-- Modern UI: the 4px sash is also the visible inter-card gutter. -->
         <Style Selector="^:columns /template/ Border#PART_Highlight">
-          <Setter Property="Width" Value="2" />
+          <Setter Property="Width" Value="0" />
           <Setter Property="HorizontalAlignment" Value="Center" />
           <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
         <Style Selector="^:rows /template/ Border#PART_Highlight">
-          <Setter Property="Height" Value="2" />
+          <Setter Property="Height" Value="0" />
           <Setter Property="HorizontalAlignment" Value="Stretch" />
           <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <!-- Hover / drag: sash.hoverBorder fills the sash size (VS Code). -->
+        <Style Selector="^:pointerover /template/ Border#PART_Highlight">
+          <Setter Property="Background" Value="{DynamicResource sash.hoverBorder}" />
+        </Style>
         <Style Selector="^:pressed /template/ Border#PART_Highlight">
-          <Setter Property="Background" Value="{DynamicResource DockSplitterHoverBrush}" />
+          <Setter Property="Background" Value="{DynamicResource sash.hoverBorder}" />
         </Style>
         <Style Selector="^:dragging /template/ Border#PART_Highlight">
-          <Setter Property="Background" Value="{DynamicResource DockSplitterHoverBrush}" />
+          <Setter Property="Background" Value="{DynamicResource sash.hoverBorder}" />
+        </Style>
+        <Style Selector="^:columns:pointerover /template/ Border#PART_Highlight">
+          <Setter Property="Width" Value="{DynamicResource DockPaneGap}" />
+        </Style>
+        <Style Selector="^:columns:pressed /template/ Border#PART_Highlight">
+          <Setter Property="Width" Value="{DynamicResource DockPaneGap}" />
+        </Style>
+        <Style Selector="^:columns:dragging /template/ Border#PART_Highlight">
+          <Setter Property="Width" Value="{DynamicResource DockPaneGap}" />
+        </Style>
+        <Style Selector="^:rows:pointerover /template/ Border#PART_Highlight">
+          <Setter Property="Height" Value="{DynamicResource DockPaneGap}" />
+        </Style>
+        <Style Selector="^:rows:pressed /template/ Border#PART_Highlight">
+          <Setter Property="Height" Value="{DynamicResource DockPaneGap}" />
+        </Style>
+        <Style Selector="^:rows:dragging /template/ Border#PART_Highlight">
+          <Setter Property="Height" Value="{DynamicResource DockPaneGap}" />
         </Style>
       </ControlTheme>
 
       <ControlTheme x:Key="{x:Type controls:DockShell}"
                     TargetType="controls:DockShell">
-        <Setter Property="Background" Value="{DynamicResource DockShellBackgroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource titleBar.activeBackground}" />
         <Setter Property="Padding" Value="{DynamicResource DockShellPadding}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
@@ -256,10 +459,11 @@
 
       <ControlTheme x:Key="{x:Type controls:DockRegion}"
                     TargetType="controls:DockRegion">
-        <Setter Property="Background" Value="{DynamicResource DockPaneBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource DockPaneBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource surface.background}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource surface.border}" />
         <Setter Property="BorderThickness" Value="{DynamicResource DockPaneBorderThickness}" />
         <Setter Property="CornerRadius" Value="{DynamicResource DockPaneCornerRadius}" />
+        <Setter Property="Margin" Value="0" />
         <Setter Property="TabHeaderTemplate" Value="{StaticResource DockDefaultTabHeaderTemplate}" />
         <Setter Property="TabItemTheme" Value="{StaticResource DockTabStripItemTheme}" />
         <Setter Property="Template">
@@ -273,12 +477,13 @@
                 <DockPanel LastChildFill="True">
                 <Grid x:Name="PART_HeaderHost"
                       DockPanel.Dock="Top"
-                      Background="{DynamicResource DockTabStripBackgroundBrush}">
+                      Background="Transparent"
+                      ClipToBounds="True">
                   <Border x:Name="PART_HeaderDivider"
                           Height="1"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Bottom"
-                          Background="{DynamicResource DockPaneBorderBrush}"
+                          Background="Transparent"
                           IsHitTestVisible="False" />
                   <DockPanel LastChildFill="True">
                     <StackPanel x:Name="PART_ChromeHost"
@@ -321,8 +526,8 @@
                                   HorizontalContentAlignment="Stretch"
                                   VerticalContentAlignment="Stretch" />
                   <Border x:Name="PART_DropHint"
-                          Background="{DynamicResource DockDropHintBackgroundBrush}"
-                          BorderBrush="{DynamicResource DockDropHintBorderBrush}"
+                          Background="{DynamicResource editorGroup.dropBackground}"
+                          BorderBrush="{DynamicResource focusBorder}"
                           BorderThickness="1"
                           CornerRadius="{DynamicResource DockPaneCornerRadius}"
                           IsVisible="False"
@@ -372,7 +577,7 @@
 
       <ControlTheme x:Key="{x:Type controls:DockTabHeader}"
                     TargetType="controls:DockTabHeader">
-        <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
+        <Setter Property="MinHeight" Value="{DynamicResource DockTabPillHeight}" />
         <Setter Property="Template">
           <ControlTemplate>
             <LayoutTransformControl x:Name="PART_HeaderTransform">
@@ -406,7 +611,7 @@
                     Width="20"
                     Height="20"
                     Stretch="None"
-                    Stroke="{DynamicResource DockChromeIconForegroundBrush}"
+                    Stroke="{DynamicResource icon.foreground}"
                     StrokeLineCap="Round"
                     StrokeThickness="1.8" />
             </Viewbox>
@@ -419,27 +624,97 @@
   <Style Selector="controls|DockRegion TabStrip">
     <Setter Property="Background" Value="Transparent" />
   </Style>
+  <!-- Floating-card tiling: splitters provide the exact 4px inter-card gutter. -->
+  <Style Selector="controls|DockRegion">
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector="controls|DockShell">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="{DynamicResource DockShellPadding}" />
+  </Style>
+  <Style Selector="controls|DockSplitter">
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <!-- Header strip fuses with tabs: exact shared height / width, flush to pane edge. -->
+  <Style Selector="controls|DockRegion:horizontal /template/ Grid#PART_HeaderHost">
+    <Setter Property="Height" Value="{DynamicResource DockTabHeight}" />
+    <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
+  </Style>
+  <Style Selector="controls|DockRegion:vertical /template/ Grid#PART_HeaderHost">
+    <Setter Property="Width" Value="{DynamicResource DockTabHeight}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockTabHeight}" />
+  </Style>
   <Style Selector="controls|DockRegion:horizontal TabStripItem">
     <Setter Property="Height" Value="{DynamicResource DockTabHeight}" />
   </Style>
   <Style Selector="controls|DockRegion:vertical TabStripItem">
     <Setter Property="Width" Value="{DynamicResource DockTabHeight}" />
   </Style>
+  <!-- VS Code shows a tab's 28px action slot only for the active/hovered item. -->
+  <Style Selector="controls|DockRegion TabStripItem controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="20" />
+  </Style>
+  <Style Selector="controls|DockRegion TabStripItem:selected controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="controls|DockRegion TabStripItem:pointerover controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <!-- Square tabs (VS Code). -->
+  <Style Selector="controls|DockRegion:top TabStripItem">
+    <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusTop}" />
+  </Style>
+  <Style Selector="controls|DockRegion:bottom TabStripItem">
+    <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusBottom}" />
+  </Style>
+  <Style Selector="controls|DockRegion:left TabStripItem">
+    <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusLeft}" />
+  </Style>
+  <Style Selector="controls|DockRegion:right TabStripItem">
+    <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusRight}" />
+  </Style>
+  <!-- Modern UI pills are borderless; the 2px horizontal inset is the visual separator. -->
+  <Style Selector="controls|DockRegion:top TabStripItem:not(:selected)">
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="controls|DockRegion:bottom TabStripItem:not(:selected)">
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="controls|DockRegion:left TabStripItem:not(:selected)">
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="controls|DockRegion:right TabStripItem:not(:selected)">
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <!-- Modern UI removes the classic active-border-top accent. -->
   <Style Selector="controls|DockRegion:top TabStripItem:selected">
-    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
-    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="controls|DockRegion:bottom TabStripItem:selected">
-    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
-    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="controls|DockRegion:left TabStripItem:selected">
-    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
-    <Setter Property="BorderThickness" Value="1,0,0,0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="controls|DockRegion:right TabStripItem:selected">
-    <Setter Property="BorderBrush" Value="{DynamicResource DockAccentBrush}" />
-    <Setter Property="BorderThickness" Value="0,0,1,0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <!-- Chrome buttons fill the header strip so outer headers read as one fused bar. -->
+  <Style Selector="controls|DockRegion:horizontal controls|DockHeaderButton">
+    <Setter Property="Height" Value="{DynamicResource DockTabHeight}" />
+  </Style>
+  <Style Selector="controls|DockRegion:vertical controls|DockHeaderButton">
+    <Setter Property="Width" Value="{DynamicResource DockTabHeight}" />
   </Style>
   <Style Selector="controls|DockRegion:left controls|DockTabHeader /template/ LayoutTransformControl#PART_HeaderTransform">
     <Setter Property="LayoutTransform">

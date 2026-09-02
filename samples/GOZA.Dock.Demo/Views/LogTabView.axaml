@@ -3,8 +3,6 @@
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
              x:Class="GOZA.Dock.Demo.Views.LogTabView"
              x:DataType="vm:LogTabViewModel">
-    <TextBlock FontSize="20"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Text="{Binding Header}" />
+    <TextBlock Margin="12,10" FontFamily="Cascadia Code,Consolas" FontSize="12" LineHeight="19"
+               Text="PS C:\Users\Ouse\Desktop\Projects\GOZA.Dock&gt; dotnet build&#x0a;  GOZA.Dock net10.0 succeeded&#x0a;  GOZA.Dock.Demo net10.0 succeeded&#x0a;&#x0a;Build succeeded.&#x0a;PS C:\Users\Ouse\Desktop\Projects\GOZA.Dock&gt; _" />
 </UserControl>

@@ -5,7 +5,7 @@ namespace GOZA.Dock.Demo.ViewModels;
 public sealed class ToolsTabViewModel : DockTabViewModelBase
 {
     public ToolsTabViewModel()
-        : base("right-tools", "Tools", DockRegionIds.Right, selectOnStartup: true)
+        : base("right-tools", "Copilot", DockRegionIds.Right, selectOnStartup: true)
     {
     }
 }

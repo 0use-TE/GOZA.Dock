@@ -1,112 +1,81 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dock="using:GOZA.Dock"
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
              x:Class="GOZA.Dock.Demo.Views.MainView"
              x:DataType="vm:MainViewModel"
              ViewModelLocator.AutoWireViewModel="True"
-             MinWidth="320"
-             MinHeight="240">
-  <Grid>
-    <DockPanel>
-      <Menu DockPanel.Dock="Top">
-        <MenuItem Header="_Layout">
-          <MenuItem Header="_Save layout"
-                    Command="{Binding SaveLayoutCommand}" />
-          <MenuItem Header="_Load layout"
-                    Command="{Binding LoadLayoutCommand}" />
-          <Separator />
-          <MenuItem Header="_Reset default"
-                    Command="{Binding ResetLayoutCommand}" />
-        </MenuItem>
-        <MenuItem Header="_View">
-          <MenuItem Header="Home"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding HomeTab}" />
-          <MenuItem Header="Info"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding InfoTab}" />
-          <MenuItem Header="Chart"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding ChartTab}" />
-          <MenuItem Header="Log"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding LogTab}" />
-          <MenuItem Header="Browser"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding BrowserTab}" />
-          <MenuItem Header="Tools"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding ToolsTab}" />
-          <MenuItem Header="Guide"
-                    Command="{Binding OpenTabCommand}"
-                    CommandParameter="{Binding GuideTab}" />
-          <Separator />
-          <MenuItem Header="{Binding ThemeToggleLabel}"
-                    Command="{Binding ToggleThemeCommand}" />
-        </MenuItem>
-      </Menu>
-      <DockShell x:Name="Shell">
-        <Grid ColumnDefinitions="*,Auto,2*,Auto,*">
-          <DockRegion Grid.Column="0"
-                      TabStripPlacement="Left"
-                      ItemsSource="{Binding LeftTabs}"
+             MinWidth="720" MinHeight="480">
+  <Grid RowDefinitions="35,*,22" Background="{DynamicResource titleBar.activeBackground}">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto">
+      <TextBlock Margin="10,0,12,0" VerticalAlignment="Center" FontSize="16"
+                 Foreground="#23A8F2" Text="◆" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center">
+        <TextBlock Text="文件(F)" /><TextBlock Text="编辑(E)" /><TextBlock Text="选择(S)" />
+        <TextBlock Text="查看(V)" /><TextBlock Text="转到(G)" /><TextBlock Text="运行(R)" />
+        <TextBlock Text="终端(T)" /><TextBlock Text="帮助(H)" />
+      </StackPanel>
+      <Border Grid.Column="2" Width="360" Height="24" HorizontalAlignment="Center"
+              VerticalAlignment="Center" Background="{DynamicResource toolbar.hoverBackground}"
+              BorderBrush="{DynamicResource surface.border}" BorderThickness="1" CornerRadius="6">
+        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"
+                   Opacity="0.75" Text="GOZA.Dock  —  vscode-theme-defaults" />
+      </Border>
+      <StackPanel Grid.Column="3" Margin="8,0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+        <TextBlock Text="◧" /><TextBlock Text="◫" /><TextBlock Text="□" />
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="48,*">
+      <Border Grid.Column="0" Background="{DynamicResource sideBar.background}"
+              BorderBrush="{DynamicResource surface.border}" BorderThickness="0,0,1,0">
+        <Grid RowDefinitions="*,Auto">
+          <StackPanel Spacing="4">
+            <Border Height="48" BorderBrush="{DynamicResource focusBorder}" BorderThickness="2,0,0,0">
+              <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Text="▱" />
+            </Border>
+            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Opacity="0.65" Text="⌕" />
+            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="21" Opacity="0.65" Text="⑂" />
+            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Opacity="0.65" Text="▷" />
+            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Opacity="0.65" Text="◇" />
+          </StackPanel>
+          <StackPanel Grid.Row="1" Margin="0,0,0,6" Spacing="8">
+            <TextBlock HorizontalAlignment="Center" FontSize="19" Opacity="0.7" Text="◎" />
+            <TextBlock HorizontalAlignment="Center" FontSize="21" Opacity="0.7" Text="⚙" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <DockShell Grid.Column="1" x:Name="Shell">
+        <Grid ColumnDefinitions="240,Auto,*,Auto,280">
+          <DockRegion Grid.Column="0" ItemsSource="{Binding LeftTabs}"
                       SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
-
           <DockSplitter Grid.Column="1" />
-
-          <Grid Grid.Column="2" RowDefinitions="2*,Auto,*">
-            <DockRegion Grid.Row="0"
-                        TabStripPlacement="Top"
-                        ShowAddButton="True"
-                        AddTabCommand="{Binding AddDocCommand}"
+          <Grid Grid.Column="2" RowDefinitions="*,Auto,190">
+            <DockRegion Grid.Row="0" ShowAddButton="True" AddTabCommand="{Binding AddDocCommand}"
                         ItemsSource="{Binding CenterTopTabs}"
                         SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
-
             <DockSplitter Grid.Row="1" />
-
-            <DockRegion Grid.Row="2"
-                        ShowMaximizeButton="True"
-                        ItemsSource="{Binding CenterBottomTabs}"
-                        SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}">
-              <DockRegion.HeaderContent>
-                <DockHeaderButton Content="⋯"
-                                  FontSize="18"
-                                  ToolTip.Tip="Region actions"
-                                  Command="{Binding ShowRegionActionsCommand}" />
-              </DockRegion.HeaderContent>
-            </DockRegion>
+            <DockRegion Grid.Row="2" ItemsSource="{Binding CenterBottomTabs}"
+                        SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
           </Grid>
-
           <DockSplitter Grid.Column="3" />
-
-          <DockRegion Grid.Column="4"
-                      TabStripPlacement="Right"
-                      ItemsSource="{Binding RightTabs}"
+          <DockRegion Grid.Column="4" ItemsSource="{Binding RightTabs}"
                       SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
         </Grid>
       </DockShell>
-    </DockPanel>
+    </Grid>
 
-    <Border Margin="16"
-            MaxWidth="380"
-            Padding="12,10"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Background="#E6282828"
-            BorderBrush="#661878D4"
-            BorderThickness="1"
-            CornerRadius="8"
-            IsVisible="{Binding IsNotificationVisible}"
-            IsHitTestVisible="False">
-      <StackPanel Spacing="6">
-        <TextBlock FontWeight="SemiBold"
-                   Foreground="#F2FFFFFF"
-                   Text="{Binding NotificationTitle}" />
-        <TextBlock Foreground="#E6FFFFFF"
-                   LineHeight="20"
-                   Text="{Binding NotificationBody}"
-                   TextWrapping="Wrap" />
+    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Background="{DynamicResource titleBar.activeBackground}">
+      <StackPanel Margin="10,0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+        <TextBlock FontSize="12" Text="⑂  main*" /><TextBlock FontSize="12" Text="↻  0  ⚠ 0" />
       </StackPanel>
-    </Border>
+      <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 FontSize="12" Opacity="0.7" Text="GOZA.Dock · Avalonia" />
+      <StackPanel Grid.Column="2" Margin="0,0,10,0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+        <TextBlock FontSize="12" Text="Ln 12, Col 18" /><TextBlock FontSize="12" Text="UTF-8" />
+        <TextBlock FontSize="12" Text="C#" /><TextBlock FontSize="12" Text="◯" />
+      </StackPanel>
+    </Grid>
   </Grid>
 </UserControl>

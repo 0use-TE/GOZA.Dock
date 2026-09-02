@@ -3,8 +3,17 @@
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
              x:Class="GOZA.Dock.Demo.Views.ToolsTabView"
              x:DataType="vm:ToolsTabViewModel">
-    <TextBlock FontSize="20"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Text="{Binding Header}" />
+    <Grid RowDefinitions="Auto,*,Auto" Margin="10">
+      <TextBlock Margin="2,2,0,10" FontWeight="SemiBold" Text="CHAT" />
+      <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+        <TextBlock HorizontalAlignment="Center" FontSize="26" Foreground="#23A8F2" Text="✦" />
+        <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold" Text="Ask Copilot" />
+        <TextBlock MaxWidth="220" TextAlignment="Center" Opacity="0.65" TextWrapping="Wrap"
+                   Text="询问代码、主题资源或当前工作区中的任何内容。" />
+      </StackPanel>
+      <Border Grid.Row="2" MinHeight="72" Padding="10" BorderBrush="{DynamicResource surface.border}"
+              BorderThickness="1" CornerRadius="8" Background="{DynamicResource editor.background}">
+        <TextBlock Opacity="0.5" Text="Ask about GOZA.Dock" />
+      </Border>
+    </Grid>
 </UserControl>

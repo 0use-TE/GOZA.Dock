@@ -11,10 +11,17 @@ namespace GOZA.Dock.Controls;
 /// <summary>
 /// A themeable GridSplitter for dock grids. Use an <c>Auto</c> gutter row or column;
 /// the control infers the resize direction and spans the opposite axis.
+/// Defaults match VS Code sash: <c>workbench.sash.size</c> (= <c>DockPaneGap</c>) and live resize.
 /// </summary>
 [PseudoClasses(":columns", ":rows", ":dragging")]
 public sealed class DockSplitter : GridSplitter
 {
+    public DockSplitter()
+    {
+        // VS Code sash resizes live; never show Avalonia's drag-preview overlay by default.
+        ShowsPreview = false;
+    }
+
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnAttachedToLogicalTree(e);
@@ -128,5 +135,5 @@ public sealed class DockSplitter : GridSplitter
         length.IsAuto || length.IsAbsolute && length.Value is > 0 and <= 32;
 
     private static double ResolveGap() =>
-        Math.Max(1, DockThemeBrushHelper.ResolveValue(DockThemeResources.PaneGap, 6d));
+        Math.Max(1, DockThemeBrushHelper.ResolveValue(DockThemeResources.PaneGap, 1d));
 }

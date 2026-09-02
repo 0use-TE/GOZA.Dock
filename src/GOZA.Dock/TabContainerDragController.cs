@@ -292,16 +292,15 @@ public sealed class TabContainerDragController : IDisposable
         _pressPending = false;
         _visualDragActive = true;
 
-        UpdateDragMetrics(dragItem);
+        UpdateDragMetrics();
+        _dragGhost = CreateDragGhost(_draggedWidth, _draggedHeight, dragItem);
+        // Ghost may grow to fit the full header; keep grab/reorder metrics in sync.
+        _draggedWidth = _dragGhost.Width;
+        _draggedHeight = _dragGhost.Height;
         _grabOffsetInGhost = ComputeGrabOffsetInGhost();
         _ghostStartPos = new Point(
             overlayPointerPos.X - _grabOffsetInGhost.X,
             overlayPointerPos.Y - _grabOffsetInGhost.Y);
-
-        var width = Math.Ceiling(_draggedWidth);
-        var height = Math.Ceiling(_draggedHeight);
-
-        _dragGhost = CreateDragGhost(width, height, dragItem, forceHorizontal: !IsHorizontalTabStrip);
         _dragGhost.RenderTransform = new TranslateTransform(_ghostStartPos.X, _ghostStartPos.Y);
 
         _overlayLayer.Children.Add(_dragGhost);
@@ -780,38 +779,52 @@ public sealed class TabContainerDragController : IDisposable
             Math.Clamp(relativeY * _draggedHeight, 0, _draggedHeight));
     }
 
-    private void UpdateDragMetrics(IDockTabItem? dragItem)
+    private void UpdateDragMetrics()
     {
         if (_draggedContainer is null)
             return;
 
+        var tabHeight = DockThemeBrushHelper.ResolveValue(DockThemeResources.TabHeight, 35d);
+
         if (IsHorizontalTabStrip)
         {
-            _draggedWidth = _draggedContainer.Bounds.Width;
-            _draggedHeight = _draggedContainer.Bounds.Height;
+            _draggedWidth = Math.Max(1, _draggedContainer.Bounds.Width);
+            _draggedHeight = Math.Max(1, _draggedContainer.Bounds.Height);
             return;
         }
 
-        _draggedWidth = EstimateHorizontalGhostWidth(dragItem?.Header);
-        _draggedHeight = DockThemeBrushHelper.ResolveValue(DockThemeResources.TabHeight, 34d);
-    }
-
-    private static double EstimateHorizontalGhostWidth(string? header)
-    {
-        var length = string.IsNullOrWhiteSpace(header) ? 4 : header.Length;
-        return Math.Clamp(48 + length * 7, 72, 220);
+        // Vertical strip containers are TabHeight × text-length; ghost is always shown horizontally.
+        _draggedWidth = tabHeight;
+        _draggedHeight = tabHeight;
     }
 
     private static Border CreateDragGhost(
-        double width,
-        double height,
-        IDockTabItem dragItem,
-        bool forceHorizontal)
+        double minWidth,
+        double minHeight,
+        IDockTabItem dragItem)
     {
-        return new Border
+        var padding = DockThemeBrushHelper.ResolveValue(
+            DockThemeResources.DragGhostPadding,
+            new Thickness(8, 4));
+
+        var text = new TextBlock
         {
-            Width = width,
-            Height = height,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            TextAlignment = TextAlignment.Center,
+            TextWrapping = TextWrapping.NoWrap,
+            TextTrimming = TextTrimming.None,
+            Foreground = DockThemeBrushHelper.Resolve(
+                DockThemeResources.DragGhostForegroundBrush,
+                DockThemeBrushHelper.DragGhostForegroundFallback()),
+            Text = dragItem.Header ?? string.Empty,
+        };
+
+        var ghost = new Border
+        {
+            MinWidth = Math.Max(1, minWidth),
+            MinHeight = Math.Max(1, minHeight),
+            Padding = padding,
             Background = DockThemeBrushHelper.Resolve(
                 DockThemeResources.DragGhostBackgroundBrush,
                 DockThemeBrushHelper.DragGhostBackgroundFallback()),
@@ -824,21 +837,15 @@ public sealed class TabContainerDragController : IDisposable
             CornerRadius = DockThemeBrushHelper.ResolveValue(
                 DockThemeResources.DragGhostCornerRadius,
                 new CornerRadius(2)),
+            ClipToBounds = true,
             IsHitTestVisible = false,
-            Child = new TextBlock
-            {
-                Margin = DockThemeBrushHelper.ResolveValue(
-                    DockThemeResources.DragGhostPadding,
-                    new Thickness(8, 4)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = forceHorizontal ? TextAlignment.Center : TextAlignment.Left,
-                TextWrapping = forceHorizontal ? TextWrapping.NoWrap : TextWrapping.Wrap,
-                Foreground = DockThemeBrushHelper.Resolve(
-                    DockThemeResources.DragGhostForegroundBrush,
-                    DockThemeBrushHelper.DragGhostForegroundFallback()),
-                Text = dragItem.Header,
-            },
+            Child = text,
         };
+
+        // Measure unconstrained so CJK / long headers are never clipped by a too-narrow Bounds.
+        ghost.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        ghost.Width = Math.Ceiling(Math.Max(minWidth, ghost.DesiredSize.Width));
+        ghost.Height = Math.Ceiling(Math.Max(minHeight, ghost.DesiredSize.Height));
+        return ghost;
     }
 }

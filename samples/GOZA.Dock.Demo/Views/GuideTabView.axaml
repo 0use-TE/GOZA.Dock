@@ -3,24 +3,26 @@
              xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
              x:Class="GOZA.Dock.Demo.Views.GuideTabView"
              x:DataType="vm:GuideTabViewModel">
-  <ScrollViewer Padding="20">
-    <StackPanel MaxWidth="640" Spacing="16">
-      <TextBlock FontSize="20"
-                 FontWeight="SemiBold"
-                 Text="{Binding Title}" />
-      <TextBlock LineHeight="22"
-                 Text="{Binding Intro}"
-                 TextWrapping="Wrap" />
-      <TextBlock FontWeight="SemiBold"
-                 Text="{Binding BasicsTitle}" />
-      <TextBlock LineHeight="22"
-                 Text="{Binding Basics}"
-                 TextWrapping="Wrap" />
-      <TextBlock FontWeight="SemiBold"
-                 Text="{Binding IntegrationTitle}" />
-      <TextBlock LineHeight="22"
-                 Text="{Binding Integration}"
-                 TextWrapping="Wrap" />
-    </StackPanel>
-  </ScrollViewer>
+  <Grid RowDefinitions="26,*">
+    <Border Grid.Row="0" BorderBrush="{DynamicResource surface.border}" BorderThickness="0,0,0,1">
+      <TextBlock Margin="12,0" VerticalAlignment="Center" FontSize="12" Opacity="0.7"
+                 Text="src  ›  GOZA.Dock  ›  Themes  ›  DockShellStyles.axaml" />
+    </Border>
+    <ScrollViewer Grid.Row="1" FontFamily="Cascadia Code,Consolas">
+      <Grid Margin="0,8" ColumnDefinitions="42,*">
+        <TextBlock HorizontalAlignment="Right" Foreground="#858585" LineHeight="21"
+                   Text="1&#x0a;2&#x0a;3&#x0a;4&#x0a;5&#x0a;6&#x0a;7&#x0a;8&#x0a;9&#x0a;10&#x0a;11&#x0a;12&#x0a;13&#x0a;14" />
+        <TextBlock Grid.Column="1" Margin="14,0" LineHeight="21" TextWrapping="NoWrap">
+          <Run Foreground="#808080" Text="&lt;!-- VS Code Modern UI / Floating Panels --&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="&lt;Styles" /><Run Foreground="#9CDCFE" Text=" xmlns" /><Run Foreground="#D4D4D4" Text="=" /><Run Foreground="#CE9178" Text="&quot;https://github.com/avaloniaui&quot;" /><Run Foreground="#569CD6" Text="&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="  &lt;Styles.Resources&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="    &lt;x:Double" /><Run Foreground="#9CDCFE" Text=" x:Key" /><Run Foreground="#D4D4D4" Text="=" /><Run Foreground="#CE9178" Text="&quot;DockPaneGap&quot;" /><Run Foreground="#569CD6" Text="&gt;" /><Run Foreground="#B5CEA8" Text="4" /><Run Foreground="#569CD6" Text="&lt;/x:Double&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="    &lt;x:Double" /><Run Foreground="#9CDCFE" Text=" x:Key" /><Run Foreground="#D4D4D4" Text="=" /><Run Foreground="#CE9178" Text="&quot;DockTabHeight&quot;" /><Run Foreground="#569CD6" Text="&gt;" /><Run Foreground="#B5CEA8" Text="32" /><Run Foreground="#569CD6" Text="&lt;/x:Double&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="    &lt;CornerRadius" /><Run Foreground="#9CDCFE" Text=" x:Key" /><Run Foreground="#D4D4D4" Text="=" /><Run Foreground="#CE9178" Text="&quot;DockPaneCornerRadius&quot;" /><Run Foreground="#569CD6" Text="&gt;" /><Run Foreground="#B5CEA8" Text="8" /><Run Foreground="#569CD6" Text="&lt;/CornerRadius&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="    &lt;SolidColorBrush" /><Run Foreground="#9CDCFE" Text=" x:Key" /><Run Foreground="#D4D4D4" Text="=" /><Run Foreground="#CE9178" Text="&quot;surface.border&quot;" /><Run Foreground="#9CDCFE" Text=" Color" /><Run Foreground="#D4D4D4" Text="=" /><Run Foreground="#CE9178" Text="&quot;#2B2B2B&quot;" /><Run Foreground="#569CD6" Text=" /&gt;&#x0a;" />
+          <Run Foreground="#569CD6" Text="  &lt;/Styles.Resources&gt;&#x0a;&lt;/Styles&gt;" />
+        </TextBlock>
+      </Grid>
+    </ScrollViewer>
+  </Grid>
 </UserControl>
