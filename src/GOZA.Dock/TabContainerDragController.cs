@@ -781,10 +781,9 @@ public sealed class TabContainerDragController : IDisposable
     }
 
     /// <summary>
-    /// Builds a floating tab pill in code (Border + text [+ close mark]).
-    /// Copies the live header surface brushes; sizes to fit the full title
-    /// (no ellipsis). OverlayLayer is outside <c>DockShell.Styles</c>, so
-    /// templated <see cref="DockTabHeader"/> would render empty.
+    /// Builds a floating tab pill in code. Copies live header typography (FontFamily/Size/…)
+    /// because OverlayLayer does not inherit host fonts (e.g. HarmonyFont on MainView).
+    /// Width is driven by measured text — not the possibly-ellipsized source Bounds.
     /// </summary>
     private Border? CreateDragGhostClone(IDockTabItem dragItem)
     {
@@ -793,8 +792,8 @@ public sealed class TabContainerDragController : IDisposable
 
         var surface = FindTabSurface(_draggedContainer);
         var source = (Control?)surface ?? _draggedContainer;
+        var liveText = FindHeaderText(_draggedContainer);
 
-        // Prefer the live pill look (already theme-correct) over resource lookup.
         IBrush background = Brushes.Transparent;
         var corner = new CornerRadius(4);
         if (surface is not null)
@@ -812,7 +811,7 @@ public sealed class TabContainerDragController : IDisposable
                 _host);
         }
 
-        var foreground = FindHeaderTextBrush(_draggedContainer)
+        var foreground = liveText?.Foreground
             ?? DockThemeBrushHelper.Resolve(
                 VsCodeThemeColors.ModernEditorTabActiveForeground,
                 Brushes.White,
@@ -844,6 +843,7 @@ public sealed class TabContainerDragController : IDisposable
             TextTrimming = TextTrimming.None,
             TextWrapping = TextWrapping.NoWrap,
         };
+        CopyTypography(liveText, title);
 
         Control content;
         if (dragItem.IsClosable)
@@ -878,7 +878,6 @@ public sealed class TabContainerDragController : IDisposable
                 HorizontalAlignment = HorizontalAlignment.Center,
             };
 
-            // Auto|Auto so the title is never starved by a fixed ghost width.
             var grid = new Grid
             {
                 Margin = padding,
@@ -895,19 +894,19 @@ public sealed class TabContainerDragController : IDisposable
             content = title;
         }
 
-        var minWidth = Math.Max(1, Math.Ceiling(source.Bounds.Width));
-        var minHeight = Math.Max(1, Math.Ceiling(source.Bounds.Height));
+        var borderThickness = DockThemeBrushHelper.ResolveValue(
+            DockThemeResources.DragGhostBorderThickness,
+            new Thickness(1),
+            _host);
+
+        // Height matches the live pill; width is content-driven (font + padding + close).
+        var height = Math.Max(1, Math.Ceiling(source.Bounds.Height));
 
         var ghost = new Border
         {
-            MinWidth = minWidth,
-            MinHeight = minHeight,
-            Height = minHeight,
+            Height = height,
             CornerRadius = corner,
-            BorderThickness = DockThemeBrushHelper.ResolveValue(
-                DockThemeResources.DragGhostBorderThickness,
-                new Thickness(1),
-                _host),
+            BorderThickness = borderThickness,
             BorderBrush = brightBorder,
             Background = background,
             ClipToBounds = true,
@@ -917,10 +916,9 @@ public sealed class TabContainerDragController : IDisposable
             VerticalAlignment = VerticalAlignment.Top,
         };
 
-        // Grow to fit the full header text (surface bounds can be tighter while dragging).
-        ghost.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        ghost.Width = Math.Ceiling(Math.Max(minWidth, ghost.DesiredSize.Width));
-        ghost.Height = Math.Ceiling(Math.Max(minHeight, ghost.DesiredSize.Height));
+        content.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        var horizontalChrome = borderThickness.Left + borderThickness.Right;
+        ghost.Width = Math.Ceiling(content.DesiredSize.Width + horizontalChrome);
         return ghost;
     }
 
@@ -929,9 +927,24 @@ public sealed class TabContainerDragController : IDisposable
             .OfType<Border>()
             .FirstOrDefault(b => b.Name == "PART_DockTabSurface");
 
-    private static IBrush? FindHeaderTextBrush(Control container) =>
+    private static TextBlock? FindHeaderText(Control container) =>
         container.GetVisualDescendants()
             .OfType<TextBlock>()
-            .Select(t => t.Foreground)
-            .FirstOrDefault(b => b is not null);
+            .FirstOrDefault(t => t.Name == "PART_HeaderText")
+        ?? container.GetVisualDescendants()
+            .OfType<TextBlock>()
+            .FirstOrDefault();
+
+    private static void CopyTypography(TextBlock? source, TextBlock target)
+    {
+        if (source is null)
+            return;
+
+        target.FontFamily = source.FontFamily;
+        target.FontSize = source.FontSize;
+        target.FontWeight = source.FontWeight;
+        target.FontStyle = source.FontStyle;
+        target.FontStretch = source.FontStretch;
+        target.LetterSpacing = source.LetterSpacing;
+    }
 }
