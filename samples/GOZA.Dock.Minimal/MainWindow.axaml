@@ -29,7 +29,7 @@
         <DockShell ColorTheme="{Binding ColorTheme}">
             <Grid ColumnDefinitions="220,Auto,*">
                 <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
-                    <DockRegion Grid.Row="0" ItemsSource="{Binding LeftTopTabs}" />
+                    <DockRegion Grid.Row="0" ShowMaximizeButton="true"  ItemsSource="{Binding LeftTopTabs}"  />
                     <DockSplitter Grid.Row="1" />
                     <DockRegion Grid.Row="2" ItemsSource="{Binding LeftBottomTabs}" />
                 </Grid>
