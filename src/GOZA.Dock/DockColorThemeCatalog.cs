@@ -220,6 +220,8 @@ public static class DockColorThemeCatalog
         [DockThemeResources.DragGhostBackgroundBrush] = Color.Parse("#F01F1F1F"),
         [DockThemeResources.DragGhostBorderBrush] = Color.Parse("#AA2B2B2B"),
         [DockThemeResources.DragGhostForegroundBrush] = Color.Parse("#FFFFFF"),
+        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#53595D99"),
+        [DockThemeResources.DropHintBorderBrush] = Color.Parse("#AA2B2B2B"),
     };
 
     // --- Light Modern ---
@@ -276,6 +278,8 @@ public static class DockColorThemeCatalog
         [DockThemeResources.DragGhostBackgroundBrush] = Color.Parse("#F2FFFFFF"),
         [DockThemeResources.DragGhostBorderBrush] = Color.Parse("#AAE5E5E5"),
         [DockThemeResources.DragGhostForegroundBrush] = Color.Parse("#3B3B3B"),
+        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#2677CB66"),
+        [DockThemeResources.DropHintBorderBrush] = Color.Parse("#AAE5E5E5"),
     };
 
     // --- Dark (Visual Studio): dark_vs.json + workbench defaults ---
@@ -332,6 +336,8 @@ public static class DockColorThemeCatalog
         [DockThemeResources.DragGhostBackgroundBrush] = Color.Parse("#F01E1E1E"),
         [DockThemeResources.DragGhostBorderBrush] = Color.Parse("#AA444444"),
         [DockThemeResources.DragGhostForegroundBrush] = Color.Parse("#FFFFFF"),
+        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#53595D99"),
+        [DockThemeResources.DropHintBorderBrush] = Color.Parse("#AA444444"),
     };
 
     // --- Light (Visual Studio): light_vs.json + workbench defaults ---
@@ -388,5 +394,7 @@ public static class DockColorThemeCatalog
         [DockThemeResources.DragGhostBackgroundBrush] = Color.Parse("#F2FFFFFF"),
         [DockThemeResources.DragGhostBorderBrush] = Color.Parse("#AAE7E7E7"),
         [DockThemeResources.DragGhostForegroundBrush] = Color.Parse("#000000"),
+        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#2677CB66"),
+        [DockThemeResources.DropHintBorderBrush] = Color.Parse("#AAE7E7E7"),
     };
 }

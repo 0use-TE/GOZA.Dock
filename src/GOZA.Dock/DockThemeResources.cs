@@ -27,8 +27,9 @@ public static class DockThemeResources
     public const string ChromeHoverBackgroundBrush = VsCodeThemeColors.ToolbarHoverBackground;
     public const string ChromeHoverOutlineBrush = VsCodeThemeColors.ToolbarHoverOutline;
     public const string ChromePressedBackgroundBrush = VsCodeThemeColors.ToolbarActiveBackground;
-    public const string DropHintBackgroundBrush = VsCodeThemeColors.EditorGroupDropBackground;
-    public const string DropHintBorderBrush = VsCodeThemeColors.FocusBorder;
+    public const string DropHintBackgroundBrush = "DockDropHintBackgroundBrush";
+    public const string DropHintBorderBrush = "DockDropHintBorderBrush";
+    public const string DropHintBorderThickness = "DockDropHintBorderThickness";
 
     // --- Drag ghost (not in VS Code; Dock-specific overlays) ---
     public const string DragGhostBackgroundBrush = "DockDragGhostBackgroundBrush";

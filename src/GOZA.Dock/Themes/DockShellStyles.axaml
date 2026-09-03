@@ -13,7 +13,13 @@
       <x:Double x:Key="DockChromeButtonSize">28</x:Double>
       <Thickness x:Key="DockShellPadding">4</Thickness>
       <Thickness x:Key="DockPaneBorderThickness">1</Thickness>
-      <Thickness x:Key="DockTabPadding">8,0,4,0</Thickness>
+      <!-- VS Code Modern UI tabs.css: left 6px, right 8px. The action overlay
+           is 24px wide with 2px inline margin; its 20px action is centered. -->
+      <Thickness x:Key="DockTabPadding">6,0,8,0</Thickness>
+      <Thickness x:Key="DockTabPaddingClosable">6,0,2,0</Thickness>
+      <Thickness x:Key="DockTabCloseGap">0</Thickness>
+      <x:Double x:Key="DockTabCloseActionWidth">24</x:Double>
+      <x:Double x:Key="DockTabCloseSurfaceSize">20</x:Double>
       <CornerRadius x:Key="DockPaneCornerRadius">8</CornerRadius>
       <CornerRadius x:Key="DockTabCornerRadius">4</CornerRadius>
       <CornerRadius x:Key="DockTabCornerRadiusTop">4</CornerRadius>
@@ -21,8 +27,9 @@
       <CornerRadius x:Key="DockTabCornerRadiusLeft">4</CornerRadius>
       <CornerRadius x:Key="DockTabCornerRadiusRight">4</CornerRadius>
       <Thickness x:Key="DockDragGhostBorderThickness">1</Thickness>
-      <CornerRadius x:Key="DockDragGhostCornerRadius">0</CornerRadius>
+      <CornerRadius x:Key="DockDragGhostCornerRadius">4</CornerRadius>
       <Thickness x:Key="DockDragGhostPadding">8,4</Thickness>
+      <Thickness x:Key="DockDropHintBorderThickness">1</Thickness>
 
       <!--
         Workbench colors use official VS Code color IDs (theme JSON "colors" keys).
@@ -96,6 +103,11 @@
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F01F1F1F" />
           <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AA2B2B2B" />
           <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#FFFFFF" />
+          <!-- Same family as drag ghost: muted wash + soft border (no focusBorder neon). -->
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#9953595D" />
+          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#AA2B2B2B" />
+          <SolidColorBrush x:Key="DockTabCloseHoverBackground" Color="#28FFFFFF" />
+          <SolidColorBrush x:Key="DockTabClosePressedBackground" Color="#3CFFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
           <SolidColorBrush x:Key="editor.background" Color="#1F1F1F" />
@@ -163,6 +175,10 @@
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F01F1F1F" />
           <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AA2B2B2B" />
           <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#9953595D" />
+          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#AA2B2B2B" />
+          <SolidColorBrush x:Key="DockTabCloseHoverBackground" Color="#28FFFFFF" />
+          <SolidColorBrush x:Key="DockTabClosePressedBackground" Color="#3CFFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="editor.background" Color="#FFFFFF" />
@@ -230,6 +246,10 @@
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F2FFFFFF" />
           <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AAE5E5E5" />
           <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#3B3B3B" />
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#662677CB" />
+          <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#AAE5E5E5" />
+          <SolidColorBrush x:Key="DockTabCloseHoverBackground" Color="#14000000" />
+          <SolidColorBrush x:Key="DockTabClosePressedBackground" Color="#24000000" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
 
@@ -526,9 +546,9 @@
                                   HorizontalContentAlignment="Stretch"
                                   VerticalContentAlignment="Stretch" />
                   <Border x:Name="PART_DropHint"
-                          Background="{DynamicResource editorGroup.dropBackground}"
-                          BorderBrush="{DynamicResource focusBorder}"
-                          BorderThickness="1"
+                          Background="{DynamicResource DockDropHintBackgroundBrush}"
+                          BorderBrush="{DynamicResource DockDropHintBorderBrush}"
+                          BorderThickness="{DynamicResource DockDropHintBorderThickness}"
                           CornerRadius="{DynamicResource DockPaneCornerRadius}"
                           IsVisible="False"
                           IsHitTestVisible="False" />
@@ -581,9 +601,11 @@
         <Setter Property="Template">
           <ControlTemplate>
             <LayoutTransformControl x:Name="PART_HeaderTransform">
-              <Grid ColumnDefinitions="*,Auto"
+              <Grid x:Name="PART_HeaderContent"
+                    ColumnDefinitions="*,Auto"
+                    Margin="{DynamicResource DockTabPadding}"
                     Background="Transparent">
-                <TextBlock Margin="{DynamicResource DockTabPadding}"
+                <TextBlock x:Name="PART_HeaderText"
                            VerticalAlignment="Center"
                            Foreground="{TemplateBinding Foreground}"
                            Text="{TemplateBinding Header}"
@@ -591,13 +613,19 @@
                 <controls:DockHeaderButton x:Name="PART_CloseButton"
                                            Grid.Column="1"
                                            Classes="dock-tab-close"
-                                           VerticalAlignment="Center">
+                                           Margin="{DynamicResource DockTabCloseGap}"
+                                           VerticalAlignment="Center"
+                                           ToolTip.Tip="Close">
                   <controls:DockChromeIcon Kind="Close" />
                 </controls:DockHeaderButton>
               </Grid>
             </LayoutTransformControl>
           </ControlTemplate>
         </Setter>
+        <!-- VS Code: close sits near the pill's right edge. -->
+        <Style Selector="^:closable /template/ Grid#PART_HeaderContent">
+          <Setter Property="Margin" Value="{DynamicResource DockTabPaddingClosable}" />
+        </Style>
       </ControlTheme>
 
       <ControlTheme x:Key="{x:Type controls:DockChromeIcon}"
@@ -606,14 +634,12 @@
         <Setter Property="Height" Value="16" />
         <Setter Property="Template">
           <ControlTemplate>
-            <Viewbox Stretch="Uniform">
+            <Viewbox Stretch="None">
               <Path x:Name="PART_Icon"
-                    Width="20"
-                    Height="20"
+                    Width="16"
+                    Height="16"
                     Stretch="None"
-                    Stroke="{DynamicResource icon.foreground}"
-                    StrokeLineCap="Round"
-                    StrokeThickness="1.8" />
+                    Fill="{DynamicResource icon.foreground}" />
             </Viewbox>
           </ControlTemplate>
         </Setter>
@@ -650,17 +676,66 @@
   <Style Selector="controls|DockRegion:vertical TabStripItem">
     <Setter Property="Width" Value="{DynamicResource DockTabHeight}" />
   </Style>
-  <!-- VS Code shows a tab's 28px action slot only for the active/hovered item. -->
+  <!-- VS Code Modern UI tabs.css:
+       tab-actions = 24px lane with 2px inline margin;
+       action-label = 16px icon + 2px padding => 20px hover surface. -->
   <Style Selector="controls|DockRegion TabStripItem controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Opacity" Value="0" />
-    <Setter Property="Width" Value="20" />
-    <Setter Property="Height" Value="20" />
+    <Setter Property="Width" Value="0" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Height" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="MaxHeight" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="IsHitTestVisible" Value="False" />
   </Style>
   <Style Selector="controls|DockRegion TabStripItem:selected controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Opacity" Value="1" />
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="Margin" Value="{DynamicResource DockTabCloseGap}" />
+    <Setter Property="IsHitTestVisible" Value="True" />
   </Style>
   <Style Selector="controls|DockRegion TabStripItem:pointerover controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Opacity" Value="1" />
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="Margin" Value="{DynamicResource DockTabCloseGap}" />
+    <Setter Property="IsHitTestVisible" Value="True" />
+  </Style>
+  <!-- Rounded hover square on the X (VS Code tab action). -->
+  <Style Selector="controls|DockHeaderButton.dock-tab-close /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseSurfaceSize}" />
+    <Setter Property="Height" Value="{DynamicResource DockTabCloseSurfaceSize}" />
+    <Setter Property="Padding" Value="2" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <!-- VS Code toolbar actions use the same centered 20x20 rounded surface.
+       The outer button remains header-height, preserving an easy hit target. -->
+  <Style Selector="controls|DockHeaderButton.dock-maximize /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseSurfaceSize}" />
+    <Setter Property="Height" Value="{DynamicResource DockTabCloseSurfaceSize}" />
+    <Setter Property="Padding" Value="2" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="controls|DockHeaderButton.dock-add-tab /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseSurfaceSize}" />
+    <Setter Property="Height" Value="{DynamicResource DockTabCloseSurfaceSize}" />
+    <Setter Property="Padding" Value="2" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="controls|DockHeaderButton.dock-tab-close:pointerover /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+    <Setter Property="Background" Value="{DynamicResource DockTabCloseHoverBackground}" />
+  </Style>
+  <Style Selector="controls|DockHeaderButton.dock-tab-close:pressed /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+    <Setter Property="Background" Value="{DynamicResource DockTabClosePressedBackground}" />
   </Style>
   <!-- Square tabs (VS Code). -->
   <Style Selector="controls|DockRegion:top TabStripItem">
@@ -709,11 +784,11 @@
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <!-- Chrome buttons fill the header strip so outer headers read as one fused bar. -->
-  <Style Selector="controls|DockRegion:horizontal controls|DockHeaderButton">
+  <!-- Chrome buttons fill the header strip; tab close stays a 20px chip. -->
+  <Style Selector="controls|DockRegion:horizontal controls|DockHeaderButton:not(.dock-tab-close)">
     <Setter Property="Height" Value="{DynamicResource DockTabHeight}" />
   </Style>
-  <Style Selector="controls|DockRegion:vertical controls|DockHeaderButton">
+  <Style Selector="controls|DockRegion:vertical controls|DockHeaderButton:not(.dock-tab-close)">
     <Setter Property="Width" Value="{DynamicResource DockTabHeight}" />
   </Style>
   <Style Selector="controls|DockRegion:left controls|DockTabHeader /template/ LayoutTransformControl#PART_HeaderTransform">

@@ -842,7 +842,7 @@ public sealed class TabContainerDragController : IDisposable
                 relativeTo),
             CornerRadius = DockThemeBrushHelper.ResolveValue(
                 DockThemeResources.DragGhostCornerRadius,
-                new CornerRadius(2),
+                new CornerRadius(4),
                 relativeTo),
             ClipToBounds = true,
             IsHitTestVisible = false,

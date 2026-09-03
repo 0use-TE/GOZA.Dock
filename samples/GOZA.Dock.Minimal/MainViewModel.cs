@@ -16,7 +16,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         LeftTopTabs =
         [
-            new PlainTab("left-top", "Explorer", "左侧上方区域"),
+            new PlainTab("left-top", "Explorer", "左侧上方区域"){
+                IsClosable=true
+            },
         ];
         LeftBottomTabs =
         [

@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Ouse.Diagnostics" />
     <PackageReference Include="StaticLink.Avalonia" />
   </ItemGroup>
 

@@ -79,22 +79,18 @@ internal static class DockThemeBrushHelper
     }
 
     /// <summary>
-    /// Builds a drop-hint background brush from the system accent color at ~20% opacity.
+    /// Soft wash fallback for drop hints — muted gray, not system accent neon.
     /// </summary>
-    public static IBrush DropHintBackgroundFallback()
-    {
-        var c = GetSystemAccentColor();
-        return new SolidColorBrush(Color.FromArgb(0x33, c.R, c.G, c.B));
-    }
+    public static IBrush DropHintBackgroundFallback() =>
+        Application.Current?.ActualThemeVariant == ThemeVariant.Dark
+            ? new SolidColorBrush(Color.FromArgb(0x99, 0x53, 0x59, 0x5D))
+            : new SolidColorBrush(Color.FromArgb(0x66, 0x26, 0x77, 0xCB));
 
     /// <summary>
-    /// Builds a drop-hint border brush from the system accent color at ~40% opacity.
+    /// Matches drag-ghost border language for drop hints.
     /// </summary>
-    public static IBrush DropHintBorderFallback()
-    {
-        var c = GetSystemAccentColor();
-        return new SolidColorBrush(Color.FromArgb(0x66, c.R, c.G, c.B));
-    }
+    public static IBrush DropHintBorderFallback() =>
+        DragGhostBorderFallback();
 
     public static IBrush DragGhostBackgroundFallback() =>
         Application.Current?.ActualThemeVariant == ThemeVariant.Dark

@@ -394,10 +394,15 @@ public static class VsCodeThemeJson
         var fg = Get(colors, VsCodeThemeColors.TabActiveForeground)
             ?? Get(colors, VsCodeThemeColors.Foreground)
             ?? (isDark ? "#FFFFFF" : "#000000");
+        var drop = Get(colors, VsCodeThemeColors.EditorGroupDropBackground)
+            ?? (isDark ? "#53595D99" : "#2677CB66");
 
         PutIfAbsent(colors, DockThemeResources.DragGhostBackgroundBrush, WithAlpha(editorBg, 0xF0));
         PutIfAbsent(colors, DockThemeResources.DragGhostBorderBrush, WithAlpha(border, 0xAA));
         PutIfAbsent(colors, DockThemeResources.DragGhostForegroundBrush, fg);
+        // Drop hint shares ghost border language; wash stays translucent over content.
+        PutIfAbsent(colors, DockThemeResources.DropHintBackgroundBrush, drop);
+        PutIfAbsent(colors, DockThemeResources.DropHintBorderBrush, WithAlpha(border, 0xAA));
     }
 
     private static string? Get(IDictionary<string, string> colors, string key) =>
