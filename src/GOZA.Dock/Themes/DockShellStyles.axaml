@@ -246,7 +246,7 @@
           <SolidColorBrush x:Key="DockDragGhostBackgroundBrush" Color="#F2FFFFFF" />
           <SolidColorBrush x:Key="DockDragGhostBorderBrush" Color="#AAE5E5E5" />
           <SolidColorBrush x:Key="DockDragGhostForegroundBrush" Color="#3B3B3B" />
-          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#662677CB" />
+          <SolidColorBrush x:Key="DockDropHintBackgroundBrush" Color="#33999999" />
           <SolidColorBrush x:Key="DockDropHintBorderBrush" Color="#AAE5E5E5" />
           <SolidColorBrush x:Key="DockTabCloseHoverBackground" Color="#14000000" />
           <SolidColorBrush x:Key="DockTabClosePressedBackground" Color="#24000000" />
@@ -736,6 +736,18 @@
   </Style>
   <Style Selector="controls|DockHeaderButton.dock-tab-close:pressed /template/ ContentPresenter#PART_DockHeaderButtonSurface">
     <Setter Property="Background" Value="{DynamicResource DockTabClosePressedBackground}" />
+  </Style>
+  <!-- Overlay drag ghost: close chip matches in-strip sizing (not chrome 28px). -->
+  <Style Selector="Border.dock-drag-ghost controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseButtonSize}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockTabCloseButtonSize}" />
+    <Setter Property="Height" Value="{DynamicResource DockTabCloseButtonSize}" />
+    <Setter Property="MinHeight" Value="{DynamicResource DockTabCloseButtonSize}" />
+    <Setter Property="MaxHeight" Value="{DynamicResource DockTabCloseButtonSize}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="{DynamicResource DockTabCloseGap}" />
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="IsHitTestVisible" Value="False" />
   </Style>
   <!-- Square tabs (VS Code). -->
   <Style Selector="controls|DockRegion:top TabStripItem">

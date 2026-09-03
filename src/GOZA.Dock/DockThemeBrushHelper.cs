@@ -84,7 +84,7 @@ internal static class DockThemeBrushHelper
     public static IBrush DropHintBackgroundFallback() =>
         Application.Current?.ActualThemeVariant == ThemeVariant.Dark
             ? new SolidColorBrush(Color.FromArgb(0x99, 0x53, 0x59, 0x5D))
-            : new SolidColorBrush(Color.FromArgb(0x66, 0x26, 0x77, 0xCB));
+            : new SolidColorBrush(Color.FromArgb(0x33, 0x99, 0x99, 0x99));
 
     /// <summary>
     /// Matches drag-ghost border language for drop hints.

@@ -9,7 +9,7 @@
 		<LangVersion>latest</LangVersion>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IsAotCompatible>true</IsAotCompatible>
-		<Version>3.0.2</Version>
+		<Version>3.0.3</Version>
 
 		<Title>GOZA.Dock</Title>
 		<Description>Cross-platform, AOT-first Avalonia tab workspace with fixed regions, draggable tabs, self-contained Dock chrome, and optional view reuse.</Description>

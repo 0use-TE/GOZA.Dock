@@ -278,7 +278,7 @@ public static class DockColorThemeCatalog
         [DockThemeResources.DragGhostBackgroundBrush] = Color.Parse("#F2FFFFFF"),
         [DockThemeResources.DragGhostBorderBrush] = Color.Parse("#AAE5E5E5"),
         [DockThemeResources.DragGhostForegroundBrush] = Color.Parse("#3B3B3B"),
-        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#2677CB66"),
+        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#99999933"),
         [DockThemeResources.DropHintBorderBrush] = Color.Parse("#AAE5E5E5"),
     };
 
@@ -394,7 +394,7 @@ public static class DockColorThemeCatalog
         [DockThemeResources.DragGhostBackgroundBrush] = Color.Parse("#F2FFFFFF"),
         [DockThemeResources.DragGhostBorderBrush] = Color.Parse("#AAE7E7E7"),
         [DockThemeResources.DragGhostForegroundBrush] = Color.Parse("#000000"),
-        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#2677CB66"),
+        [DockThemeResources.DropHintBackgroundBrush] = ParseVsCodeColor("#99999933"),
         [DockThemeResources.DropHintBorderBrush] = Color.Parse("#AAE7E7E7"),
     };
 }

@@ -5,7 +5,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -38,7 +37,6 @@ public sealed class TabContainerDragController : IDisposable
 
     private Control? _draggedContainer;
     private Border? _dragGhost;
-    private IDisposable? _dragGhostBitmap;
     private OverlayLayer? _overlayLayer;
     private IPointer? _capturedPointer;
     private DispatcherTimer? _longPressTimer;
@@ -740,8 +738,6 @@ public sealed class TabContainerDragController : IDisposable
         if (_overlayLayer is not null && _dragGhost is not null)
             _overlayLayer.Children.Remove(_dragGhost);
 
-        _dragGhostBitmap?.Dispose();
-        _dragGhostBitmap = null;
         _dragGhost = null;
 
         if (_draggedContainer is not null)
@@ -785,70 +781,147 @@ public sealed class TabContainerDragController : IDisposable
     }
 
     /// <summary>
-    /// Pixel-perfect clone of the tab pill: same size/content as <c>PART_DockTabSurface</c>,
-    /// with a brighter border so it reads as a floating preview.
+    /// Builds a floating tab pill in code (Border + text [+ close mark]).
+    /// Copies the live header surface brushes; sizes to fit the full title
+    /// (no ellipsis). OverlayLayer is outside <c>DockShell.Styles</c>, so
+    /// templated <see cref="DockTabHeader"/> would render empty.
     /// </summary>
     private Border? CreateDragGhostClone(IDockTabItem dragItem)
     {
         if (_draggedContainer is null)
             return null;
 
-        var surface = FindTabSurface(_draggedContainer) ?? _draggedContainer;
-        var width = Math.Max(1, Math.Ceiling(surface.Bounds.Width));
-        var height = Math.Max(1, Math.Ceiling(surface.Bounds.Height));
-        var corner = surface is Border border
-            ? border.CornerRadius
-            : DockThemeBrushHelper.ResolveValue(
-                DockThemeResources.TabCornerRadius,
-                new CornerRadius(4),
-                _host);
+        var surface = FindTabSurface(_draggedContainer);
+        var source = (Control?)surface ?? _draggedContainer;
 
+        // Prefer the live pill look (already theme-correct) over resource lookup.
+        IBrush background = Brushes.Transparent;
+        var corner = new CornerRadius(4);
+        if (surface is not null)
+        {
+            background = surface.Background ?? background;
+            corner = surface.CornerRadius;
+        }
+
+        if (background is null
+            || (background is ISolidColorBrush solid && solid.Color.A == 0))
+        {
+            background = DockThemeBrushHelper.Resolve(
+                VsCodeThemeColors.ModernEditorTabActiveBackground,
+                new SolidColorBrush(Color.FromRgb(0x2C, 0x2D, 0x2E)),
+                _host);
+        }
+
+        var foreground = FindHeaderTextBrush(_draggedContainer)
+            ?? DockThemeBrushHelper.Resolve(
+                VsCodeThemeColors.ModernEditorTabActiveForeground,
+                Brushes.White,
+                _host);
+        var iconBrush = DockThemeBrushHelper.Resolve(
+            VsCodeThemeColors.IconForeground,
+            foreground,
+            _host);
         var brightBorder = DockThemeBrushHelper.Resolve(
             VsCodeThemeColors.FocusBorder,
             new SolidColorBrush(Color.FromRgb(0x00, 0x78, 0xD4)),
             _host);
 
-        Control child;
-        var snapshot = TryRenderSnapshot(surface, width, height);
-        if (snapshot is not null)
+        var padding = dragItem.IsClosable
+            ? DockThemeBrushHelper.ResolveValue(
+                "DockTabPaddingClosable",
+                new Thickness(6, 0, 2, 0),
+                _host)
+            : DockThemeBrushHelper.ResolveValue(
+                DockThemeResources.TabPadding,
+                new Thickness(6, 0, 8, 0),
+                _host);
+
+        var title = new TextBlock
         {
-            _dragGhostBitmap = snapshot;
-            child = new Image
+            Text = dragItem.Header ?? string.Empty,
+            Foreground = foreground,
+            VerticalAlignment = VerticalAlignment.Center,
+            TextTrimming = TextTrimming.None,
+            TextWrapping = TextWrapping.NoWrap,
+        };
+
+        Control content;
+        if (dragItem.IsClosable)
+        {
+            var closeSize = DockThemeBrushHelper.ResolveValue("DockTabCloseSurfaceSize", 20d, _host);
+            var close = new Viewbox
             {
-                Source = snapshot,
-                Width = width,
-                Height = height,
-                Stretch = Stretch.Fill,
-                IsHitTestVisible = false,
+                Width = 12,
+                Height = 12,
+                Stretch = Stretch.Uniform,
+                Child = new Avalonia.Controls.Shapes.Path
+                {
+                    Data = Geometry.Parse(
+                        "M7.116 8 L2.558 12.558 L3.442 13.442 L8 8.884 " +
+                        "L12.558 13.442 L13.442 12.558 L8.884 8 " +
+                        "L13.442 3.442 L12.558 2.558 L8 7.116 " +
+                        "L3.442 2.558 L2.558 3.442 Z"),
+                    Fill = iconBrush,
+                    Width = 16,
+                    Height = 16,
+                    Stretch = Stretch.None,
+                },
             };
+
+            var closeHost = new Border
+            {
+                Width = closeSize,
+                Height = closeSize,
+                Margin = DockThemeBrushHelper.ResolveValue("DockTabCloseGap", new Thickness(0), _host),
+                VerticalAlignment = VerticalAlignment.Center,
+                Child = close,
+                HorizontalAlignment = HorizontalAlignment.Center,
+            };
+
+            // Auto|Auto so the title is never starved by a fixed ghost width.
+            var grid = new Grid
+            {
+                Margin = padding,
+                ColumnDefinitions = new ColumnDefinitions("Auto,Auto"),
+            };
+            grid.Children.Add(title);
+            Grid.SetColumn(closeHost, 1);
+            grid.Children.Add(closeHost);
+            content = grid;
         }
         else
         {
-            // Fallback: same header control tree if snapshot is unavailable.
-            child = new DockTabHeader
-            {
-                Header = dragItem.Header,
-                IsClosable = dragItem.IsClosable,
-                DataContext = dragItem,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
+            title.Margin = padding;
+            content = title;
         }
 
-        return new Border
+        var minWidth = Math.Max(1, Math.Ceiling(source.Bounds.Width));
+        var minHeight = Math.Max(1, Math.Ceiling(source.Bounds.Height));
+
+        var ghost = new Border
         {
-            Width = width,
-            Height = height,
+            MinWidth = minWidth,
+            MinHeight = minHeight,
+            Height = minHeight,
             CornerRadius = corner,
             BorderThickness = DockThemeBrushHelper.ResolveValue(
                 DockThemeResources.DragGhostBorderThickness,
                 new Thickness(1),
                 _host),
             BorderBrush = brightBorder,
-            Background = Brushes.Transparent,
+            Background = background,
             ClipToBounds = true,
             IsHitTestVisible = false,
-            Child = child,
+            Child = content,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
         };
+
+        // Grow to fit the full header text (surface bounds can be tighter while dragging).
+        ghost.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        ghost.Width = Math.Ceiling(Math.Max(minWidth, ghost.DesiredSize.Width));
+        ghost.Height = Math.Ceiling(Math.Max(minHeight, ghost.DesiredSize.Height));
+        return ghost;
     }
 
     private static Border? FindTabSurface(Control container) =>
@@ -856,23 +929,9 @@ public sealed class TabContainerDragController : IDisposable
             .OfType<Border>()
             .FirstOrDefault(b => b.Name == "PART_DockTabSurface");
 
-    private static RenderTargetBitmap? TryRenderSnapshot(Visual visual, double width, double height)
-    {
-        try
-        {
-            var scale = TopLevel.GetTopLevel(visual)?.RenderScaling ?? 1.0;
-            var pixelWidth = Math.Max(1, (int)Math.Ceiling(width * scale));
-            var pixelHeight = Math.Max(1, (int)Math.Ceiling(height * scale));
-            var dpi = 96.0 * scale;
-            var bitmap = new RenderTargetBitmap(
-                new PixelSize(pixelWidth, pixelHeight),
-                new Vector(dpi, dpi));
-            bitmap.Render(visual);
-            return bitmap;
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    private static IBrush? FindHeaderTextBrush(Control container) =>
+        container.GetVisualDescendants()
+            .OfType<TextBlock>()
+            .Select(t => t.Foreground)
+            .FirstOrDefault(b => b is not null);
 }
