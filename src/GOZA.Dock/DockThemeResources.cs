@@ -43,10 +43,15 @@ public static class DockThemeResources
     public const string PaneGap = "DockPaneGap";
     public const string TabHeight = "DockTabHeight";
     public const string TabPillHeight = "DockTabPillHeight";
+    public const string TabFontSize = "DockTabFontSize";
     public const string ChromeButtonSize = "DockChromeButtonSize";
     public const string ShellPadding = "DockShellPadding";
     public const string PaneBorderThickness = "DockPaneBorderThickness";
     public const string TabPadding = "DockTabPadding";
+    public const string TabPaddingClosable = "DockTabPaddingClosable";
+    public const string TabCloseGap = "DockTabCloseGap";
+    public const string TabCloseActionWidth = "DockTabCloseActionWidth";
+    public const string TabCloseSurfaceSize = "DockTabCloseSurfaceSize";
     public const string PaneCornerRadius = "DockPaneCornerRadius";
     public const string TabCornerRadius = "DockTabCornerRadius";
     public const string TabCornerRadiusTop = "DockTabCornerRadiusTop";

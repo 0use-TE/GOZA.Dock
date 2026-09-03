@@ -14,7 +14,7 @@
                 BorderBrush="{DynamicResource surface.border}">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <TextBlock Text="主题" VerticalAlignment="Center" />
-                <ComboBox Width="140"
+                <ComboBox Width="240"
                           ItemsSource="{Binding Themes}"
                           SelectedItem="{Binding ColorTheme}">
                     <ComboBox.ItemTemplate>
@@ -23,10 +23,18 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                <TextBlock Text="Tab 条尺寸" VerticalAlignment="Center" Margin="12,0,0,0" />
+                <NumericUpDown Width="148"
+                               Minimum="20"
+                               Maximum="72"
+                               Increment="1"
+                               FormatString="0"
+                               Value="{Binding TabStripSize}" />
             </StackPanel>
         </Border>
 
-        <DockShell ColorTheme="{Binding ColorTheme}">
+        <DockShell ColorTheme="{Binding ColorTheme}"
+                   TabStripSize="{Binding TabStripSize}">
             <Grid ColumnDefinitions="220,Auto,*">
                 <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
                     <DockRegion Grid.Row="0" ShowMaximizeButton="true"  ItemsSource="{Binding LeftTopTabs}"  />

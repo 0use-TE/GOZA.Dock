@@ -96,7 +96,8 @@ dockShell.ColorTheme = DockColorThemeCatalog.Create(DockColorTheme.DarkModern);
 | `DockPaneGap` | `4` | 卡片间距 / sash 宽度 |
 | `DockShellPadding` | `4` | Shell 外缘内边距 |
 | `DockPaneCornerRadius` | `8` | 卡片圆角 |
-| `DockTabHeight` / `DockTabPillHeight` | `32` / `24` | Modern Tab |
+| `DockTabHeight` / `DockTabPillHeight` / `DockTabFontSize` | `32` / `24` / `13` | 由 `DockShell.TabStripSize` 写入；字号同比缩放，`DockTabPadding*` 不变 |
+| `DockChromeButtonSize` / `DockTabCloseSurfaceSize` | `28` / `20` | 随 `TabStripSize` 按比例更新 |
 | `DockDragGhost*` | — | 拖拽幽灵（无 VS Code ID） |
 
 ## 人工测试清单（Demo）

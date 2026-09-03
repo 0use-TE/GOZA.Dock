@@ -10,6 +10,7 @@
       <!-- Modern UI: 24px pill + 4px transparent hit gutter on each side. -->
       <x:Double x:Key="DockTabHeight">32</x:Double>
       <x:Double x:Key="DockTabPillHeight">24</x:Double>
+      <x:Double x:Key="DockTabFontSize">13</x:Double>
       <x:Double x:Key="DockChromeButtonSize">28</x:Double>
       <Thickness x:Key="DockShellPadding">4</Thickness>
       <Thickness x:Key="DockPaneBorderThickness">1</Thickness>
@@ -598,6 +599,7 @@
       <ControlTheme x:Key="{x:Type controls:DockTabHeader}"
                     TargetType="controls:DockTabHeader">
         <Setter Property="MinHeight" Value="{DynamicResource DockTabPillHeight}" />
+        <Setter Property="FontSize" Value="{DynamicResource DockTabFontSize}" />
         <Setter Property="Template">
           <ControlTemplate>
             <LayoutTransformControl x:Name="PART_HeaderTransform">
@@ -608,6 +610,7 @@
                 <TextBlock x:Name="PART_HeaderText"
                            VerticalAlignment="Center"
                            Foreground="{TemplateBinding Foreground}"
+                           FontSize="{TemplateBinding FontSize}"
                            Text="{TemplateBinding Header}"
                            TextTrimming="CharacterEllipsis" />
                 <controls:DockHeaderButton x:Name="PART_CloseButton"

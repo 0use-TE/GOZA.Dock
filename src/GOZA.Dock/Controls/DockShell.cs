@@ -33,6 +33,21 @@ public sealed partial class DockShell : ContentControl
     public static readonly StyledProperty<VsCodeColorTheme?> ColorThemeProperty =
         AvaloniaProperty.Register<DockShell, VsCodeColorTheme?>(nameof(ColorTheme));
 
+    /// <summary>VS Code default: horizontal tab-strip height / vertical tab-strip width.</summary>
+    public const double DefaultTabStripSize = 32;
+
+    /// <summary>Tab title font size when <see cref="TabStripSize"/> is <see cref="DefaultTabStripSize"/>.</summary>
+    public const double DefaultTabFontSize = 13;
+
+    /// <summary>
+    /// Single size for the tab strip: <strong>height</strong> when tabs are top/bottom,
+    /// <strong>width</strong> when tabs are left/right. Default <see cref="DefaultTabStripSize"/>.
+    /// Title font scales with this value; padding / gutters stay fixed so width grows with text.
+    /// Pill, chrome, and close metrics are derived (VS Code gutters: strip − 8 / strip − 4).
+    /// </summary>
+    public static readonly StyledProperty<double> TabStripSizeProperty =
+        AvaloniaProperty.Register<DockShell, double>(nameof(TabStripSize), DefaultTabStripSize);
+
     private static readonly DirectProperty<DockShell, DockRegion?> MaximizedRegionPropertyKey =
         AvaloniaProperty.RegisterDirect<DockShell, DockRegion?>(
             nameof(MaximizedRegion),
@@ -50,6 +65,7 @@ public sealed partial class DockShell : ContentControl
     public DockShell()
     {
         AvaloniaXamlLoader.Load(this);
+        WriteHeaderMetrics();
     }
 
     /// <summary>
@@ -73,6 +89,15 @@ public sealed partial class DockShell : ContentControl
         set => SetValue(ColorThemeProperty, value);
     }
 
+    /// <summary>
+    /// Tab strip thickness: height for horizontal strips, width for vertical strips.
+    /// </summary>
+    public double TabStripSize
+    {
+        get => GetValue(TabStripSizeProperty);
+        set => SetValue(TabStripSizeProperty, value);
+    }
+
     /// <summary>The region currently filling this shell, or null while the normal grid is shown.</summary>
     public DockRegion? MaximizedRegion
     {
@@ -85,6 +110,30 @@ public sealed partial class DockShell : ContentControl
         EnableViewCacheProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.TryAttachViewHost());
         ColorThemeProperty.Changed.AddClassHandler<DockShell>((shell, e) =>
             shell.OnColorThemeChanged(e.GetNewValue<VsCodeColorTheme?>()));
+        TabStripSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.WriteHeaderMetrics());
+    }
+
+    private void WriteHeaderMetrics()
+    {
+        var strip = TabStripSize;
+        if (strip <= 0 || double.IsNaN(strip) || double.IsInfinity(strip))
+            strip = DefaultTabStripSize;
+
+        // VS Code modern tabs: 32 strip / 24 pill / 28 chrome / 20 close.
+        // Font scales with strip; DockTabPadding* stay fixed → width grows with text.
+        var scale = strip / DefaultTabStripSize;
+        var fontSize = Math.Max(1, DefaultTabFontSize * scale);
+        var pill = Math.Max(1, strip - 8);
+        var chrome = Math.Max(1, strip - 4);
+        var closeSurface = Math.Max(1, pill - 4);
+        var closeAction = Math.Max(closeSurface, pill);
+
+        Resources[DockThemeResources.TabHeight] = strip;
+        Resources[DockThemeResources.TabPillHeight] = pill;
+        Resources[DockThemeResources.TabFontSize] = fontSize;
+        Resources[DockThemeResources.ChromeButtonSize] = chrome;
+        Resources[DockThemeResources.TabCloseSurfaceSize] = closeSurface;
+        Resources[DockThemeResources.TabCloseActionWidth] = closeAction;
     }
 
     private void OnColorThemeChanged(VsCodeColorTheme? theme)
@@ -94,6 +143,8 @@ public sealed partial class DockShell : ContentControl
 
         // Theme lives on this shell — set ColorTheme; do not call static Apply from the host.
         VsCodeThemeJson.Apply(theme, Resources);
+        // Color apply must not wipe structural metrics written by header APIs.
+        WriteHeaderMetrics();
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
@@ -106,6 +157,8 @@ public sealed partial class DockShell : ContentControl
         // Re-apply if the theme was set before the visual tree / Application was ready.
         if (ColorTheme is not null)
             OnColorThemeChanged(ColorTheme);
+        else
+            WriteHeaderMetrics();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

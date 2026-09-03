@@ -32,3 +32,18 @@ Application.Current!.RequestedThemeVariant =
 When JSON omits `type`, resolution uses [`VsCodeThemeTypeMap`](../../src/GOZA.Dock/VsCodeThemeTypeMap.cs).
 
 Color IDs: `VsCodeThemeColors` / [DOCK-THEMING.zh-CN.md](../../DOCK-THEMING.zh-CN.md).
+
+## Header size (tab strip)
+
+One property on **`DockShell`**: `TabStripSize` (default `32`).
+
+- Horizontal tabs (top/bottom) → strip **height**
+- Vertical tabs (left/right) → strip **width**
+
+Title **font scales** with this value (`13 × strip/32`); horizontal padding stays fixed so tab **width grows with text**. Pill / chrome / close sizes are derived (`strip−8`, `strip−4`, …).
+
+```xml
+<DockShell TabStripSize="40" ColorTheme="{Binding DockColorTheme}" />
+```
+
+You can still override the same keys manually in `DockShell.Resources` (`DockTabHeight`, …) — see [DOCK-THEMING.zh-CN.md](../../DOCK-THEMING.zh-CN.md).

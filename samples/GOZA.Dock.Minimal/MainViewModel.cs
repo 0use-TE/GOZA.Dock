@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Styling;
 using GOZA.Dock;
+using GOZA.Dock.Controls;
 
 namespace GOZA.Dock.Minimal;
 
@@ -12,6 +13,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private const string AssetRoot = "avares://GOZA.Dock.Minimal/Themes/";
 
     private VsCodeColorTheme? _colorTheme;
+    private double _tabStripSize = DockShell.DefaultTabStripSize;
+
     public MainViewModel()
     {
         LeftTopTabs =
@@ -69,6 +72,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             if (value is not null && Application.Current is { } app)
                 app.RequestedThemeVariant = value.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
+        }
+    }
+
+    /// <summary>绑 <c>DockShell.TabStripSize</c>：水平=高，垂直=宽。</summary>
+    public double TabStripSize
+    {
+        get => _tabStripSize;
+        set
+        {
+            if (Math.Abs(_tabStripSize - value) < 0.001)
+                return;
+
+            _tabStripSize = value;
+            OnPropertyChanged();
         }
     }
 

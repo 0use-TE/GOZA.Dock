@@ -38,7 +38,8 @@ The workspace root. It is intentionally thin: it themes the background/padding, 
 | Member | Type | Default | Notes |
 |---|---|---|---|
 | `Content` | `object?` | `null` | Your layout. Must be a `Panel` (e.g. `Grid`) for the view cache to attach. |
-| `ColorTheme` | `VsCodeColorTheme?` | `null` | **Only** theming API. Writes workbench brushes to this shell's `Resources`. Does **not** set `RequestedThemeVariant`. |
+| `ColorTheme` | `VsCodeColorTheme?` | `null` | **Only** color-theme apply API. Writes workbench brushes to this shell's `Resources`. Does **not** set `RequestedThemeVariant`. |
+| `TabStripSize` | `double` | `32` | Horizontal strip **height** / vertical strip **width**. Scales title font; padding fixed; derives pill/chrome/close. |
 | `EnableViewCache` | `bool` | `true` | Enables surface reuse for tabs with `ReuseSurface = true`. Backed by `EnableViewCacheProperty`. |
 | `MaximizedRegion` | `DockRegion?` | `null` | Read-only region currently filling the shell. |
 | `Background`, `Padding` | — | `DockShellBackgroundBrush`, `DockShellPadding` | From the default control theme. |
