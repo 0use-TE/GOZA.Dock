@@ -9,7 +9,7 @@
         <TextBlock HorizontalAlignment="Center" FontSize="26" Foreground="#23A8F2" Text="✦" />
         <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold" Text="Ask Copilot" />
         <TextBlock MaxWidth="220" TextAlignment="Center" Opacity="0.65" TextWrapping="Wrap"
-                   Text="询问代码、主题资源或当前工作区中的任何内容。" />
+                   Text="Ask about code, theme resources, or anything in this workspace." />
       </StackPanel>
       <Border Grid.Row="2" MinHeight="72" Padding="10" BorderBrush="{DynamicResource surface.border}"
               BorderThickness="1" CornerRadius="8" Background="{DynamicResource editor.background}">

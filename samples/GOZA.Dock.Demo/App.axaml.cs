@@ -21,6 +21,7 @@ public partial class App : CrystalApplication
         services.AddMvvmTransient<GuideTabView, GuideTabViewModel>();
         services.AddMvvmTransient<HomeTabView, HomeTabViewModel>();
         services.AddMvvmTransient<LeftInfoTabView, LeftInfoTabViewModel>();
+        services.AddMvvmTransient<SourceControlTabView, SourceControlTabViewModel>();
         services.AddMvvmTransient<ChartTabView, ChartTabViewModel>();
         services.AddMvvmTransient<LogTabView, LogTabViewModel>();
         services.AddMvvmTransient<ToolsTabView, ToolsTabViewModel>();

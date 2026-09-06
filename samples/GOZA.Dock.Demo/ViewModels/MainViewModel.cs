@@ -1,4 +1,6 @@
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -30,6 +32,7 @@ public partial class MainViewModel : ObservableObject
 
     public HomeTabViewModel HomeTab { get; }
     public LeftInfoTabViewModel InfoTab { get; }
+    public SourceControlTabViewModel SourceControlTab { get; }
     public ChartTabViewModel ChartTab { get; }
     public LogTabViewModel LogTab { get; }
     public BrowserTabViewModel BrowserTab { get; }
@@ -72,11 +75,31 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _notificationBody = string.Empty;
 
+    [ObservableProperty]
+    private string _activeActivity = "Explorer";
+
+    [ObservableProperty]
+    private bool _isSideBarVisible = true;
+
+    [ObservableProperty]
+    private bool _isPanelVisible = true;
+
+    [ObservableProperty]
+    private bool _isSecondarySideBarVisible = true;
+
+    [ObservableProperty]
+    private bool _isCommandPaletteOpen;
+
+    [ObservableProperty]
+    private string _commandPaletteQuery = string.Empty;
+
     private DispatcherTimer? _notificationTimer;
+    private IReadOnlyList<WorkbenchCommandItem> _allCommands = [];
 
     public MainViewModel(
         HomeTabViewModel home,
         LeftInfoTabViewModel leftInfo,
+        SourceControlTabViewModel sourceControl,
         ChartTabViewModel chart,
         LogTabViewModel log,
         ToolsTabViewModel tools,
@@ -85,16 +108,20 @@ public partial class MainViewModel : ObservableObject
     {
         HomeTab = home;
         InfoTab = leftInfo;
+        SourceControlTab = sourceControl;
         ChartTab = chart;
         LogTab = log;
         ToolsTab = tools;
         BrowserTab = browser;
         GuideTab = guide;
 
+        HomeTab.OpenDocumentAction = OpenExplorerDocument;
+
         _tabs =
         [
             home,
             leftInfo,
+            sourceControl,
             chart,
             log,
             tools,
@@ -116,10 +143,54 @@ public partial class MainViewModel : ObservableObject
             ApplySnapshot(saved);
         else
             ApplyDefaultLayout();
+
+        _allCommands = BuildCommandCatalog();
     }
 
     public string ColorThemeDisplayName =>
         DockColorTheme?.Name ?? SelectedColorTheme?.DisplayName ?? "theme";
+
+    public string CommandCenterText =>
+        $"GOZA.Dock  —  {ColorThemeDisplayName}";
+
+    public GridLength SideBarColumnWidth =>
+        IsSideBarVisible ? new GridLength(240) : new GridLength(0);
+
+    public GridLength PanelRowHeight =>
+        IsPanelVisible ? new GridLength(190) : new GridLength(0);
+
+    public GridLength SecondarySideBarColumnWidth =>
+        IsSecondarySideBarVisible ? new GridLength(280) : new GridLength(0);
+
+    public bool IsExplorerSelected =>
+        string.Equals(ActiveActivity, "Explorer", StringComparison.Ordinal);
+
+    public bool IsSearchSelected =>
+        string.Equals(ActiveActivity, "Search", StringComparison.Ordinal);
+
+    public bool IsSourceControlSelected =>
+        string.Equals(ActiveActivity, "SourceControl", StringComparison.Ordinal);
+
+    public bool IsRunSelected =>
+        string.Equals(ActiveActivity, "Run", StringComparison.Ordinal);
+
+    public bool IsExtensionsSelected =>
+        string.Equals(ActiveActivity, "Extensions", StringComparison.Ordinal);
+
+    public IReadOnlyList<WorkbenchCommandItem> FilteredCommands
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(CommandPaletteQuery))
+                return _allCommands;
+
+            return _allCommands
+                .Where(item =>
+                    item.Title.Contains(CommandPaletteQuery, StringComparison.OrdinalIgnoreCase)
+                    || item.Detail.Contains(CommandPaletteQuery, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        }
+    }
 
     partial void OnSelectedColorThemeChanged(DemoColorThemeItem? value)
     {
@@ -128,6 +199,40 @@ public partial class MainViewModel : ObservableObject
 
         ApplySelectedTheme(value);
         OnPropertyChanged(nameof(ColorThemeDisplayName));
+        OnPropertyChanged(nameof(CommandCenterText));
+    }
+
+    partial void OnActiveActivityChanged(string value) => NotifyWorkbenchState();
+
+    partial void OnIsSideBarVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(SideBarColumnWidth));
+        NotifyWorkbenchState();
+    }
+
+    partial void OnIsPanelVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(PanelRowHeight));
+        NotifyWorkbenchState();
+    }
+
+    partial void OnIsSecondarySideBarVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(SecondarySideBarColumnWidth));
+        NotifyWorkbenchState();
+    }
+
+    partial void OnCommandPaletteQueryChanged(string value) =>
+        OnPropertyChanged(nameof(FilteredCommands));
+
+    partial void OnLeftSelectedChanged(IDockTabItem? value)
+    {
+        if (ReferenceEquals(value, HomeTab))
+            ActiveActivity = "Explorer";
+        else if (ReferenceEquals(value, InfoTab))
+            ActiveActivity = "Search";
+        else if (ReferenceEquals(value, SourceControlTab))
+            ActiveActivity = "SourceControl";
     }
 
     [RelayCommand]
@@ -144,12 +249,16 @@ public partial class MainViewModel : ObservableObject
 
         // Host decides Avalonia Fluent light/dark (library never touches ThemeVariant).
         if (Application.Current is Application app)
+        {
             app.RequestedThemeVariant = DockColorTheme.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
+            ApplyWorkbenchChrome(app, DockColorTheme);
+        }
 
         foreach (var item in ColorThemes)
             item.IsSelected = ReferenceEquals(item, theme);
 
         OnPropertyChanged(nameof(ColorThemeDisplayName));
+        OnPropertyChanged(nameof(CommandCenterText));
     }
 
     [RelayCommand]
@@ -200,6 +309,96 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ShowRegionActions() =>
         Notify("Header actions", "This DockHeaderButton is supplied by the application.");
+
+    [RelayCommand]
+    private void SelectActivity(string? kind)
+    {
+        if (string.IsNullOrWhiteSpace(kind))
+            return;
+
+        switch (kind)
+        {
+            case "Explorer":
+                ToggleOrReveal(kind, IsSideBarVisible, v => IsSideBarVisible = v, HomeTab);
+                break;
+            case "Search":
+                ToggleOrReveal(kind, IsSideBarVisible, v => IsSideBarVisible = v, InfoTab);
+                break;
+            case "SourceControl":
+                ToggleOrReveal(kind, IsSideBarVisible, v => IsSideBarVisible = v, SourceControlTab);
+                break;
+            case "Run":
+                ToggleOrReveal(kind, IsPanelVisible, v => IsPanelVisible = v, LogTab);
+                break;
+            case "Extensions":
+                ToggleOrReveal(kind, IsSecondarySideBarVisible, v => IsSecondarySideBarVisible = v, ToolsTab);
+                break;
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleSideBar() => IsSideBarVisible = !IsSideBarVisible;
+
+    [RelayCommand]
+    private void TogglePanel() => IsPanelVisible = !IsPanelVisible;
+
+    [RelayCommand]
+    private void ToggleSecondarySideBar() => IsSecondarySideBarVisible = !IsSecondarySideBarVisible;
+
+    [RelayCommand]
+    private void ToggleCommandPalette()
+    {
+        IsCommandPaletteOpen = !IsCommandPaletteOpen;
+        if (IsCommandPaletteOpen)
+            CommandPaletteQuery = string.Empty;
+    }
+
+    [RelayCommand]
+    private void CloseCommandPalette() => IsCommandPaletteOpen = false;
+
+    [RelayCommand]
+    private void RunWorkbenchCommand(WorkbenchCommandItem? item)
+    {
+        if (item is null)
+            return;
+
+        IsCommandPaletteOpen = false;
+        item.Execute();
+    }
+
+    [RelayCommand]
+    private void ShowAccounts() =>
+        Notify("Account", "Sign-in is not configured in this demo.");
+
+    [RelayCommand]
+    private void ShowSettings()
+    {
+        IsCommandPaletteOpen = true;
+        CommandPaletteQuery = "theme";
+        Notify("Settings", "Color themes are listed in View → Color Theme and in the command palette.");
+    }
+
+    [RelayCommand]
+    private void StartDebugging()
+    {
+        SelectActivity("Run");
+        Notify("Run", "No launch.json — opened the Terminal panel.");
+    }
+
+    [RelayCommand]
+    private void NewTerminal()
+    {
+        SelectActivity("Run");
+        Notify("Terminal", "Terminal is ready.");
+    }
+
+    [RelayCommand]
+    private void ShowProblems() =>
+        Notify("Problems", "No problems have been detected in the workspace.");
+
+    [RelayCommand]
+    private void ShowAbout() =>
+        Notify("GOZA.Dock", "Avalonia workspace demo with VS Code-style activity bar, panels, and themes.");
 
     [RelayCommand]
     private void OpenTab(IDockTabViewModel tab)
@@ -262,6 +461,104 @@ public partial class MainViewModel : ObservableObject
             _ => regionId,
         };
 
+    private void NotifyWorkbenchState()
+    {
+        OnPropertyChanged(nameof(IsExplorerSelected));
+        OnPropertyChanged(nameof(IsSearchSelected));
+        OnPropertyChanged(nameof(IsSourceControlSelected));
+        OnPropertyChanged(nameof(IsRunSelected));
+        OnPropertyChanged(nameof(IsExtensionsSelected));
+    }
+
+    private void ToggleOrReveal(
+        string kind,
+        bool surfaceVisible,
+        Action<bool> show,
+        IDockTabViewModel tab)
+    {
+        var alreadyActive = string.Equals(ActiveActivity, kind, StringComparison.Ordinal);
+        if (alreadyActive && surfaceVisible)
+        {
+            show(false);
+            ActiveActivity = string.Empty;
+            return;
+        }
+
+        show(true);
+        ActiveActivity = kind;
+        RevealTab(tab);
+    }
+
+    private void RevealTab(IDockTabViewModel tab)
+    {
+        if (TryFindOpenRegionId(tab, out var openRegionId))
+            SetSelected(openRegionId, tab);
+        else
+            OpenTab(tab, tab.RegionId, select: true);
+    }
+
+    private void OpenExplorerDocument(string documentKey)
+    {
+        switch (documentKey)
+        {
+            case "guide":
+                OpenTab(GuideTab);
+                break;
+            case "readme":
+                OpenTab(BrowserTab);
+                break;
+            case "mainview":
+                OpenTab(ChartTab);
+                break;
+        }
+    }
+
+    private IReadOnlyList<WorkbenchCommandItem> BuildCommandCatalog()
+    {
+        var commands = new List<WorkbenchCommandItem>
+        {
+            new("View: Explorer", "Open the file explorer", () => SelectActivity("Explorer")),
+            new("View: Search", "Search the workspace", () => SelectActivity("Search")),
+            new("View: Source Control", "Open source control", () => SelectActivity("SourceControl")),
+            new("View: Terminal", "Toggle the terminal panel", () => SelectActivity("Run")),
+            new("View: Copilot", "Open the chat side bar", () => SelectActivity("Extensions")),
+            new("View: Toggle Primary Side Bar", "Ctrl+B", ToggleSideBar),
+            new("View: Toggle Panel", "Ctrl+J", TogglePanel),
+            new("View: Toggle Secondary Side Bar", "Ctrl+Alt+B", ToggleSecondarySideBar),
+            new("File: Save Layout", "Remember the current dock layout", SaveLayout),
+            new("File: Load Layout", "Restore the last saved layout", LoadLayout),
+            new("File: Reset Layout", "Restore the default workspace", ResetLayout),
+            new("Run: Start Debugging", "Open the Terminal panel", StartDebugging),
+            new("Help: About GOZA.Dock", "Demo workspace information", ShowAbout),
+        };
+
+        foreach (var theme in ColorThemes)
+        {
+            var captured = theme;
+            commands.Add(new WorkbenchCommandItem(
+                $"Preferences: Color Theme ({captured.DisplayName})",
+                captured.UiTheme,
+                () => SetColorTheme(captured)));
+        }
+
+        return commands;
+    }
+
+    private static void ApplyWorkbenchChrome(Application app, VsCodeColorTheme theme)
+    {
+        foreach (var (key, value) in theme.Colors)
+        {
+            try
+            {
+                app.Resources[key] = new SolidColorBrush(DockColorThemeCatalog.ParseVsCodeColor(value));
+            }
+            catch (Exception)
+            {
+                // Skip tokens that are not host chrome colors.
+            }
+        }
+    }
+
     private void ApplyDefaultLayout()
     {
         ClearAllRegions();
@@ -286,6 +583,9 @@ public partial class MainViewModel : ObservableObject
 
         if (snapshot.Id is "ct-guide" or "right-guide")
             return GuideTab;
+
+        if (snapshot.Id == "left-scm")
+            return SourceControlTab;
 
         if (snapshot.Id.StartsWith("ct-doc-", StringComparison.Ordinal))
             return RestoreDynamicTab(snapshot);

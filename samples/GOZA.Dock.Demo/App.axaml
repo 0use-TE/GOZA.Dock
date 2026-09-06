@@ -2,8 +2,118 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="GOZA.Dock.Demo.App"
              RequestedThemeVariant="Default">
+  <Application.Resources>
+    <SolidColorBrush x:Key="activityBar.background" Color="#181818" />
+    <SolidColorBrush x:Key="activityBar.foreground" Color="#D7D7D7" />
+    <SolidColorBrush x:Key="activityBar.inactiveForeground" Color="#868686" />
+    <SolidColorBrush x:Key="activityBar.activeBorder" Color="#0078D4" />
+    <SolidColorBrush x:Key="activityBar.border" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="statusBar.background" Color="#181818" />
+    <SolidColorBrush x:Key="statusBar.foreground" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="statusBar.border" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="statusBarItem.hoverBackground" Color="#33F1F1F1" />
+    <SolidColorBrush x:Key="titleBar.activeBackground" Color="#181818" />
+    <SolidColorBrush x:Key="titleBar.activeForeground" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="toolbar.hoverBackground" Color="#505A5D5E" />
+    <SolidColorBrush x:Key="toolbar.activeBackground" Color="#805A5D5E" />
+    <SolidColorBrush x:Key="input.background" Color="#313131" />
+    <SolidColorBrush x:Key="input.foreground" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="input.border" Color="#3C3C3C" />
+    <SolidColorBrush x:Key="notifications.background" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="notifications.foreground" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="notifications.border" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="quickInput.background" Color="#222222" />
+    <SolidColorBrush x:Key="quickInput.foreground" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="surface.border" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="focusBorder" Color="#0078D4" />
+  </Application.Resources>
   <Application.Styles>
     <FluentTheme />
     <!-- DockShell attaches DockShellStyles itself -->
+
+    <Style Selector="Button.workbench">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource titleBar.activeForeground}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="6,2" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}"
+                  Padding="{TemplateBinding Padding}"
+                  CornerRadius="4">
+            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Foreground="{TemplateBinding Foreground}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="Button.workbench:pointerover">
+      <Setter Property="Background" Value="{DynamicResource toolbar.hoverBackground}" />
+    </Style>
+    <Style Selector="Button.workbench:pressed">
+      <Setter Property="Background" Value="{DynamicResource toolbar.activeBackground}" />
+    </Style>
+    <Style Selector="Button.workbench:disabled">
+      <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <Style Selector="Button.activity">
+      <Setter Property="Width" Value="48" />
+      <Setter Property="Height" Value="48" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource activityBar.inactiveForeground}" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}">
+            <Grid>
+              <Border x:Name="Indicator" Width="2" HorizontalAlignment="Left" Background="Transparent" />
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Foreground="{TemplateBinding Foreground}"
+                                Content="{TemplateBinding Content}" />
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="Button.activity:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource activityBar.foreground}" />
+    </Style>
+    <Style Selector="Button.activity.selected">
+      <Setter Property="Foreground" Value="{DynamicResource activityBar.foreground}" />
+    </Style>
+    <Style Selector="Button.activity.selected /template/ Border#Indicator">
+      <Setter Property="Background" Value="{DynamicResource activityBar.activeBorder}" />
+    </Style>
+
+    <Style Selector="Button.status">
+      <Setter Property="Foreground" Value="{DynamicResource statusBar.foreground}" />
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="22" />
+    </Style>
+    <Style Selector="Button.status:pointerover">
+      <Setter Property="Background" Value="{DynamicResource statusBarItem.hoverBackground}" />
+    </Style>
+
+    <Style Selector="Button.explorer-item">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="4,2" />
+      <Setter Property="Foreground" Value="{DynamicResource titleBar.activeForeground}" />
+    </Style>
+
+    <Style Selector="Button.command-item">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
   </Application.Styles>
 </Application>

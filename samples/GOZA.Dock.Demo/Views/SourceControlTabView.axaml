@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GOZA.Dock.Demo.ViewModels"
+             x:Class="GOZA.Dock.Demo.Views.SourceControlTabView"
+             x:DataType="vm:SourceControlTabViewModel">
+  <StackPanel Margin="12,10" Spacing="10">
+    <TextBlock FontSize="11" FontWeight="SemiBold" Opacity="0.85" Text="SOURCE CONTROL" />
+    <TextBlock FontSize="12" Text="⑂  main*" />
+    <TextBlock FontSize="12" Opacity="0.7" Text="Changes (1)" />
+    <TextBlock Margin="14,0,0,0" FontSize="12" Text="M  samples/GOZA.Dock.Demo/Views/MainView.axaml" />
+    <TextBlock Margin="0,8,0,0" Opacity="0.55" TextWrapping="Wrap" FontSize="12"
+               Text="This demo workspace is not connected to a git provider. Use the activity bar and status bar to switch views." />
+  </StackPanel>
+</UserControl>

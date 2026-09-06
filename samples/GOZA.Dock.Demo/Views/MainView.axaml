@@ -4,88 +4,252 @@
              x:Class="GOZA.Dock.Demo.Views.MainView"
              x:DataType="vm:MainViewModel"
              ViewModelLocator.AutoWireViewModel="True"
+             Focusable="True"
              MinWidth="720" MinHeight="480">
-  <Grid RowDefinitions="35,*,22" Background="{DynamicResource titleBar.activeBackground}">
-    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
-      <Menu Grid.Column="0" Margin="4,0,0,0" Background="Transparent"
-            VerticalAlignment="Center">
-        <MenuItem Header="文件(_F)">
-          <MenuItem Header="保存布局" Command="{Binding SaveLayoutCommand}" />
-          <MenuItem Header="加载布局" Command="{Binding LoadLayoutCommand}" />
-        </MenuItem>
-        <MenuItem Header="编辑(_E)" />
-        <MenuItem Header="选择(_S)" />
-        <MenuItem Header="查看(_V)">
-          <MenuItem x:Name="ColorThemeMenu" Header="颜色主题" />
-        </MenuItem>
-        <MenuItem Header="转到(_G)" />
-        <MenuItem Header="运行(_R)" />
-        <MenuItem Header="终端(_T)" />
-        <MenuItem Header="帮助(_H)" />
-      </Menu>
-      <Border Grid.Column="1" Width="360" Height="24" HorizontalAlignment="Center"
-              VerticalAlignment="Center" Background="{DynamicResource toolbar.hoverBackground}"
-              BorderBrush="{DynamicResource surface.border}" BorderThickness="1" CornerRadius="6">
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"
-                   Opacity="0.75"
-                   Text="{Binding ColorThemeDisplayName, StringFormat='GOZA.Dock  —  {0}'}" />
-      </Border>
-      <StackPanel Grid.Column="2" Margin="8,0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-        <TextBlock Text="◧" /><TextBlock Text="◫" /><TextBlock Text="□" />
-      </StackPanel>
-    </Grid>
+  <Panel>
+    <Grid RowDefinitions="35,*,22" Background="{DynamicResource titleBar.activeBackground}">
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+        <Menu Grid.Column="0" Margin="4,0,0,0" Background="Transparent"
+              VerticalAlignment="Center">
+          <MenuItem Header="File(_F)">
+            <MenuItem Header="Save Layout" Command="{Binding SaveLayoutCommand}" />
+            <MenuItem Header="Load Layout" Command="{Binding LoadLayoutCommand}" />
+            <MenuItem Header="Reset Layout" Command="{Binding ResetLayoutCommand}" />
+          </MenuItem>
+          <MenuItem Header="Edit(_E)">
+            <MenuItem Header="Undo" InputGesture="Ctrl+Z" IsEnabled="False" />
+            <MenuItem Header="Redo" InputGesture="Ctrl+Y" IsEnabled="False" />
+            <Separator />
+            <MenuItem Header="Cut" InputGesture="Ctrl+X" IsEnabled="False" />
+            <MenuItem Header="Copy" InputGesture="Ctrl+C" IsEnabled="False" />
+            <MenuItem Header="Paste" InputGesture="Ctrl+V" IsEnabled="False" />
+          </MenuItem>
+          <MenuItem Header="Selection(_S)" />
+          <MenuItem Header="View(_V)">
+            <MenuItem Header="Explorer" Command="{Binding SelectActivityCommand}" CommandParameter="Explorer" />
+            <MenuItem Header="Search" Command="{Binding SelectActivityCommand}" CommandParameter="Search" />
+            <MenuItem Header="Source Control" Command="{Binding SelectActivityCommand}" CommandParameter="SourceControl" />
+            <MenuItem Header="Terminal" Command="{Binding SelectActivityCommand}" CommandParameter="Run" />
+            <MenuItem Header="Copilot" Command="{Binding SelectActivityCommand}" CommandParameter="Extensions" />
+            <Separator />
+            <MenuItem x:Name="ColorThemeMenu" Header="Color Theme" />
+            <Separator />
+            <MenuItem Header="Toggle Primary Side Bar" Command="{Binding ToggleSideBarCommand}" InputGesture="Ctrl+B" />
+            <MenuItem Header="Toggle Panel" Command="{Binding TogglePanelCommand}" InputGesture="Ctrl+J" />
+            <MenuItem Header="Toggle Secondary Side Bar" Command="{Binding ToggleSecondarySideBarCommand}" InputGesture="Ctrl+Alt+B" />
+          </MenuItem>
+          <MenuItem Header="Go(_G)">
+            <MenuItem Header="Go to File..." Command="{Binding ToggleCommandPaletteCommand}" InputGesture="Ctrl+P" />
+          </MenuItem>
+          <MenuItem Header="Run(_R)">
+            <MenuItem Header="Start Debugging" Command="{Binding StartDebuggingCommand}" InputGesture="F5" />
+          </MenuItem>
+          <MenuItem Header="Terminal(_T)">
+            <MenuItem Header="New Terminal" Command="{Binding NewTerminalCommand}" />
+          </MenuItem>
+          <MenuItem Header="Help(_H)">
+            <MenuItem Header="About GOZA.Dock" Command="{Binding ShowAboutCommand}" />
+          </MenuItem>
+        </Menu>
+        <Button Grid.Column="1" Classes="workbench" Width="360" Height="24" HorizontalAlignment="Center"
+                VerticalAlignment="Center" Background="{DynamicResource toolbar.hoverBackground}"
+                BorderBrush="{DynamicResource surface.border}" BorderThickness="1" CornerRadius="6"
+                Command="{Binding ToggleCommandPaletteCommand}"
+                ToolTip.Tip="Search files and commands (Ctrl+P)">
+          <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"
+                     Opacity="0.75"
+                     Text="{Binding CommandCenterText}" />
+        </Button>
+        <StackPanel Grid.Column="2" Margin="8,0" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+          <Button Classes="workbench" Width="28" Height="28"
+                  Command="{Binding ToggleSideBarCommand}"
+                  ToolTip.Tip="Toggle Primary Side Bar (Ctrl+B)">
+            <TextBlock FontSize="14" Text="◧" />
+          </Button>
+          <Button Classes="workbench" Width="28" Height="28"
+                  Command="{Binding TogglePanelCommand}"
+                  ToolTip.Tip="Toggle Panel (Ctrl+J)">
+            <TextBlock FontSize="14" Text="◫" />
+          </Button>
+          <Button Classes="workbench" Width="28" Height="28"
+                  Command="{Binding ToggleSecondarySideBarCommand}"
+                  ToolTip.Tip="Toggle Secondary Side Bar (Ctrl+Alt+B)">
+            <TextBlock FontSize="14" Text="□" />
+          </Button>
+        </StackPanel>
+      </Grid>
 
-    <Grid Grid.Row="1" ColumnDefinitions="48,*">
-      <Border Grid.Column="0" Background="{DynamicResource sideBar.background}"
-              BorderBrush="{DynamicResource surface.border}" BorderThickness="0,0,1,0">
-        <Grid RowDefinitions="*,Auto">
-          <StackPanel Spacing="4">
-            <Border Height="48" BorderBrush="{DynamicResource focusBorder}" BorderThickness="2,0,0,0">
-              <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Text="▱" />
-            </Border>
-            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Opacity="0.65" Text="⌕" />
-            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="21" Opacity="0.65" Text="⑂" />
-            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Opacity="0.65" Text="▷" />
-            <TextBlock Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Opacity="0.65" Text="◇" />
-          </StackPanel>
-          <StackPanel Grid.Row="1" Margin="0,0,0,6" Spacing="8">
-            <TextBlock HorizontalAlignment="Center" FontSize="19" Opacity="0.7" Text="◎" />
-            <TextBlock HorizontalAlignment="Center" FontSize="21" Opacity="0.7" Text="⚙" />
-          </StackPanel>
-        </Grid>
-      </Border>
-
-      <DockShell Grid.Column="1" x:Name="Shell"
-                 ColorTheme="{Binding DockColorTheme}">
-        <Grid ColumnDefinitions="240,Auto,*,Auto,280">
-          <DockRegion Grid.Column="0" ItemsSource="{Binding LeftTabs}"
-                      SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
-          <DockSplitter Grid.Column="1" />
-          <Grid Grid.Column="2" RowDefinitions="*,Auto,190">
-            <DockRegion Grid.Row="0" ShowAddButton="True" AddTabCommand="{Binding AddDocCommand}"
-                        ItemsSource="{Binding CenterTopTabs}"
-                        SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
-            <DockSplitter Grid.Row="1" />
-            <DockRegion Grid.Row="2" ItemsSource="{Binding CenterBottomTabs}"
-                        SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
+      <Grid Grid.Row="1" ColumnDefinitions="48,*">
+        <Border Grid.Column="0" Background="{DynamicResource activityBar.background}"
+                BorderBrush="{DynamicResource activityBar.border}" BorderThickness="0,0,1,0">
+          <Grid RowDefinitions="*,Auto">
+            <StackPanel>
+              <Button Classes="workbench activity"
+                      Classes.selected="{Binding IsExplorerSelected}"
+                      Command="{Binding SelectActivityCommand}"
+                      CommandParameter="Explorer"
+                      ToolTip.Tip="Explorer">
+                <TextBlock FontSize="22" Text="▱" />
+              </Button>
+              <Button Classes="workbench activity"
+                      Classes.selected="{Binding IsSearchSelected}"
+                      Command="{Binding SelectActivityCommand}"
+                      CommandParameter="Search"
+                      ToolTip.Tip="Search">
+                <TextBlock FontSize="22" Text="⌕" />
+              </Button>
+              <Button Classes="workbench activity"
+                      Classes.selected="{Binding IsSourceControlSelected}"
+                      Command="{Binding SelectActivityCommand}"
+                      CommandParameter="SourceControl"
+                      ToolTip.Tip="Source Control">
+                <TextBlock FontSize="21" Text="⑂" />
+              </Button>
+              <Button Classes="workbench activity"
+                      Classes.selected="{Binding IsRunSelected}"
+                      Command="{Binding SelectActivityCommand}"
+                      CommandParameter="Run"
+                      ToolTip.Tip="Run and Debug">
+                <TextBlock FontSize="20" Text="▷" />
+              </Button>
+              <Button Classes="workbench activity"
+                      Classes.selected="{Binding IsExtensionsSelected}"
+                      Command="{Binding SelectActivityCommand}"
+                      CommandParameter="Extensions"
+                      ToolTip.Tip="Copilot">
+                <TextBlock FontSize="20" Text="◇" />
+              </Button>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Margin="0,0,0,6">
+              <Button Classes="workbench activity"
+                      Command="{Binding ShowAccountsCommand}"
+                      ToolTip.Tip="Accounts">
+                <TextBlock FontSize="19" Text="◎" />
+              </Button>
+              <Button Classes="workbench activity"
+                      Command="{Binding ShowSettingsCommand}"
+                      ToolTip.Tip="Settings">
+                <TextBlock FontSize="21" Text="⚙" />
+              </Button>
+            </StackPanel>
           </Grid>
-          <DockSplitter Grid.Column="3" />
-          <DockRegion Grid.Column="4" ItemsSource="{Binding RightTabs}"
-                      SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
-        </Grid>
-      </DockShell>
+        </Border>
+
+        <DockShell Grid.Column="1" x:Name="Shell"
+                   ColorTheme="{Binding DockColorTheme}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="{Binding SideBarColumnWidth}" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="{Binding SecondarySideBarColumnWidth}" />
+            </Grid.ColumnDefinitions>
+            <DockRegion Grid.Column="0"
+                        IsVisible="{Binding IsSideBarVisible}"
+                        ItemsSource="{Binding LeftTabs}"
+                        SelectedItem="{Binding LeftSelected, Mode=TwoWay}" />
+            <DockSplitter Grid.Column="1" IsVisible="{Binding IsSideBarVisible}" />
+            <Grid Grid.Column="2">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="{Binding PanelRowHeight}" />
+              </Grid.RowDefinitions>
+              <DockRegion Grid.Row="0" ShowAddButton="True" AddTabCommand="{Binding AddDocCommand}"
+                          ItemsSource="{Binding CenterTopTabs}"
+                          SelectedItem="{Binding CenterTopSelected, Mode=TwoWay}" />
+              <DockSplitter Grid.Row="1" IsVisible="{Binding IsPanelVisible}" />
+              <DockRegion Grid.Row="2"
+                          IsVisible="{Binding IsPanelVisible}"
+                          ItemsSource="{Binding CenterBottomTabs}"
+                          SelectedItem="{Binding CenterBottomSelected, Mode=TwoWay}" />
+            </Grid>
+            <DockSplitter Grid.Column="3" IsVisible="{Binding IsSecondarySideBarVisible}" />
+            <DockRegion Grid.Column="4"
+                        IsVisible="{Binding IsSecondarySideBarVisible}"
+                        ItemsSource="{Binding RightTabs}"
+                        SelectedItem="{Binding RightSelected, Mode=TwoWay}" />
+          </Grid>
+        </DockShell>
+      </Grid>
+
+      <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto"
+            Background="{DynamicResource statusBar.background}">
+        <StackPanel Margin="2,0" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button Classes="workbench status"
+                  Command="{Binding SelectActivityCommand}"
+                  CommandParameter="SourceControl"
+                  ToolTip.Tip="Source Control — main*">
+            <TextBlock Text="⑂  main*" />
+          </Button>
+          <Button Classes="workbench status"
+                  Command="{Binding ShowProblemsCommand}"
+                  ToolTip.Tip="No Problems">
+            <TextBlock Text="↻  0  ⚠ 0" />
+          </Button>
+        </StackPanel>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="12" Opacity="0.7" Foreground="{DynamicResource statusBar.foreground}"
+                   Text="GOZA.Dock · Avalonia" />
+        <StackPanel Grid.Column="2" Margin="0,0,2,0" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button Classes="workbench status" Command="{Binding ShowProblemsCommand}" ToolTip.Tip="Go to Line">
+            <TextBlock Text="Ln 12, Col 18" />
+          </Button>
+          <Button Classes="workbench status" Command="{Binding ShowAboutCommand}" ToolTip.Tip="Encoding">
+            <TextBlock Text="UTF-8" />
+          </Button>
+          <Button Classes="workbench status" Command="{Binding OpenTabCommand}" CommandParameter="{Binding GuideTab}" ToolTip.Tip="Language Mode">
+            <TextBlock Text="C#" />
+          </Button>
+          <Button Classes="workbench status" Command="{Binding ToggleCommandPaletteCommand}" ToolTip.Tip="Notifications">
+            <TextBlock Text="◯" />
+          </Button>
+        </StackPanel>
+      </Grid>
     </Grid>
 
-    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Background="{DynamicResource titleBar.activeBackground}">
-      <StackPanel Margin="10,0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-        <TextBlock FontSize="12" Text="⑂  main*" /><TextBlock FontSize="12" Text="↻  0  ⚠ 0" />
+    <Panel IsVisible="{Binding IsCommandPaletteOpen}">
+      <Border Background="#66000000" PointerPressed="OnPaletteBackdropPressed" />
+      <Border Width="520" MaxHeight="420" HorizontalAlignment="Center" VerticalAlignment="Top"
+              Margin="0,48,0,0" Padding="8"
+              Background="{DynamicResource quickInput.background}"
+              BorderBrush="{DynamicResource surface.border}"
+              BorderThickness="1" CornerRadius="8">
+        <Grid RowDefinitions="Auto,*">
+          <TextBox x:Name="CommandPaletteBox"
+                   PlaceholderText="Search files and commands"
+                   Text="{Binding CommandPaletteQuery}" />
+          <ScrollViewer Grid.Row="1" Margin="0,8,0,0" MaxHeight="320">
+            <ItemsControl ItemsSource="{Binding FilteredCommands}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:WorkbenchCommandItem">
+                  <Button Classes="workbench command-item"
+                          Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).RunWorkbenchCommandCommand}"
+                          CommandParameter="{Binding}">
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="{Binding Title}" />
+                      <TextBlock FontSize="11" Opacity="0.65" Text="{Binding Detail}" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Panel>
+
+    <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,16,36"
+            Width="280" Padding="12,10" CornerRadius="6"
+            IsVisible="{Binding IsNotificationVisible}"
+            Background="{DynamicResource notifications.background}"
+            BorderBrush="{DynamicResource notifications.border}"
+            BorderThickness="1">
+      <StackPanel Spacing="4">
+        <TextBlock FontWeight="SemiBold" Text="{Binding NotificationTitle}" />
+        <TextBlock Opacity="0.8" TextWrapping="Wrap" Text="{Binding NotificationBody}" />
       </StackPanel>
-      <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                 FontSize="12" Opacity="0.7" Text="GOZA.Dock · Avalonia" />
-      <StackPanel Grid.Column="2" Margin="0,0,10,0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-        <TextBlock FontSize="12" Text="Ln 12, Col 18" /><TextBlock FontSize="12" Text="UTF-8" />
-        <TextBlock FontSize="12" Text="C#" /><TextBlock FontSize="12" Text="◯" />
-      </StackPanel>
-    </Grid>
-  </Grid>
+    </Border>
+  </Panel>
 </UserControl>
