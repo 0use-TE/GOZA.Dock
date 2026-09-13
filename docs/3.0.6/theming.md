@@ -55,8 +55,10 @@ Title **font scales** with this value (`13 × strip/32`); horizontal padding sta
            PanePresentation="{Binding PanePresentation}" />
 ```
 
-- `ClassicSeams` (default): edge-to-edge panes, a one-pixel `editorGroup.border` seam, and a four-pixel overlay sash using `sash.hoverBorder` on hover/drag.
+- `ClassicSeams` (default): edge-to-edge panes and a one-pixel `editorGroup.border` seam using `sash.hoverBorder` on hover/drag.
 - `ModernCards`: `surface.background`, `surface.border`, card gaps, and rounded pane corners.
+
+`DockShell.SashSize` controls the transparent splitter hit target for mouse, pen, and touch. It defaults to `12`; the target is centered over the boundary and does not alter the one-pixel classic seam or the modern card gap.
 
 | ClassicSeams (default) | ModernCards |
 |---|---|

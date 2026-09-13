@@ -52,8 +52,10 @@ JSON 缺少 `type` 时查 [`VsCodeThemeTypeMap`](https://github.com/0use-TE/GOZA
            PanePresentation="{Binding PanePresentation}" />
 ```
 
-- `ClassicSeams`（默认）：区域贴边，常态显示 1px `editorGroup.border` 直缝，并保留覆盖边界的 4px sash 命中区；悬停/拖动使用 `sash.hoverBorder`。
+- `ClassicSeams`（默认）：区域贴边，常态显示 1px `editorGroup.border` 直缝；悬停/拖动使用 `sash.hoverBorder`。
 - `ModernCards`：使用 `surface.background`、`surface.border`、卡片间距和区域圆角。
+
+`DockShell.SashSize` 控制鼠标、触控笔和手指共用的透明拖动命中区，默认值为 `12`。命中区居中覆盖边界，不会改变经典模式的 1px 直缝或现代模式的卡片间距。
 
 | ClassicSeams（默认） | ModernCards |
 |---|---|

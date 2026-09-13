@@ -11,12 +11,12 @@ namespace GOZA.Dock.Controls;
 /// <summary>
 /// A themeable GridSplitter for dock grids. Use an <c>Auto</c> gutter row or column;
 /// the control infers the resize direction and spans the opposite axis.
-/// Defaults match VS Code sash: <c>workbench.sash.size</c> (= <c>DockPaneGap</c>) and live resize.
+/// Its hit thickness comes from <see cref="DockShell.SashSize"/> and is independent of
+/// the visible seam or card gap.
 /// </summary>
 [PseudoClasses(":columns", ":rows", ":dragging")]
 public sealed class DockSplitter : GridSplitter
 {
-    private const double ClassicSashSize = 4;
     private const double ClassicSeamSize = 1;
     private bool _isDragging;
     private bool _layoutRefreshPending;
@@ -96,11 +96,17 @@ public sealed class DockSplitter : GridSplitter
         if (Parent is not Grid grid)
             return;
 
-        var classic = this.GetVisualAncestors()
+        var shell = this.GetVisualAncestors()
             .OfType<DockShell>()
-            .FirstOrDefault()?.PanePresentation == DockPanePresentation.ClassicSeams;
-        var sashSize = classic ? ClassicSashSize : ResolveGap();
-        var overlap = classic ? -(ClassicSashSize - ClassicSeamSize) / 2 : 0;
+            .FirstOrDefault();
+        var classic = shell?.PanePresentation == DockPanePresentation.ClassicSeams;
+        var visualGutter = classic ? ClassicSeamSize : ResolveGap();
+        var configuredSashSize = shell?.SashSize ?? DockShell.DefaultSashSize;
+        if (configuredSashSize <= 0 || double.IsNaN(configuredSashSize) || double.IsInfinity(configuredSashSize))
+            configuredSashSize = DockShell.DefaultSashSize;
+
+        var sashSize = Math.Max(visualGutter, configuredSashSize);
+        var overlap = -(sashSize - visualGutter) / 2;
 
         var column = Grid.GetColumn(this);
         var row = Grid.GetRow(this);

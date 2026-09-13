@@ -7,6 +7,7 @@
 - 可关闭 Tab 的关闭按钮现在默认常显。设置 `DockRegion.CloseButtonDisplayMode="SelectedOrPointerOver"` 可恢复原先仅在选中或悬停时显示的行为。
 - 新增 `DockRegion.TabScrollBarVisibility`。默认值为 `Hidden`，仍支持滚轮和触控板滚动；需要明确的滚动条时可设为 `Auto` 或 `Visible`。
 - 新增 `DockShell.PanePresentation`，可在 `ModernCards` 与 VS Code 风格的 `ClassicSeams` 之间运行时切换，且不会重建 Tab 或 View；默认采用 `ClassicSeams`。
+- 新增 `DockShell.SashSize`，鼠标、触控笔和手指共用默认 12px 命中区，同时不加宽可见边界。
 
 ---
 

@@ -39,6 +39,12 @@ public sealed partial class DockShell : ContentControl
             nameof(PanePresentation),
             DockPanePresentation.ClassicSeams);
 
+    /// <summary>Default pointer hit thickness of a dock sash.</summary>
+    public const double DefaultSashSize = 12;
+
+    public static readonly StyledProperty<double> SashSizeProperty =
+        AvaloniaProperty.Register<DockShell, double>(nameof(SashSize), DefaultSashSize);
+
     /// <summary>VS Code default: horizontal tab-strip height / vertical tab-strip width.</summary>
     public const double DefaultTabStripSize = 32;
 
@@ -107,6 +113,17 @@ public sealed partial class DockShell : ContentControl
     }
 
     /// <summary>
+    /// Pointer hit thickness shared by mouse, pen, and touch for every splitter in this shell.
+    /// It is centered over the boundary and does not change the visible seam or card gap.
+    /// Defaults to <see cref="DefaultSashSize"/>.
+    /// </summary>
+    public double SashSize
+    {
+        get => GetValue(SashSizeProperty);
+        set => SetValue(SashSizeProperty, value);
+    }
+
+    /// <summary>
     /// Tab strip thickness: height for horizontal strips, width for vertical strips.
     /// </summary>
     public double TabStripSize
@@ -130,6 +147,7 @@ public sealed partial class DockShell : ContentControl
         TabStripSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.WriteHeaderMetrics());
         PanePresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
             shell.UpdatePanePresentation());
+        SashSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.RefreshSplitters());
     }
 
     private void UpdatePanePresentation()
@@ -140,6 +158,11 @@ public sealed partial class DockShell : ContentControl
 
         // The sash geometry is calculated by DockSplitter rather than its template.
         // Refresh every realized splitter after the shell-level presentation changes.
+        RefreshSplitters();
+    }
+
+    private void RefreshSplitters()
+    {
         foreach (var splitter in this.GetVisualDescendants().OfType<DockSplitter>())
             splitter.RefreshAutoLayout();
     }

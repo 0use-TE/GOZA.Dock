@@ -7,6 +7,7 @@
 - Close buttons on closable tabs are now visible by default. Set `DockRegion.CloseButtonDisplayMode="SelectedOrPointerOver"` to restore the previous selected/hover-only behavior.
 - Added `DockRegion.TabScrollBarVisibility`. It defaults to `Hidden`, preserving wheel and touchpad scrolling without a visible bar; set it to `Auto` or `Visible` when an explicit scroll bar is preferred.
 - Added runtime `DockShell.PanePresentation` switching between `ModernCards` and VS Code-style `ClassicSeams`, without recreating tabs or views. `ClassicSeams` is the default.
+- Added `DockShell.SashSize`, defaulting to a shared 12px mouse, pen, and touch hit target without widening the visible boundary.
 
 ---
 

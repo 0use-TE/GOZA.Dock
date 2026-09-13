@@ -42,6 +42,7 @@ public sealed class DockShell : ContentControl
 | `Content` | `object?` | `null` | 你的布局。必须是 `Panel`（通常是 `Grid`），否则 Parking Lot 无法挂载。 |
 | `ColorTheme` | `VsCodeColorTheme?` | `null` | **唯一颜色主题入口**。将 workbench 笔刷写入本 Shell 的 `Resources`。**不**设置 `RequestedThemeVariant`。 |
 | `PanePresentation` | `DockPanePresentation` | `ClassicSeams` | 在贴边的 VS Code 经典直缝与圆角现代卡片之间运行时切换；Tab 与 View 保持不变。 |
+| `SashSize` | `double` | `12` | 所有分隔条共用的鼠标、触控笔和手指命中宽度；不会改变可见直缝或卡片间距。 |
 | `TabStripSize` | `double` | `32` | 水平条**高度** / 垂直条**宽度**；标题字号同比缩放，间距固定，宽度由文字撑开。 |
 | `EnableViewCache` | `bool` | `true` | 为 `ReuseSurface = true` 的 Tab 启用表面复用。对应 `EnableViewCacheProperty`。 |
 | `MaximizedRegion` | `DockRegion?` | `null` | 当前填满 Shell 的 Region，只读。 |
