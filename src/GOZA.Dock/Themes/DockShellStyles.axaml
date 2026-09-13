@@ -271,8 +271,8 @@
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
                     Padding="{TemplateBinding Padding}">
-              <ScrollViewer HorizontalScrollBarVisibility="Hidden"
-                            VerticalScrollBarVisibility="Hidden"
+              <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                            VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
                             BringIntoViewOnFocusChange="True">
                 <ItemsPresenter x:Name="PART_ItemsPresenter"
                                 ItemsPanel="{TemplateBinding ItemsPanel}" />
@@ -403,13 +403,13 @@
         <!-- VS Code sash: live resize only (no drag-preview bar). -->
         <Setter Property="ShowsPreview" Value="False" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource editorGroup.border}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
           <ControlTemplate>
             <Border Background="{TemplateBinding Background}">
               <Border x:Name="PART_Highlight"
-                      Background="{DynamicResource editorGroup.border}" />
+                      Background="{TemplateBinding BorderBrush}" />
             </Border>
           </ControlTemplate>
         </Setter>
@@ -530,6 +530,8 @@
 
                     <TabStrip x:Name="PART_TabStrip"
                               Theme="{StaticResource DockTabStripTheme}"
+                              ScrollViewer.HorizontalScrollBarVisibility="{TemplateBinding TabScrollBarVisibility}"
+                              ScrollViewer.VerticalScrollBarVisibility="{TemplateBinding TabScrollBarVisibility}"
                               ItemsSource="{TemplateBinding ItemsSource}"
                               ItemTemplate="{TemplateBinding TabHeaderTemplate}"
                               ItemContainerTheme="{TemplateBinding TabItemTheme}"
@@ -683,24 +685,67 @@
        tab-actions = 24px lane with 2px inline margin;
        action-label = 16px icon + 2px padding => 20px hover surface. -->
   <Style Selector="controls|DockRegion TabStripItem controls|DockHeaderButton.dock-tab-close">
-    <Setter Property="Opacity" Value="0" />
-    <Setter Property="Width" Value="0" />
-    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Width" Value="{DynamicResource DockTabCloseActionWidth}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="Height" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="MinHeight" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="MaxHeight" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="Margin" Value="0" />
+    <Setter Property="IsHitTestVisible" Value="True" />
+  </Style>
+  <!-- VS Code Classic: parts meet edge-to-edge. The splitter keeps a 4px overlay
+       hit target while only this centered 1px seam is visible at rest. -->
+  <Style Selector="controls|DockShell:classic-seams">
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockRegion">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns /template/ Border#PART_Highlight">
+    <Setter Property="Width" Value="1" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns:pointerover /template/ Border#PART_Highlight">
+    <Setter Property="Width" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns:pressed /template/ Border#PART_Highlight">
+    <Setter Property="Width" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns:dragging /template/ Border#PART_Highlight">
+    <Setter Property="Width" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:rows /template/ Border#PART_Highlight">
+    <Setter Property="Height" Value="1" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:rows:pointerover /template/ Border#PART_Highlight">
+    <Setter Property="Height" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:rows:pressed /template/ Border#PART_Highlight">
+    <Setter Property="Height" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:rows:dragging /template/ Border#PART_Highlight">
+    <Setter Property="Height" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockRegion /template/ Border#PART_DropHint">
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+  <Style Selector="controls|DockRegion:close-button-selected-or-pointerover TabStripItem controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="Width" Value="0" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Margin" Value="0" />
     <Setter Property="IsHitTestVisible" Value="False" />
   </Style>
-  <Style Selector="controls|DockRegion TabStripItem:selected controls|DockHeaderButton.dock-tab-close">
+  <Style Selector="controls|DockRegion:close-button-selected-or-pointerover TabStripItem:selected controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Opacity" Value="1" />
     <Setter Property="Width" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="MinWidth" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="Margin" Value="{DynamicResource DockTabCloseGap}" />
     <Setter Property="IsHitTestVisible" Value="True" />
   </Style>
-  <Style Selector="controls|DockRegion TabStripItem:pointerover controls|DockHeaderButton.dock-tab-close">
+  <Style Selector="controls|DockRegion:close-button-selected-or-pointerover TabStripItem:pointerover controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Opacity" Value="1" />
     <Setter Property="Width" Value="{DynamicResource DockTabCloseActionWidth}" />
     <Setter Property="MinWidth" Value="{DynamicResource DockTabCloseActionWidth}" />

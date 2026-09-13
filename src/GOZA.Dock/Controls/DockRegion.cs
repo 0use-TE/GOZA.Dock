@@ -52,6 +52,16 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             nameof(TabStripPlacement),
             DockTabStripPlacement.Top);
 
+    public static readonly StyledProperty<DockTabCloseButtonDisplayMode> CloseButtonDisplayModeProperty =
+        AvaloniaProperty.Register<DockRegion, DockTabCloseButtonDisplayMode>(
+            nameof(CloseButtonDisplayMode),
+            DockTabCloseButtonDisplayMode.Always);
+
+    public static readonly StyledProperty<ScrollBarVisibility> TabScrollBarVisibilityProperty =
+        AvaloniaProperty.Register<DockRegion, ScrollBarVisibility>(
+            nameof(TabScrollBarVisibility),
+            ScrollBarVisibility.Hidden);
+
     public static readonly StyledProperty<IDataTemplate?> TabHeaderTemplateProperty =
         AvaloniaProperty.Register<DockRegion, IDataTemplate?>(nameof(TabHeaderTemplate));
 
@@ -117,6 +127,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             region.OnSelectionChanged(change.OldValue, change.NewValue));
         TabStripPlacementProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateVisualState());
+        CloseButtonDisplayModeProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateVisualState());
         ShowAddButtonProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateHeaderState());
         HeaderContentProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
@@ -157,6 +169,26 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     {
         get => GetValue(TabStripPlacementProperty);
         set => SetValue(TabStripPlacementProperty, value);
+    }
+
+    /// <summary>
+    /// Controls when close buttons are shown for tabs whose <see cref="IDockTabItem.IsClosable"/>
+    /// is true. Defaults to <see cref="DockTabCloseButtonDisplayMode.Always"/>.
+    /// </summary>
+    public DockTabCloseButtonDisplayMode CloseButtonDisplayMode
+    {
+        get => GetValue(CloseButtonDisplayModeProperty);
+        set => SetValue(CloseButtonDisplayModeProperty, value);
+    }
+
+    /// <summary>
+    /// Visibility of the tab strip scroll bar. Hidden scroll bars still allow wheel and
+    /// touchpad scrolling. Defaults to <see cref="ScrollBarVisibility.Hidden"/>.
+    /// </summary>
+    public ScrollBarVisibility TabScrollBarVisibility
+    {
+        get => GetValue(TabScrollBarVisibilityProperty);
+        set => SetValue(TabScrollBarVisibilityProperty, value);
     }
 
     /// <summary>Optional application-defined tab header template.</summary>
@@ -596,6 +628,9 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         PseudoClasses.Set(":horizontal", TabStripPlacement.IsHorizontal());
         PseudoClasses.Set(":vertical", !TabStripPlacement.IsHorizontal());
         PseudoClasses.Set(":header-body-separated", ShowHeaderBodySeparator);
+        PseudoClasses.Set(
+            ":close-button-selected-or-pointerover",
+            CloseButtonDisplayMode == DockTabCloseButtonDisplayMode.SelectedOrPointerOver);
     }
 
     private void UpdateHeaderState()

@@ -15,6 +15,7 @@ namespace GOZA.Dock.Controls;
 /// into its <see cref="StyledElement.Styles"/> via compiled XAML (no App <c>StyleInclude</c> required).
 /// </summary>
 [TemplatePart(PartMaximizedHost, typeof(Panel), IsRequired = true)]
+[PseudoClasses(":modern-cards", ":classic-seams")]
 public sealed partial class DockShell : ContentControl
 {
     internal const string PartMaximizedHost = "PART_MaximizedHost";
@@ -32,6 +33,11 @@ public sealed partial class DockShell : ContentControl
     /// </summary>
     public static readonly StyledProperty<VsCodeColorTheme?> ColorThemeProperty =
         AvaloniaProperty.Register<DockShell, VsCodeColorTheme?>(nameof(ColorTheme));
+
+    public static readonly StyledProperty<DockPanePresentation> PanePresentationProperty =
+        AvaloniaProperty.Register<DockShell, DockPanePresentation>(
+            nameof(PanePresentation),
+            DockPanePresentation.ClassicSeams);
 
     /// <summary>VS Code default: horizontal tab-strip height / vertical tab-strip width.</summary>
     public const double DefaultTabStripSize = 32;
@@ -66,6 +72,7 @@ public sealed partial class DockShell : ContentControl
     {
         AvaloniaXamlLoader.Load(this);
         WriteHeaderMetrics();
+        UpdatePanePresentation();
     }
 
     /// <summary>
@@ -90,6 +97,16 @@ public sealed partial class DockShell : ContentControl
     }
 
     /// <summary>
+    /// Region presentation. Switches at runtime without recreating regions or their content.
+    /// Defaults to <see cref="DockPanePresentation.ClassicSeams"/>.
+    /// </summary>
+    public DockPanePresentation PanePresentation
+    {
+        get => GetValue(PanePresentationProperty);
+        set => SetValue(PanePresentationProperty, value);
+    }
+
+    /// <summary>
     /// Tab strip thickness: height for horizontal strips, width for vertical strips.
     /// </summary>
     public double TabStripSize
@@ -111,6 +128,20 @@ public sealed partial class DockShell : ContentControl
         ColorThemeProperty.Changed.AddClassHandler<DockShell>((shell, e) =>
             shell.OnColorThemeChanged(e.GetNewValue<VsCodeColorTheme?>()));
         TabStripSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.WriteHeaderMetrics());
+        PanePresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
+            shell.UpdatePanePresentation());
+    }
+
+    private void UpdatePanePresentation()
+    {
+        var classic = PanePresentation == DockPanePresentation.ClassicSeams;
+        PseudoClasses.Set(":classic-seams", classic);
+        PseudoClasses.Set(":modern-cards", !classic);
+
+        // The sash geometry is calculated by DockSplitter rather than its template.
+        // Refresh every realized splitter after the shell-level presentation changes.
+        foreach (var splitter in this.GetVisualDescendants().OfType<DockSplitter>())
+            splitter.RefreshAutoLayout();
     }
 
     private void WriteHeaderMetrics()

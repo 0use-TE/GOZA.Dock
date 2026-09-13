@@ -13,6 +13,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private const string AssetRoot = "avares://GOZA.Dock.Minimal/Themes/";
 
     private VsCodeColorTheme? _colorTheme;
+    private DockPanePresentation _panePresentation = DockPanePresentation.ClassicSeams;
     private double _tabStripSize = DockShell.DefaultTabStripSize;
 
     public MainViewModel()
@@ -58,6 +59,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     /// <summary>可选主题（已加载好的 <see cref="VsCodeColorTheme"/>）。</summary>
     public IReadOnlyList<VsCodeColorTheme> Themes { get; }
 
+    public IReadOnlyList<DockPanePresentation> PanePresentations { get; } =
+        Enum.GetValues<DockPanePresentation>();
+
     /// <summary>直接绑 <c>DockShell.ColorTheme</c>；ComboBox 的 SelectedItem 也是它。</summary>
     public VsCodeColorTheme? ColorTheme
     {
@@ -85,6 +89,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 return;
 
             _tabStripSize = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Switches the shell between modern cards and classic VS Code seams.</summary>
+    public DockPanePresentation PanePresentation
+    {
+        get => _panePresentation;
+        set
+        {
+            if (_panePresentation == value)
+                return;
+
+            _panePresentation = value;
             OnPropertyChanged();
         }
     }

@@ -1,0 +1,62 @@
+# 主题（3.0）
+
+**唯一应用入口：** 给 [`DockShell.ColorTheme`](https://github.com/0use-TE/GOZA.Dock/blob/master/src/GOZA.Dock/Controls/DockShell.cs) 赋值。
+
+每个 `DockShell` 已自带 `DockShellStyles`。加载器只返回 [`VsCodeColorTheme`](https://github.com/0use-TE/GOZA.Dock/blob/master/src/GOZA.Dock/VsCodeThemeJson.cs)，**不**写资源。
+
+```csharp
+// 内置
+dockShell.ColorTheme = DockColorThemeCatalog.Create(DockColorTheme.DarkModern);
+
+// 外置 JSON（AOT：JsonDocument）
+dockShell.ColorTheme = VsCodeThemeJson.LoadFromFile("themes/dark_modern.json");
+```
+
+```xml
+<DockShell ColorTheme="{Binding DockColorTheme}" />
+```
+
+| | Avalonia `ThemeVariant` | `DockShell.ColorTheme` |
+|---|---|---|
+| 作用 | Fluent 明暗 | **本 Shell** 上的 Dock workbench 笔刷 |
+| 谁设置 | **宿主** | **`DockShell.ColorTheme`** |
+
+```csharp
+var theme = VsCodeThemeJson.LoadFromFile(path);
+dockShell.ColorTheme = theme;
+Application.Current!.RequestedThemeVariant =
+    theme.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
+```
+
+JSON 缺少 `type` 时查 [`VsCodeThemeTypeMap`](https://github.com/0use-TE/GOZA.Dock/blob/master/src/GOZA.Dock/VsCodeThemeTypeMap.cs)。
+
+## Header 尺寸（Tab 条）
+
+`DockShell` 上只需一个属性：`TabStripSize`（默认 `32`）。
+
+- 水平 Tab（上/下）→ 条的**高度**
+- 垂直 Tab（左/右）→ 条的**宽度**
+
+标题**字号随条尺寸缩放**（`13 × strip/32`）；左右 padding 固定，Tab **宽度由文字撑开**。Pill / chrome / 关闭按 `strip−8`、`strip−4` 推导。
+
+```xml
+<DockShell TabStripSize="40" ColorTheme="{Binding DockColorTheme}" />
+```
+
+## 区域表现模式
+
+`DockShell.PanePresentation` 与 `ColorTheme` 相互独立，并支持运行时切换：
+
+```xml
+<DockShell ColorTheme="{Binding DockColorTheme}"
+           PanePresentation="{Binding PanePresentation}" />
+```
+
+- `ClassicSeams`（默认）：区域贴边，常态显示 1px `editorGroup.border` 直缝，并保留覆盖边界的 4px sash 命中区；悬停/拖动使用 `sash.hoverBorder`。
+- `ModernCards`：使用 `surface.background`、`surface.border`、卡片间距和区域圆角。
+
+| ClassicSeams（默认） | ModernCards |
+|---|---|
+| ![经典直缝区域模式](../../../images/3.0.6/classic-seams.png) | ![现代卡片区域模式](../../../images/3.0.6/modern-cards.png) |
+
+也可继续在 `DockShell.Resources` 里覆写同名键，见 [DOCK-THEMING.zh-CN.md](https://github.com/0use-TE/GOZA.Dock/blob/master/DOCK-THEMING.zh-CN.md)。

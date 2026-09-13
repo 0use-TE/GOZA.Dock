@@ -23,6 +23,10 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                <TextBlock Text="区域风格" VerticalAlignment="Center" Margin="12,0,0,0" />
+                <ComboBox Width="150"
+                          ItemsSource="{Binding PanePresentations}"
+                          SelectedItem="{Binding PanePresentation}" />
                 <TextBlock Text="Tab 条尺寸" VerticalAlignment="Center" Margin="12,0,0,0" />
                 <NumericUpDown Width="148"
                                Minimum="20"
@@ -34,6 +38,7 @@
         </Border>
 
         <DockShell ColorTheme="{Binding ColorTheme}"
+                   PanePresentation="{Binding PanePresentation}"
                    TabStripSize="{Binding TabStripSize}">
             <Grid ColumnDefinitions="220,Auto,*">
                 <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
