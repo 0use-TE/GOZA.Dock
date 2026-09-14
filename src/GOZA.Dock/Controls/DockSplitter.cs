@@ -4,6 +4,7 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace GOZA.Dock.Controls;
@@ -18,6 +19,7 @@ namespace GOZA.Dock.Controls;
 public sealed class DockSplitter : GridSplitter
 {
     private const double ClassicSeamSize = 1;
+    private bool _isClassic;
     private bool _isDragging;
     private bool _layoutRefreshPending;
 
@@ -85,6 +87,28 @@ public sealed class DockSplitter : GridSplitter
 
     internal void RefreshAutoLayout() => ApplyAutoLayout();
 
+    public override void Render(DrawingContext context)
+    {
+        base.Render(context);
+
+        // Keep the resting classic seam independent from the enlarged transparent
+        // hit target. Drawing it here avoids template-child clipping caused by the
+        // negative margins that let a 12px sash occupy only a 1px grid gutter.
+        if (!_isClassic || BorderBrush is null)
+            return;
+
+        if (ResizeDirection == GridResizeDirection.Columns)
+        {
+            var x = Math.Floor(Bounds.Width / 2);
+            context.FillRectangle(BorderBrush, new Rect(x, 0, ClassicSeamSize, Bounds.Height));
+        }
+        else if (ResizeDirection == GridResizeDirection.Rows)
+        {
+            var y = Math.Floor(Bounds.Height / 2);
+            context.FillRectangle(BorderBrush, new Rect(0, y, Bounds.Width, ClassicSeamSize));
+        }
+    }
+
     private void ApplyAutoLayout()
     {
         if (_isDragging)
@@ -100,6 +124,12 @@ public sealed class DockSplitter : GridSplitter
             .OfType<DockShell>()
             .FirstOrDefault();
         var classic = shell?.PanePresentation == DockPanePresentation.ClassicSeams;
+        if (_isClassic != classic)
+        {
+            _isClassic = classic;
+            InvalidateVisual();
+        }
+
         var visualGutter = classic ? ClassicSeamSize : ResolveGap();
         var configuredSashSize = shell?.SashSize ?? DockShell.DefaultSashSize;
         if (configuredSashSize <= 0 || double.IsNaN(configuredSashSize) || double.IsInfinity(configuredSashSize))
