@@ -13,6 +13,10 @@ public enum DockChromeIconKind
     Close,
     Maximize,
     Restore,
+    TabPlacementTop,
+    TabPlacementRight,
+    TabPlacementBottom,
+    TabPlacementLeft,
 }
 
 /// <summary>Small vector icon used by the default dock chrome.</summary>
@@ -66,6 +70,16 @@ public sealed class DockChromeIcon : TemplatedControl
         "C2 5.77614 2.22386 6 2.5 6 H4 C5.10457 6 6 5.10457 6 4 V2.5 " +
         "C6 2.22386 5.77614 2 5.5 2 C5.22386 2 5 2.22386 5 2.5 Z");
 
+    // Compact editor frames with the current tab-strip edge drawn two pixels thick.
+    private static readonly Geometry TabPlacementTopGeometry = Geometry.Parse(
+        "M2 2 H14 V4 H2 Z M2 5 H3 V14 H2 Z M13 5 H14 V14 H13 Z M3 13 H13 V14 H3 Z");
+    private static readonly Geometry TabPlacementRightGeometry = Geometry.Parse(
+        "M12 2 H14 V14 H12 Z M2 2 H11 V3 H3 V13 H11 V14 H2 Z");
+    private static readonly Geometry TabPlacementBottomGeometry = Geometry.Parse(
+        "M2 12 H14 V14 H2 Z M2 2 H14 V3 H3 V11 H2 Z M13 3 H14 V11 H13 Z");
+    private static readonly Geometry TabPlacementLeftGeometry = Geometry.Parse(
+        "M2 2 H4 V14 H2 Z M5 2 H14 V14 H5 V13 H13 V3 H5 Z");
+
     private PathShape? _path;
 
     static DockChromeIcon()
@@ -97,6 +111,10 @@ public sealed class DockChromeIcon : TemplatedControl
                 DockChromeIconKind.Close => CloseGeometry,
                 DockChromeIconKind.Maximize => MaximizeGeometry,
                 DockChromeIconKind.Restore => RestoreGeometry,
+                DockChromeIconKind.TabPlacementTop => TabPlacementTopGeometry,
+                DockChromeIconKind.TabPlacementRight => TabPlacementRightGeometry,
+                DockChromeIconKind.TabPlacementBottom => TabPlacementBottomGeometry,
+                DockChromeIconKind.TabPlacementLeft => TabPlacementLeftGeometry,
                 _ => AddGeometry,
             };
         }

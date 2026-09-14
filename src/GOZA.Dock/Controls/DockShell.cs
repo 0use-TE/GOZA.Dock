@@ -15,6 +15,7 @@ namespace GOZA.Dock.Controls;
 /// into its <see cref="StyledElement.Styles"/> via compiled XAML (no App <c>StyleInclude</c> required).
 /// </summary>
 [TemplatePart(PartMaximizedHost, typeof(Panel), IsRequired = true)]
+[PseudoClasses(":modern-cards", ":classic-seams", ":modern-tabs", ":classic-tabs")]
 public sealed partial class DockShell : ContentControl
 {
     internal const string PartMaximizedHost = "PART_MaximizedHost";
@@ -32,6 +33,22 @@ public sealed partial class DockShell : ContentControl
     /// </summary>
     public static readonly StyledProperty<VsCodeColorTheme?> ColorThemeProperty =
         AvaloniaProperty.Register<DockShell, VsCodeColorTheme?>(nameof(ColorTheme));
+
+    public static readonly StyledProperty<DockPanePresentation> PanePresentationProperty =
+        AvaloniaProperty.Register<DockShell, DockPanePresentation>(
+            nameof(PanePresentation),
+            DockPanePresentation.ClassicSeams);
+
+    public static readonly StyledProperty<DockTabPresentation> TabPresentationProperty =
+        AvaloniaProperty.Register<DockShell, DockTabPresentation>(
+            nameof(TabPresentation),
+            DockTabPresentation.Auto);
+
+    /// <summary>Default pointer hit thickness of a dock sash.</summary>
+    public const double DefaultSashSize = 12;
+
+    public static readonly StyledProperty<double> SashSizeProperty =
+        AvaloniaProperty.Register<DockShell, double>(nameof(SashSize), DefaultSashSize);
 
     /// <summary>VS Code default: horizontal tab-strip height / vertical tab-strip width.</summary>
     public const double DefaultTabStripSize = 32;
@@ -66,6 +83,7 @@ public sealed partial class DockShell : ContentControl
     {
         AvaloniaXamlLoader.Load(this);
         WriteHeaderMetrics();
+        UpdatePresentationStates();
     }
 
     /// <summary>
@@ -90,6 +108,38 @@ public sealed partial class DockShell : ContentControl
     }
 
     /// <summary>
+    /// Region presentation. Switches at runtime without recreating regions or their content.
+    /// Defaults to <see cref="DockPanePresentation.ClassicSeams"/>.
+    /// </summary>
+    public DockPanePresentation PanePresentation
+    {
+        get => GetValue(PanePresentationProperty);
+        set => SetValue(PanePresentationProperty, value);
+    }
+
+    /// <summary>
+    /// Tab-header presentation. <see cref="DockTabPresentation.Auto"/> follows
+    /// <see cref="PanePresentation"/> and is the default. The explicit values allow
+    /// either tab style to be paired with either region style at runtime.
+    /// </summary>
+    public DockTabPresentation TabPresentation
+    {
+        get => GetValue(TabPresentationProperty);
+        set => SetValue(TabPresentationProperty, value);
+    }
+
+    /// <summary>
+    /// Pointer hit thickness shared by mouse, pen, and touch for every splitter in this shell.
+    /// It is centered over the boundary and does not change the visible seam or card gap.
+    /// Defaults to <see cref="DefaultSashSize"/>.
+    /// </summary>
+    public double SashSize
+    {
+        get => GetValue(SashSizeProperty);
+        set => SetValue(SashSizeProperty, value);
+    }
+
+    /// <summary>
     /// Tab strip thickness: height for horizontal strips, width for vertical strips.
     /// </summary>
     public double TabStripSize
@@ -111,6 +161,42 @@ public sealed partial class DockShell : ContentControl
         ColorThemeProperty.Changed.AddClassHandler<DockShell>((shell, e) =>
             shell.OnColorThemeChanged(e.GetNewValue<VsCodeColorTheme?>()));
         TabStripSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.WriteHeaderMetrics());
+        PanePresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
+            shell.UpdatePresentationStates());
+        TabPresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
+            shell.UpdateTabPresentation());
+        SashSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.RefreshSplitters());
+    }
+
+    private void UpdatePresentationStates()
+    {
+        var classic = PanePresentation == DockPanePresentation.ClassicSeams;
+        PseudoClasses.Set(":classic-seams", classic);
+        PseudoClasses.Set(":modern-cards", !classic);
+        UpdateTabPresentation();
+
+        // The sash geometry is calculated by DockSplitter rather than its template.
+        // Refresh every realized splitter after the shell-level presentation changes.
+        RefreshSplitters();
+    }
+
+    private void UpdateTabPresentation()
+    {
+        var classic = TabPresentation switch
+        {
+            DockTabPresentation.ClassicTabs => true,
+            DockTabPresentation.ModernPills => false,
+            _ => PanePresentation == DockPanePresentation.ClassicSeams
+        };
+
+        PseudoClasses.Set(":classic-tabs", classic);
+        PseudoClasses.Set(":modern-tabs", !classic);
+    }
+
+    private void RefreshSplitters()
+    {
+        foreach (var splitter in this.GetVisualDescendants().OfType<DockSplitter>())
+            splitter.RefreshAutoLayout();
     }
 
     private void WriteHeaderMetrics()

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Styling;
 using GOZA.Dock;
@@ -13,7 +14,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private const string AssetRoot = "avares://GOZA.Dock.Minimal/Themes/";
 
     private VsCodeColorTheme? _colorTheme;
+    private DockPanePresentation _panePresentation = DockPanePresentation.ClassicSeams;
+    private DockTabPresentation _tabPresentation = DockTabPresentation.Auto;
+    private bool _showMaximizeButton = true;
+    private bool _showTabPlacementButton = true;
     private double _tabStripSize = DockShell.DefaultTabStripSize;
+    private int _nextRightTab = 3;
 
     public MainViewModel()
     {
@@ -29,8 +35,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ];
         RightTabs =
         [
-            new PlainTab("right-1", "Editor", "右侧区域"),
-            new PlainTab("right-2", "Second", "右侧第二个标签（可拖拽）"),
+            new PlainTab("right-1", "Editor", "右侧区域") { IsClosable = true },
+            new PlainTab("right-2", "Second", "右侧第二个标签（可拖拽）") { IsClosable = true },
         ];
 
         // 列表里就是主题实例；选中后直接赋给 ColorTheme（绑定到 DockShell）。
@@ -47,6 +53,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ];
 
         ColorTheme = Themes[0];
+        AddRightTabCommand = new DelegateCommand(AddRightTab);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -57,6 +64,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     /// <summary>可选主题（已加载好的 <see cref="VsCodeColorTheme"/>）。</summary>
     public IReadOnlyList<VsCodeColorTheme> Themes { get; }
+
+    public IReadOnlyList<DockPanePresentation> PanePresentations { get; } =
+        Enum.GetValues<DockPanePresentation>();
+
+    public IReadOnlyList<DockTabPresentation> TabPresentations { get; } =
+        Enum.GetValues<DockTabPresentation>();
+
+    public ICommand AddRightTabCommand { get; }
 
     /// <summary>直接绑 <c>DockShell.ColorTheme</c>；ComboBox 的 SelectedItem 也是它。</summary>
     public VsCodeColorTheme? ColorTheme
@@ -89,6 +104,81 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>Switches the shell between modern cards and classic VS Code seams.</summary>
+    public DockPanePresentation PanePresentation
+    {
+        get => _panePresentation;
+        set
+        {
+            if (_panePresentation == value)
+                return;
+
+            _panePresentation = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Switches between automatic, modern pill, and classic VS Code tab headers.</summary>
+    public DockTabPresentation TabPresentation
+    {
+        get => _tabPresentation;
+        set
+        {
+            if (_tabPresentation == value)
+                return;
+
+            _tabPresentation = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowMaximizeButton
+    {
+        get => _showMaximizeButton;
+        set
+        {
+            if (_showMaximizeButton == value)
+                return;
+
+            _showMaximizeButton = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowTabPlacementButton
+    {
+        get => _showTabPlacementButton;
+        set
+        {
+            if (_showTabPlacementButton == value)
+                return;
+
+            _showTabPlacementButton = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private void AddRightTab()
+    {
+        var number = _nextRightTab++;
+        RightTabs.Add(new PlainTab($"right-{number}", $"Editor {number}", $"右侧第 {number} 个标签")
+        {
+            IsClosable = true
+        });
+    }
+
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private sealed class DelegateCommand(Action execute) : ICommand
+    {
+        public event EventHandler? CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => execute();
+    }
 }

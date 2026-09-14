@@ -11,11 +11,16 @@ namespace GOZA.Dock.Controls;
 /// <summary>
 /// A themeable GridSplitter for dock grids. Use an <c>Auto</c> gutter row or column;
 /// the control infers the resize direction and spans the opposite axis.
-/// Defaults match VS Code sash: <c>workbench.sash.size</c> (= <c>DockPaneGap</c>) and live resize.
+/// Its hit thickness comes from <see cref="DockShell.SashSize"/> and is independent of
+/// the visible seam or card gap.
 /// </summary>
 [PseudoClasses(":columns", ":rows", ":dragging")]
 public sealed class DockSplitter : GridSplitter
 {
+    private const double ClassicSeamSize = 1;
+    private bool _isDragging;
+    private bool _layoutRefreshPending;
+
     public DockSplitter()
     {
         // VS Code sash resizes live; never show Avalonia's drag-preview overlay by default.
@@ -55,6 +60,7 @@ public sealed class DockSplitter : GridSplitter
 
     protected override void OnDragStarted(VectorEventArgs e)
     {
+        _isDragging = true;
         PseudoClasses.Set(":dragging", true);
         base.OnDragStarted(e);
     }
@@ -67,14 +73,40 @@ public sealed class DockSplitter : GridSplitter
         }
         finally
         {
+            _isDragging = false;
             PseudoClasses.Set(":dragging", false);
+            if (_layoutRefreshPending)
+            {
+                _layoutRefreshPending = false;
+                ApplyAutoLayout();
+            }
         }
     }
 
+    internal void RefreshAutoLayout() => ApplyAutoLayout();
+
     private void ApplyAutoLayout()
     {
+        if (_isDragging)
+        {
+            _layoutRefreshPending = true;
+            return;
+        }
+
         if (Parent is not Grid grid)
             return;
+
+        var shell = this.GetVisualAncestors()
+            .OfType<DockShell>()
+            .FirstOrDefault();
+        var classic = shell?.PanePresentation == DockPanePresentation.ClassicSeams;
+        var visualGutter = classic ? ClassicSeamSize : ResolveGap();
+        var configuredSashSize = shell?.SashSize ?? DockShell.DefaultSashSize;
+        if (configuredSashSize <= 0 || double.IsNaN(configuredSashSize) || double.IsInfinity(configuredSashSize))
+            configuredSashSize = DockShell.DefaultSashSize;
+
+        var sashSize = Math.Max(visualGutter, configuredSashSize);
+        var overlap = -(sashSize - visualGutter) / 2;
 
         var column = Grid.GetColumn(this);
         var row = Grid.GetRow(this);
@@ -88,11 +120,11 @@ public sealed class DockSplitter : GridSplitter
             ResizeDirection = GridResizeDirection.Columns;
             PseudoClasses.Set(":columns", true);
             PseudoClasses.Set(":rows", false);
-            Width = ResolveGap();
+            Width = sashSize;
             Height = double.NaN;
             MinWidth = 0;
             MinHeight = 0;
-            Margin = new Thickness(0);
+            Margin = new Thickness(overlap, 0);
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
             if (grid.RowDefinitions.Count > 1 && Grid.GetRowSpan(this) == 1)
@@ -107,10 +139,10 @@ public sealed class DockSplitter : GridSplitter
             PseudoClasses.Set(":columns", false);
             PseudoClasses.Set(":rows", true);
             Width = double.NaN;
-            Height = ResolveGap();
+            Height = sashSize;
             MinWidth = 0;
             MinHeight = 0;
-            Margin = new Thickness(0);
+            Margin = new Thickness(0, overlap);
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
             if (grid.ColumnDefinitions.Count > 1 && Grid.GetColumnSpan(this) == 1)
