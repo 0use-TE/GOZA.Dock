@@ -7,8 +7,8 @@
         Width="960"
         Height="640">
 
-    <DockPanel>
-        <Border DockPanel.Dock="Top"
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0"
                 Padding="8,6"
                 BorderThickness="0"
                 BorderBrush="{DynamicResource surface.border}">
@@ -46,12 +46,10 @@
                                    FormatString="0"
                                    Value="{Binding TabStripSize}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6">
-                    <TextBlock Text="Tab 方向" VerticalAlignment="Center" />
-                    <ComboBox Width="120"
-                              ItemsSource="{Binding TabStripPlacements}"
-                              SelectedItem="{Binding TabStripPlacement}" />
-                </StackPanel>
+                <CheckBox Content="显示方向按钮"
+                          Margin="0,0,16,6"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding ShowTabPlacementButton}" />
                 <CheckBox Content="显示最大化按钮"
                           Margin="0,0,16,6"
                           VerticalAlignment="Center"
@@ -59,7 +57,8 @@
             </WrapPanel>
         </Border>
 
-        <DockShell ColorTheme="{Binding ColorTheme}"
+        <DockShell Grid.Row="1"
+                   ColorTheme="{Binding ColorTheme}"
                    PanePresentation="{Binding PanePresentation}"
                    TabPresentation="{Binding TabPresentation}"
                    TabStripSize="{Binding TabStripSize}">
@@ -68,12 +67,12 @@
                     <DockRegion Grid.Row="0"
                                 ItemsSource="{Binding LeftTopTabs}"
                                 ShowMaximizeButton="{Binding ShowMaximizeButton}"
-                                TabStripPlacement="{Binding TabStripPlacement}" />
+                                ShowTabPlacementButton="{Binding ShowTabPlacementButton}" />
                     <DockSplitter Grid.Row="1" />
                     <DockRegion Grid.Row="2"
                                 ItemsSource="{Binding LeftBottomTabs}"
                                 ShowMaximizeButton="{Binding ShowMaximizeButton}"
-                                TabStripPlacement="{Binding TabStripPlacement}" />
+                                ShowTabPlacementButton="{Binding ShowTabPlacementButton}" />
                 </Grid>
                 <DockSplitter Grid.Column="1" />
                 <DockRegion Grid.Column="2"
@@ -81,9 +80,9 @@
                             AddTabCommand="{Binding AddRightTabCommand}"
                             ShowAddButton="True"
                             ShowMaximizeButton="{Binding ShowMaximizeButton}"
-                            TabStripPlacement="{Binding TabStripPlacement}" />
+                            ShowTabPlacementButton="{Binding ShowTabPlacementButton}" />
             </Grid>
             </DockShell>
-    </DockPanel>
+    </Grid>
 
 </Window>

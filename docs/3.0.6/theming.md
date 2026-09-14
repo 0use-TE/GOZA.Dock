@@ -75,10 +75,14 @@ Title **font scales** with this value (`13 × strip/32`); horizontal padding sta
 
 Set an explicit value to combine either tab style with either pane style. Classic tabs consume the standard VS Code keys `editorGroupHeader.tabsBackground`, `editorGroupHeader.tabsBorder`, `tab.activeBackground`, `tab.inactiveBackground`, `tab.activeForeground`, `tab.inactiveForeground`, `tab.hoverBackground`, `tab.hoverForeground`, `tab.border`, `tab.activeBorder`, and `tab.activeBorderTop`.
 
-Non-closable classic tabs use balanced 10px horizontal title insets. Closable tabs use a 10px leading inset plus the 28px close-action lane. Header actions stay pinned to the trailing edge in the order Add → custom `HeaderContent` → maximize/restore.
+Non-closable classic tabs use balanced 10px horizontal title insets. Closable tabs use a 10px leading inset plus the 28px close-action lane. Header actions stay pinned to the trailing edge in the order Add → custom `HeaderContent` → tab placement → maximize/restore.
 
 | ClassicSeams + Auto (default) | ModernCards + Auto |
 |---|---|
 | ![Classic seam and classic tab presentation](../../images/3.0.6/classic-tabs.png) | ![Modern card presentation](../../images/3.0.6/modern-cards.png) |
+
+Vertical classic tabs keep the 32px strip metric, rotate only the tab header content, and pin Add → placement → maximize controls to the bottom edge:
+
+![Classic vertical tab presentation](../../images/3.0.6/classic-tabs-vertical.png)
 
 You can still override the same keys manually in `DockShell.Resources` (`DockTabHeight`, …) — see [DOCK-THEMING.zh-CN.md](https://github.com/0use-TE/GOZA.Dock/blob/master/DOCK-THEMING.zh-CN.md).

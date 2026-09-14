@@ -23,6 +23,8 @@ namespace GOZA.Dock.Controls;
 [TemplatePart(PartContentHost, typeof(ContentControl), IsRequired = true)]
 [TemplatePart(PartHeaderHost, typeof(Control), IsRequired = true)]
 [TemplatePart(PartChromeHost, typeof(Control), IsRequired = true)]
+[TemplatePart(PartTabPlacementButton, typeof(DockHeaderButton), IsRequired = true)]
+[TemplatePart(PartTabPlacementIcon, typeof(DockChromeIcon), IsRequired = true)]
 [TemplatePart(PartMaximizeButton, typeof(DockHeaderButton), IsRequired = true)]
 [TemplatePart(PartMaximizeIcon, typeof(DockChromeIcon), IsRequired = true)]
 [TemplatePart(PartDropHint, typeof(Border), IsRequired = true)]
@@ -32,6 +34,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     internal const string PartContentHost = "PART_ContentHost";
     internal const string PartHeaderHost = "PART_HeaderHost";
     internal const string PartChromeHost = "PART_ChromeHost";
+    internal const string PartTabPlacementButton = "PART_TabPlacementButton";
+    internal const string PartTabPlacementIcon = "PART_TabPlacementIcon";
     internal const string PartMaximizeButton = "PART_MaximizeButton";
     internal const string PartMaximizeIcon = "PART_MaximizeIcon";
     internal const string PartDropHint = "PART_DropHint";
@@ -86,6 +90,9 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     public static readonly StyledProperty<bool> ShowMaximizeButtonProperty =
         AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowMaximizeButton), true);
 
+    public static readonly StyledProperty<bool> ShowTabPlacementButtonProperty =
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowTabPlacementButton), true);
+
     public static readonly StyledProperty<bool> CanMaximizeProperty =
         AvaloniaProperty.Register<DockRegion, bool>(nameof(CanMaximize), true);
 
@@ -110,6 +117,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     private ContentControl? _contentHost;
     private Control? _headerHost;
     private Control? _chromeHost;
+    private DockHeaderButton? _tabPlacementButton;
+    private DockChromeIcon? _tabPlacementIcon;
     private DockHeaderButton? _maximizeButton;
     private DockChromeIcon? _maximizeIcon;
     private Border? _dropHint;
@@ -134,6 +143,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         HeaderContentProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateHeaderState());
         ShowMaximizeButtonProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
+            region.UpdateHeaderState());
+        ShowTabPlacementButtonProperty.Changed.AddClassHandler<DockRegion>((region, _) =>
             region.UpdateHeaderState());
         CanMaximizeProperty.Changed.AddClassHandler<DockRegion>((region, change) =>
             region.OnCanMaximizeChanged(change.NewValue is true));
@@ -253,6 +264,16 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         set => SetValue(ShowMaximizeButtonProperty, value);
     }
 
+    /// <summary>
+    /// Shows the built-in tab-placement action at the trailing edge of the header.
+    /// Clicking it cycles Top, Right, Bottom, and Left. Defaults to true.
+    /// </summary>
+    public bool ShowTabPlacementButton
+    {
+        get => GetValue(ShowTabPlacementButtonProperty);
+        set => SetValue(ShowTabPlacementButtonProperty, value);
+    }
+
     /// <summary>Allows this region to fill its containing <see cref="DockShell"/>.</summary>
     public bool CanMaximize
     {
@@ -304,6 +325,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         _contentHost = e.NameScope.Get<ContentControl>(PartContentHost);
         _headerHost = e.NameScope.Get<Control>(PartHeaderHost);
         _chromeHost = e.NameScope.Get<Control>(PartChromeHost);
+        _tabPlacementButton = e.NameScope.Get<DockHeaderButton>(PartTabPlacementButton);
+        _tabPlacementIcon = e.NameScope.Get<DockChromeIcon>(PartTabPlacementIcon);
         _maximizeButton = e.NameScope.Get<DockHeaderButton>(PartMaximizeButton);
         _maximizeIcon = e.NameScope.Get<DockChromeIcon>(PartMaximizeIcon);
         _dropHint = e.NameScope.Get<Border>(PartDropHint);
@@ -634,12 +657,16 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         PseudoClasses.Set(
             ":close-button-selected-or-pointerover",
             CloseButtonDisplayMode == DockTabCloseButtonDisplayMode.SelectedOrPointerOver);
+        UpdateTabPlacementIcon();
     }
 
     private void UpdateHeaderState()
     {
         var hasTabs = GetItemCount() > 0;
-        var hasChrome = ShowAddButton || ShowMaximizeButton || HeaderContent is not null;
+        var hasChrome = ShowAddButton
+                        || ShowTabPlacementButton
+                        || ShowMaximizeButton
+                        || HeaderContent is not null;
         var showHeader = hasTabs || hasChrome;
 
         PseudoClasses.Set(":empty", !hasTabs);
@@ -656,6 +683,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     private void AttachHeaderCommands()
     {
+        if (_tabPlacementButton is not null)
+            _tabPlacementButton.Click += OnTabPlacementButtonClick;
         if (_maximizeButton is not null)
             _maximizeButton.Click += OnMaximizeButtonClick;
         if (_headerHost is not null)
@@ -666,6 +695,8 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     private void DetachHeaderCommands()
     {
+        if (_tabPlacementButton is not null)
+            _tabPlacementButton.Click -= OnTabPlacementButtonClick;
         if (_maximizeButton is not null)
             _maximizeButton.Click -= OnMaximizeButtonClick;
         if (_headerHost is not null)
@@ -676,6 +707,32 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     {
         e.Handled = true;
         ToggleMaximize();
+    }
+
+    private void OnTabPlacementButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        e.Handled = true;
+        SetCurrentValue(TabStripPlacementProperty, TabStripPlacement switch
+        {
+            DockTabStripPlacement.Top => DockTabStripPlacement.Right,
+            DockTabStripPlacement.Right => DockTabStripPlacement.Bottom,
+            DockTabStripPlacement.Bottom => DockTabStripPlacement.Left,
+            _ => DockTabStripPlacement.Top
+        });
+    }
+
+    private void UpdateTabPlacementIcon()
+    {
+        if (_tabPlacementIcon is null)
+            return;
+
+        _tabPlacementIcon.Kind = TabStripPlacement switch
+        {
+            DockTabStripPlacement.Right => DockChromeIconKind.TabPlacementRight,
+            DockTabStripPlacement.Bottom => DockChromeIconKind.TabPlacementBottom,
+            DockTabStripPlacement.Left => DockChromeIconKind.TabPlacementLeft,
+            _ => DockChromeIconKind.TabPlacementTop
+        };
     }
 
     private void OnHeaderPointerPressed(object? sender, PointerPressedEventArgs e)

@@ -16,8 +16,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private VsCodeColorTheme? _colorTheme;
     private DockPanePresentation _panePresentation = DockPanePresentation.ClassicSeams;
     private DockTabPresentation _tabPresentation = DockTabPresentation.Auto;
-    private DockTabStripPlacement _tabStripPlacement = DockTabStripPlacement.Top;
     private bool _showMaximizeButton = true;
+    private bool _showTabPlacementButton = true;
     private double _tabStripSize = DockShell.DefaultTabStripSize;
     private int _nextRightTab = 3;
 
@@ -70,9 +70,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<DockTabPresentation> TabPresentations { get; } =
         Enum.GetValues<DockTabPresentation>();
-
-    public IReadOnlyList<DockTabStripPlacement> TabStripPlacements { get; } =
-        Enum.GetValues<DockTabStripPlacement>();
 
     public ICommand AddRightTabCommand { get; }
 
@@ -135,20 +132,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>Applies one tab-strip direction to every region in the minimal sample.</summary>
-    public DockTabStripPlacement TabStripPlacement
-    {
-        get => _tabStripPlacement;
-        set
-        {
-            if (_tabStripPlacement == value)
-                return;
-
-            _tabStripPlacement = value;
-            OnPropertyChanged();
-        }
-    }
-
     public bool ShowMaximizeButton
     {
         get => _showMaximizeButton;
@@ -158,6 +141,19 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 return;
 
             _showMaximizeButton = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowTabPlacementButton
+    {
+        get => _showTabPlacementButton;
+        set
+        {
+            if (_showTabPlacementButton == value)
+                return;
+
+            _showTabPlacementButton = value;
             OnPropertyChanged();
         }
     }

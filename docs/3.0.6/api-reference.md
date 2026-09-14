@@ -115,6 +115,7 @@ One tab region. It owns selection, view realization, tab drag/drop, and close re
 | `TabClosedCommand` | `ICommand?` | `null` | **Notification after the fact.** The library has already removed the tab and evicted its cached view; the command parameter is the closed `IDockTabItem`. |
 | `CanDragTabs` | `bool` | `true` | `false` detaches the gesture controller: tabs can still be selected and closed, but not reordered or moved. Toggling at runtime re-attaches/detaches immediately. |
 | `ShowMaximizeButton` | `bool` | `true` | Shows the built-in maximize/restore button at the trailing edge. |
+| `ShowTabPlacementButton` | `bool` | `true` | Shows the trailing-edge placement button. Each click cycles `Top → Right → Bottom → Left`. |
 | `CanMaximize` | `bool` | `true` | Allows the region to fill its containing shell. |
 | `DoubleClickHeaderToMaximize` | `bool` | `true` | Toggles maximize from an empty-header double click. |
 | `ShowHeaderBodySeparator` | `bool` | `false` | Keeps the full one-pixel divider between the selected header and body. |
@@ -122,7 +123,7 @@ One tab region. It owns selection, view realization, tab drag/drop, and close re
 
 Inherited and themed by default: `Background` (`DockPaneBackgroundBrush`), `BorderBrush`, `BorderThickness`, `CornerRadius`.
 
-Header chrome is anchored to the trailing edge. Its visual order is: per-tab close button, remaining tab strip, Add, `HeaderContent`, then maximize/restore at the outer edge. For vertical strips the same order runs toward the bottom. Add remains opt-in because the library cannot construct an application-specific tab without an `AddTabCommand`.
+Header chrome is anchored to the trailing edge. Its visual order is: per-tab close button, remaining tab strip, Add, `HeaderContent`, tab placement, then maximize/restore at the outer edge. For vertical strips the same order runs toward the bottom. Add remains opt-in because the library cannot construct an application-specific tab without an `AddTabCommand`.
 
 ### Methods
 
@@ -229,7 +230,7 @@ public DockTabStripPlacement ToolPlacement { get; set; } = DockTabStripPlacement
 | `:vertical` | placement is `Left` or `Right` |
 | `:empty` | no tabs |
 | `:has-tabs` | at least one tab |
-| `:has-chrome` | `ShowAddButton` is `true` or `HeaderContent` is set |
+| `:has-chrome` | Add, placement, maximize, or custom header chrome is visible |
 
 The header host is hidden entirely when a region has neither tabs nor chrome, so an empty region reads as a plain panel:
 
@@ -432,7 +433,12 @@ Its own template contains a `LayoutTransformControl` (`PART_HeaderTransform`) so
 ## DockChromeIcon
 
 ```csharp
-public enum DockChromeIconKind { Add, Close }
+public enum DockChromeIconKind
+{
+    Add, Close, Maximize, Restore,
+    TabPlacementTop, TabPlacementRight,
+    TabPlacementBottom, TabPlacementLeft
+}
 
 [TemplatePart("PART_Icon", typeof(Path), IsRequired = true)]
 public sealed class DockChromeIcon : TemplatedControl

@@ -115,6 +115,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 | `TabClosedCommand` | `ICommand?` | `null` | **事后通知**——库已经完成了移除和缓存清理；命令参数是被关闭的 `IDockTabItem`。 |
 | `CanDragTabs` | `bool` | `true` | 设为 `false` 时拆掉手势控制器：仍可选中/关闭，但不能重排和跨区移动。运行时切换会立即重新挂载/拆除。 |
 | `ShowMaximizeButton` | `bool` | `true` | 在尾端显示内置最大化/还原按钮。 |
+| `ShowTabPlacementButton` | `bool` | `true` | 在尾端显示 Tab 位置按钮；每次点击按 `Top → Right → Bottom → Left` 循环。 |
 | `CanMaximize` | `bool` | `true` | 是否允许 Region 填满所属 Shell。 |
 | `DoubleClickHeaderToMaximize` | `bool` | `true` | 双击 Header 空白区域时切换最大化。 |
 | `ShowHeaderBodySeparator` | `bool` | `false` | 是否在选中 Header 与 Body 之间保留完整 1px 分隔线。 |
@@ -122,7 +123,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
 主题默认提供：`Background`（`DockPaneBackgroundBrush`）、`BorderBrush`、`BorderThickness`、`CornerRadius`。
 
-Header Chrome 固定在尾端，视觉顺序为：各 Tab 内关闭按钮、剩余 Tab 条、Add、`HeaderContent`、最外侧最大化/还原。垂直 Tab 条沿相同顺序排向底端。Add 仍需显式开启，因为没有 `AddTabCommand` 时库无法构造应用自己的 Tab。
+Header Chrome 固定在尾端，视觉顺序为：各 Tab 内关闭按钮、剩余 Tab 条、Add、`HeaderContent`、Tab 位置、最外侧最大化/还原。垂直 Tab 条沿相同顺序排向底端。Add 仍需显式开启，因为没有 `AddTabCommand` 时库无法构造应用自己的 Tab。
 
 ### 方法
 
@@ -231,7 +232,7 @@ public DockTabStripPlacement ToolPlacement { get; set; } = DockTabStripPlacement
 | `:vertical` | 位置为 `Left` 或 `Right` |
 | `:empty` | 没有 Tab |
 | `:has-tabs` | 至少一个 Tab |
-| `:has-chrome` | `ShowAddButton = true` 或 `HeaderContent` 非空 |
+| `:has-chrome` | Add、Tab 位置、最大化或自定义 Header Chrome 可见 |
 
 当 region 既无 Tab 也无 Chrome 时，头部宿主会被完全隐藏，因此空 region 看上去就是一块面板：
 
@@ -438,7 +439,12 @@ public sealed class DockTabHeader : TemplatedControl
 ## DockChromeIcon
 
 ```csharp
-public enum DockChromeIconKind { Add, Close }
+public enum DockChromeIconKind
+{
+    Add, Close, Maximize, Restore,
+    TabPlacementTop, TabPlacementRight,
+    TabPlacementBottom, TabPlacementLeft
+}
 
 [TemplatePart("PART_Icon", typeof(Path), IsRequired = true)]
 public sealed class DockChromeIcon : TemplatedControl
