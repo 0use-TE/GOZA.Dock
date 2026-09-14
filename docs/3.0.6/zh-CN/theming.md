@@ -72,6 +72,8 @@ JSON 缺少 `type` 时查 [`VsCodeThemeTypeMap`](https://github.com/0use-TE/GOZA
 
 显式指定后，两种 Tab 风格都能与任一区域风格组合。经典 Tab 直接使用标准 VS Code 键：`editorGroupHeader.tabsBackground`、`editorGroupHeader.tabsBorder`、`tab.activeBackground`、`tab.inactiveBackground`、`tab.activeForeground`、`tab.inactiveForeground`、`tab.hoverBackground`、`tab.hoverForeground`、`tab.border`、`tab.activeBorder`、`tab.activeBorderTop`。
 
+不可关闭的经典 Tab 使用对称的 10px 左右标题留白；可关闭 Tab 使用 10px 起始留白和 28px 关闭操作区。Header 操作固定在尾端，顺序为 Add → 自定义 `HeaderContent` → 最大化/还原。
+
 | ClassicSeams + Auto（默认） | ModernCards + Auto |
 |---|---|
 | ![经典直缝与经典 Tab 模式](../../../images/3.0.6/classic-tabs.png) | ![现代卡片区域模式](../../../images/3.0.6/modern-cards.png) |

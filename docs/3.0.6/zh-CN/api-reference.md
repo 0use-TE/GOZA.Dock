@@ -114,13 +114,15 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 | `HeaderContentTemplate` | `IDataTemplate?` | `null` | 用于呈现 `HeaderContent` 对象或 ViewModel 的模板。 |
 | `TabClosedCommand` | `ICommand?` | `null` | **事后通知**——库已经完成了移除和缓存清理；命令参数是被关闭的 `IDockTabItem`。 |
 | `CanDragTabs` | `bool` | `true` | 设为 `false` 时拆掉手势控制器：仍可选中/关闭，但不能重排和跨区移动。运行时切换会立即重新挂载/拆除。 |
-| `ShowMaximizeButton` | `bool` | `false` | 显示内置最大化/还原按钮。 |
+| `ShowMaximizeButton` | `bool` | `true` | 在尾端显示内置最大化/还原按钮。 |
 | `CanMaximize` | `bool` | `true` | 是否允许 Region 填满所属 Shell。 |
 | `DoubleClickHeaderToMaximize` | `bool` | `true` | 双击 Header 空白区域时切换最大化。 |
 | `ShowHeaderBodySeparator` | `bool` | `false` | 是否在选中 Header 与 Body 之间保留完整 1px 分隔线。 |
 | `IsMaximized` | `bool` | `false` | 只读最大化状态。 |
 
 主题默认提供：`Background`（`DockPaneBackgroundBrush`）、`BorderBrush`、`BorderThickness`、`CornerRadius`。
+
+Header Chrome 固定在尾端，视觉顺序为：各 Tab 内关闭按钮、剩余 Tab 条、Add、`HeaderContent`、最外侧最大化/还原。垂直 Tab 条沿相同顺序排向底端。Add 仍需显式开启，因为没有 `AddTabCommand` 时库无法构造应用自己的 Tab。
 
 ### 方法
 

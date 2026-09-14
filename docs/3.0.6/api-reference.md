@@ -114,13 +114,15 @@ One tab region. It owns selection, view realization, tab drag/drop, and close re
 | `HeaderContentTemplate` | `IDataTemplate?` | `null` | Template used to render a `HeaderContent` object or view model. |
 | `TabClosedCommand` | `ICommand?` | `null` | **Notification after the fact.** The library has already removed the tab and evicted its cached view; the command parameter is the closed `IDockTabItem`. |
 | `CanDragTabs` | `bool` | `true` | `false` detaches the gesture controller: tabs can still be selected and closed, but not reordered or moved. Toggling at runtime re-attaches/detaches immediately. |
-| `ShowMaximizeButton` | `bool` | `false` | Shows the built-in maximize/restore button. |
+| `ShowMaximizeButton` | `bool` | `true` | Shows the built-in maximize/restore button at the trailing edge. |
 | `CanMaximize` | `bool` | `true` | Allows the region to fill its containing shell. |
 | `DoubleClickHeaderToMaximize` | `bool` | `true` | Toggles maximize from an empty-header double click. |
 | `ShowHeaderBodySeparator` | `bool` | `false` | Keeps the full one-pixel divider between the selected header and body. |
 | `IsMaximized` | `bool` | `false` | Read-only maximize state. |
 
 Inherited and themed by default: `Background` (`DockPaneBackgroundBrush`), `BorderBrush`, `BorderThickness`, `CornerRadius`.
+
+Header chrome is anchored to the trailing edge. Its visual order is: per-tab close button, remaining tab strip, Add, `HeaderContent`, then maximize/restore at the outer edge. For vertical strips the same order runs toward the bottom. Add remains opt-in because the library cannot construct an application-specific tab without an `AddTabCommand`.
 
 ### Methods
 

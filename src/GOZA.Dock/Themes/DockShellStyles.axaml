@@ -541,7 +541,8 @@
                                 Orientation="Horizontal">
                       <controls:DockHeaderButton Classes="dock-add-tab"
                                                    Command="{TemplateBinding AddTabCommand}"
-                                                   IsVisible="{TemplateBinding ShowAddButton}">
+                                                   IsVisible="{TemplateBinding ShowAddButton}"
+                                                   ToolTip.Tip="Add tab">
                         <controls:DockChromeIcon Kind="Add" />
                       </controls:DockHeaderButton>
                       <ContentPresenter Content="{TemplateBinding HeaderContent}"
@@ -940,6 +941,10 @@
     <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
   </Style>
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader /template/ Grid#PART_HeaderContent">
+    <Setter Property="Margin" Value="10,0,10,0" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
+    <!-- The 28px close lane supplies the trailing breathing room for closable tabs. -->
     <Setter Property="Margin" Value="10,0,0,0" />
   </Style>
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockHeaderButton.dock-tab-close">

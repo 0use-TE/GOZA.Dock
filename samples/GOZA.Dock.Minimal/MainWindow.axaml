@@ -12,33 +12,51 @@
                 Padding="8,6"
                 BorderThickness="0"
                 BorderBrush="{DynamicResource surface.border}">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="主题" VerticalAlignment="Center" />
-                <ComboBox Width="240"
-                          ItemsSource="{Binding Themes}"
-                          SelectedItem="{Binding ColorTheme}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="dock:VsCodeColorTheme">
-                            <TextBlock Text="{Binding Name}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBlock Text="区域风格" VerticalAlignment="Center" Margin="12,0,0,0" />
-                <ComboBox Width="150"
-                          ItemsSource="{Binding PanePresentations}"
-                          SelectedItem="{Binding PanePresentation}" />
-                <TextBlock Text="Tab 风格" VerticalAlignment="Center" Margin="12,0,0,0" />
-                <ComboBox Width="130"
-                          ItemsSource="{Binding TabPresentations}"
-                          SelectedItem="{Binding TabPresentation}" />
-                <TextBlock Text="Tab 条尺寸" VerticalAlignment="Center" Margin="12,0,0,0" />
-                <NumericUpDown Width="100"
-                               Minimum="20"
-                               Maximum="72"
-                               Increment="1"
-                               FormatString="0"
-                               Value="{Binding TabStripSize}" />
-            </StackPanel>
+            <WrapPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6">
+                    <TextBlock Text="主题" VerticalAlignment="Center" />
+                    <ComboBox Width="240"
+                              ItemsSource="{Binding Themes}"
+                              SelectedItem="{Binding ColorTheme}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="dock:VsCodeColorTheme">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6">
+                    <TextBlock Text="区域风格" VerticalAlignment="Center" />
+                    <ComboBox Width="150"
+                              ItemsSource="{Binding PanePresentations}"
+                              SelectedItem="{Binding PanePresentation}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6">
+                    <TextBlock Text="Tab 风格" VerticalAlignment="Center" />
+                    <ComboBox Width="130"
+                              ItemsSource="{Binding TabPresentations}"
+                              SelectedItem="{Binding TabPresentation}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6">
+                    <TextBlock Text="Tab 条尺寸" VerticalAlignment="Center" />
+                    <NumericUpDown Width="148"
+                                   Minimum="20"
+                                   Maximum="72"
+                                   Increment="1"
+                                   FormatString="0"
+                                   Value="{Binding TabStripSize}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,16,6">
+                    <TextBlock Text="Tab 方向" VerticalAlignment="Center" />
+                    <ComboBox Width="120"
+                              ItemsSource="{Binding TabStripPlacements}"
+                              SelectedItem="{Binding TabStripPlacement}" />
+                </StackPanel>
+                <CheckBox Content="显示最大化按钮"
+                          Margin="0,0,16,6"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding ShowMaximizeButton}" />
+            </WrapPanel>
         </Border>
 
         <DockShell ColorTheme="{Binding ColorTheme}"
@@ -47,12 +65,23 @@
                    TabStripSize="{Binding TabStripSize}">
             <Grid ColumnDefinitions="220,Auto,*">
                 <Grid Grid.Column="0" RowDefinitions="*,Auto,*">
-                    <DockRegion Grid.Row="0" ShowMaximizeButton="true"  ItemsSource="{Binding LeftTopTabs}"  />
+                    <DockRegion Grid.Row="0"
+                                ItemsSource="{Binding LeftTopTabs}"
+                                ShowMaximizeButton="{Binding ShowMaximizeButton}"
+                                TabStripPlacement="{Binding TabStripPlacement}" />
                     <DockSplitter Grid.Row="1" />
-                    <DockRegion Grid.Row="2" ItemsSource="{Binding LeftBottomTabs}" />
+                    <DockRegion Grid.Row="2"
+                                ItemsSource="{Binding LeftBottomTabs}"
+                                ShowMaximizeButton="{Binding ShowMaximizeButton}"
+                                TabStripPlacement="{Binding TabStripPlacement}" />
                 </Grid>
                 <DockSplitter Grid.Column="1" />
-                <DockRegion Grid.Column="2" ItemsSource="{Binding RightTabs}" />
+                <DockRegion Grid.Column="2"
+                            ItemsSource="{Binding RightTabs}"
+                            AddTabCommand="{Binding AddRightTabCommand}"
+                            ShowAddButton="True"
+                            ShowMaximizeButton="{Binding ShowMaximizeButton}"
+                            TabStripPlacement="{Binding TabStripPlacement}" />
             </Grid>
             </DockShell>
     </DockPanel>

@@ -9,6 +9,8 @@
 - Added runtime `DockShell.PanePresentation` switching between `ModernCards` and VS Code-style `ClassicSeams`, without recreating tabs or views. `ClassicSeams` is the default.
 - Added runtime `DockShell.TabPresentation`: `ClassicTabs` reproduces the legacy VS Code full-height rectangular tab strip, `ModernPills` retains the rounded style, and the default `Auto` follows the pane presentation. Both tab styles can be paired with either pane style.
 - Added `DockShell.SashSize`, defaulting to a shared 12px mouse, pen, and touch hit target without widening the visible boundary.
+- The built-in maximize/restore action is now visible by default. The minimal sample exposes tab direction and maximize visibility, uses a responsive wrapping settings bar, and keeps the tab-size editor fully readable.
+- Balanced the trailing inset of non-closable classic tabs while retaining the VS Code 28px close-action lane for closable tabs.
 
 ---
 

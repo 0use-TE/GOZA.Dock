@@ -84,7 +84,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         AvaloniaProperty.Register<DockRegion, ICommand?>(nameof(TabClosedCommand));
 
     public static readonly StyledProperty<bool> ShowMaximizeButtonProperty =
-        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowMaximizeButton));
+        AvaloniaProperty.Register<DockRegion, bool>(nameof(ShowMaximizeButton), true);
 
     public static readonly StyledProperty<bool> CanMaximizeProperty =
         AvaloniaProperty.Register<DockRegion, bool>(nameof(CanMaximize), true);
@@ -243,7 +243,10 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         set => SetValue(TabClosedCommandProperty, value);
     }
 
-    /// <summary>Shows the built-in maximize/restore button at the trailing edge of the header.</summary>
+    /// <summary>
+    /// Shows the built-in maximize/restore button at the trailing edge of the header.
+    /// Defaults to true.
+    /// </summary>
     public bool ShowMaximizeButton
     {
         get => GetValue(ShowMaximizeButtonProperty);
