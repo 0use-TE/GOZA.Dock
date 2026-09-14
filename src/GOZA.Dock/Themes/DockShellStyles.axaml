@@ -403,6 +403,8 @@
         <!-- VS Code sash: live resize only (no drag-preview bar). -->
         <Setter Property="ShowsPreview" Value="False" />
         <Setter Property="Background" Value="Transparent" />
+        <!-- The enlarged sash overlaps adjacent panes and must render/hit-test above them. -->
+        <Setter Property="ZIndex" Value="35" />
         <Setter Property="BorderBrush" Value="{DynamicResource editorGroup.border}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
@@ -704,6 +706,9 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="CornerRadius" Value="0" />
   </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns /template/ Border#PART_Highlight">
+    <Setter Property="Width" Value="1" />
+  </Style>
   <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns:pointerover /template/ Border#PART_Highlight">
     <Setter Property="Width" Value="4" />
   </Style>
@@ -712,6 +717,9 @@
   </Style>
   <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:columns:dragging /template/ Border#PART_Highlight">
     <Setter Property="Width" Value="4" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:rows /template/ Border#PART_Highlight">
+    <Setter Property="Height" Value="1" />
   </Style>
   <Style Selector="controls|DockShell:classic-seams controls|DockSplitter:rows:pointerover /template/ Border#PART_Highlight">
     <Setter Property="Height" Value="4" />
