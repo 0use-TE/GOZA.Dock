@@ -353,19 +353,46 @@
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
           <ControlTemplate>
-            <Border x:Name="PART_DockTabSurface"
-                    Margin="2,4"
-                    Background="{DynamicResource modernEditorTab.inactiveBackground}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="{TemplateBinding CornerRadius}"
-                    ClipToBounds="True"
-                    Padding="{TemplateBinding Padding}">
-              <ContentPresenter Content="{TemplateBinding Content}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}"
-                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
-            </Border>
+            <Grid>
+              <Border x:Name="PART_DockTabSurface"
+                      Margin="2,4"
+                      Background="{DynamicResource modernEditorTab.inactiveBackground}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="{TemplateBinding CornerRadius}"
+                      ClipToBounds="True"
+                      Padding="{TemplateBinding Padding}">
+                <ContentPresenter Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+              </Border>
+              <!-- Classic VS Code overlays. They stay in the template so switching style
+                   changes no controls, tab instances, selection, or hosted views. -->
+              <Border x:Name="PART_TabSeparator"
+                      Width="1"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Stretch"
+                      Background="{DynamicResource tab.border}"
+                      IsHitTestVisible="False"
+                      Opacity="0" />
+              <Border x:Name="PART_ActiveBorderTop"
+                      Height="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Top"
+                      Background="{DynamicResource tab.activeBorderTop}"
+                      IsHitTestVisible="False"
+                      Opacity="0"
+                      ZIndex="6" />
+              <Border x:Name="PART_ActiveBorderBody"
+                      Height="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Bottom"
+                      Background="{DynamicResource tab.activeBorder}"
+                      IsHitTestVisible="False"
+                      Opacity="0"
+                      ZIndex="10" />
+            </Grid>
           </ControlTemplate>
         </Setter>
         <Style Selector="^:pointerover /template/ Border#PART_DockTabSurface">
@@ -799,50 +826,50 @@
     <Setter Property="Opacity" Value="1" />
     <Setter Property="IsHitTestVisible" Value="False" />
   </Style>
-  <!-- Square tabs (VS Code). -->
-  <Style Selector="controls|DockRegion:top TabStripItem">
+  <!-- Modern UI pills. -->
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:top TabStripItem">
     <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusTop}" />
   </Style>
-  <Style Selector="controls|DockRegion:bottom TabStripItem">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:bottom TabStripItem">
     <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusBottom}" />
   </Style>
-  <Style Selector="controls|DockRegion:left TabStripItem">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:left TabStripItem">
     <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusLeft}" />
   </Style>
-  <Style Selector="controls|DockRegion:right TabStripItem">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:right TabStripItem">
     <Setter Property="CornerRadius" Value="{DynamicResource DockTabCornerRadiusRight}" />
   </Style>
   <!-- Modern UI pills are borderless; the 2px horizontal inset is the visual separator. -->
-  <Style Selector="controls|DockRegion:top TabStripItem:not(:selected)">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:top TabStripItem:not(:selected)">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="controls|DockRegion:bottom TabStripItem:not(:selected)">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:bottom TabStripItem:not(:selected)">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="controls|DockRegion:left TabStripItem:not(:selected)">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:left TabStripItem:not(:selected)">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="controls|DockRegion:right TabStripItem:not(:selected)">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:right TabStripItem:not(:selected)">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
   <!-- Modern UI removes the classic active-border-top accent. -->
-  <Style Selector="controls|DockRegion:top TabStripItem:selected">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:top TabStripItem:selected">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="controls|DockRegion:bottom TabStripItem:selected">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:bottom TabStripItem:selected">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="controls|DockRegion:left TabStripItem:selected">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:left TabStripItem:selected">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="controls|DockRegion:right TabStripItem:selected">
+  <Style Selector="controls|DockShell:modern-tabs controls|DockRegion:right TabStripItem:selected">
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
@@ -862,6 +889,123 @@
     <Setter Property="LayoutTransform">
       <RotateTransform Angle="90" />
     </Setter>
+  </Style>
+
+  <!-- Classic VS Code editor tabs: full-height rectangular tabs, a one-pixel
+       separator between tabs, the header/body rule, and selected top/body rules. -->
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion /template/ Grid#PART_HeaderHost">
+    <Setter Property="Background" Value="{DynamicResource editorGroupHeader.tabsBackground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion /template/ Border#PART_HeaderDivider">
+    <Setter Property="Background" Value="{DynamicResource editorGroupHeader.tabsBorder}" />
+    <Setter Property="ZIndex" Value="5" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem">
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource tab.inactiveForeground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem /template/ Border#PART_DockTabSurface">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Background" Value="{DynamicResource tab.inactiveBackground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:pointerover /template/ Border#PART_DockTabSurface">
+    <Setter Property="Background" Value="{DynamicResource tab.hoverBackground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource tab.hoverForeground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:selected /template/ Border#PART_DockTabSurface">
+    <Setter Property="Background" Value="{DynamicResource tab.activeBackground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:selected:pointerover /template/ Border#PART_DockTabSurface">
+    <Setter Property="Background" Value="{DynamicResource tab.activeBackground}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:selected">
+    <Setter Property="Foreground" Value="{DynamicResource tab.activeForeground}" />
+    <Setter Property="ZIndex" Value="1" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem /template/ Border#PART_TabSeparator">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:selected /template/ Border#PART_ActiveBorderTop">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion TabStripItem:selected /template/ Border#PART_ActiveBorderBody">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+
+  <!-- Legacy tabs use the original 10px title inset and 28px action lane. -->
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader">
+    <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader /template/ Grid#PART_HeaderContent">
+    <Setter Property="Margin" Value="10,0,0,0" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Width" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="Height" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="MinHeight" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="MaxHeight" Value="{DynamicResource DockChromeButtonSize}" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:close-button-selected-or-pointerover TabStripItem controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="Width" Value="0" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:close-button-selected-or-pointerover TabStripItem:selected controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Width" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="IsHitTestVisible" Value="True" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:close-button-selected-or-pointerover TabStripItem:pointerover controls|DockHeaderButton.dock-tab-close">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Width" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DockChromeButtonSize}" />
+    <Setter Property="IsHitTestVisible" Value="True" />
+  </Style>
+
+  <!-- Rotate separator and active rules around the body edge for supported vertical
+       and bottom placements; top placement is the literal VS Code arrangement. -->
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:vertical TabStripItem /template/ Border#PART_TabSeparator">
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="Height" Value="1" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:bottom TabStripItem /template/ Border#PART_ActiveBorderTop">
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:bottom TabStripItem /template/ Border#PART_ActiveBorderBody">
+    <Setter Property="VerticalAlignment" Value="Top" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:left TabStripItem /template/ Border#PART_ActiveBorderTop">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:left TabStripItem /template/ Border#PART_ActiveBorderBody">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:right TabStripItem /template/ Border#PART_ActiveBorderTop">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:right TabStripItem /template/ Border#PART_ActiveBorderBody">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
   </Style>
 
 </Styles>

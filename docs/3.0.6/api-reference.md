@@ -15,6 +15,7 @@ Everything public in GOZA.Dock 3.0.6, with usage examples. The generated member-
 | [`IDockTabItem`](#idocktabitem) | `GOZA.Dock` | interface | Tab contract implemented by your view models |
 | [`DockTabStripPlacement`](#docktabstripplacement) | `GOZA.Dock` | enum | `Top` / `Bottom` / `Left` / `Right` |
 | [`DockPanePresentation`](#dockpanepresentation) | `GOZA.Dock` | enum | `ClassicSeams` / `ModernCards` region presentation |
+| [`DockTabPresentation`](#docktabpresentation) | `GOZA.Dock` | enum | Automatic, legacy rectangular, or modern pill tab headers |
 | [`DockTabCloseButtonDisplayMode`](#docktabclosebuttondisplaymode) | `GOZA.Dock` | enum | Always-visible or selected/hover close buttons |
 | [`DockViewHost`](#dockviewhost) | `GOZA.Dock` | class | Parking lot for reusable control surfaces |
 | [`IDockRegionSession`](#idockregionsession) | `GOZA.Dock` | interface | Drag-coordination hooks implemented by `DockRegion` |
@@ -42,6 +43,7 @@ The workspace root. It is intentionally thin: it themes the background/padding, 
 | `Content` | `object?` | `null` | Your layout. Must be a `Panel` (e.g. `Grid`) for the view cache to attach. |
 | `ColorTheme` | `VsCodeColorTheme?` | `null` | **Only** color-theme apply API. Writes workbench brushes to this shell's `Resources`. Does **not** set `RequestedThemeVariant`. |
 | `PanePresentation` | `DockPanePresentation` | `ClassicSeams` | Runtime switch between edge-to-edge classic VS Code seams and rounded modern cards. Tabs and views are preserved. |
+| `TabPresentation` | `DockTabPresentation` | `Auto` | Runtime tab-header style. Auto follows `PanePresentation`; explicit values allow every combination. |
 | `SashSize` | `double` | `12` | Mouse, pen, and touch hit thickness centered over every splitter. Does not change the visible seam or card gap. |
 | `TabStripSize` | `double` | `32` | Horizontal strip **height** / vertical strip **width**. Scales title font; padding fixed; derives pill/chrome/close. |
 | `EnableViewCache` | `bool` | `true` | Enables surface reuse for tabs with `ReuseSurface = true`. Backed by `EnableViewCacheProperty`. |
@@ -303,7 +305,20 @@ public enum DockPanePresentation
 }
 ```
 
-`ClassicSeams` removes shell/card gaps, borders, and pane corner radii while retaining a four-pixel overlay sash with a one-pixel `editorGroup.border` seam. Hover and drag use `sash.hoverBorder`.
+`ClassicSeams` removes shell/card gaps, borders, and pane corner radii while retaining a 12-pixel overlay sash with a one-pixel `editorGroup.border` seam. Hover and drag use `sash.hoverBorder`.
+
+## DockTabPresentation
+
+```csharp
+public enum DockTabPresentation
+{
+    Auto,
+    ModernPills,
+    ClassicTabs
+}
+```
+
+`Auto` is the default: classic seams select classic tabs and modern cards select modern pills. `ClassicTabs` uses the legacy VS Code full-height rectangular layout and standard `editorGroupHeader.*` / `tab.*` color keys. Explicit values are independent of `PanePresentation` and switch without recreating controls.
 
 ## DockTabCloseButtonDisplayMode
 

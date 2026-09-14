@@ -15,7 +15,7 @@ namespace GOZA.Dock.Controls;
 /// into its <see cref="StyledElement.Styles"/> via compiled XAML (no App <c>StyleInclude</c> required).
 /// </summary>
 [TemplatePart(PartMaximizedHost, typeof(Panel), IsRequired = true)]
-[PseudoClasses(":modern-cards", ":classic-seams")]
+[PseudoClasses(":modern-cards", ":classic-seams", ":modern-tabs", ":classic-tabs")]
 public sealed partial class DockShell : ContentControl
 {
     internal const string PartMaximizedHost = "PART_MaximizedHost";
@@ -38,6 +38,11 @@ public sealed partial class DockShell : ContentControl
         AvaloniaProperty.Register<DockShell, DockPanePresentation>(
             nameof(PanePresentation),
             DockPanePresentation.ClassicSeams);
+
+    public static readonly StyledProperty<DockTabPresentation> TabPresentationProperty =
+        AvaloniaProperty.Register<DockShell, DockTabPresentation>(
+            nameof(TabPresentation),
+            DockTabPresentation.Auto);
 
     /// <summary>Default pointer hit thickness of a dock sash.</summary>
     public const double DefaultSashSize = 12;
@@ -78,7 +83,7 @@ public sealed partial class DockShell : ContentControl
     {
         AvaloniaXamlLoader.Load(this);
         WriteHeaderMetrics();
-        UpdatePanePresentation();
+        UpdatePresentationStates();
     }
 
     /// <summary>
@@ -110,6 +115,17 @@ public sealed partial class DockShell : ContentControl
     {
         get => GetValue(PanePresentationProperty);
         set => SetValue(PanePresentationProperty, value);
+    }
+
+    /// <summary>
+    /// Tab-header presentation. <see cref="DockTabPresentation.Auto"/> follows
+    /// <see cref="PanePresentation"/> and is the default. The explicit values allow
+    /// either tab style to be paired with either region style at runtime.
+    /// </summary>
+    public DockTabPresentation TabPresentation
+    {
+        get => GetValue(TabPresentationProperty);
+        set => SetValue(TabPresentationProperty, value);
     }
 
     /// <summary>
@@ -146,19 +162,35 @@ public sealed partial class DockShell : ContentControl
             shell.OnColorThemeChanged(e.GetNewValue<VsCodeColorTheme?>()));
         TabStripSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.WriteHeaderMetrics());
         PanePresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
-            shell.UpdatePanePresentation());
+            shell.UpdatePresentationStates());
+        TabPresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
+            shell.UpdateTabPresentation());
         SashSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.RefreshSplitters());
     }
 
-    private void UpdatePanePresentation()
+    private void UpdatePresentationStates()
     {
         var classic = PanePresentation == DockPanePresentation.ClassicSeams;
         PseudoClasses.Set(":classic-seams", classic);
         PseudoClasses.Set(":modern-cards", !classic);
+        UpdateTabPresentation();
 
         // The sash geometry is calculated by DockSplitter rather than its template.
         // Refresh every realized splitter after the shell-level presentation changes.
         RefreshSplitters();
+    }
+
+    private void UpdateTabPresentation()
+    {
+        var classic = TabPresentation switch
+        {
+            DockTabPresentation.ClassicTabs => true,
+            DockTabPresentation.ModernPills => false,
+            _ => PanePresentation == DockPanePresentation.ClassicSeams
+        };
+
+        PseudoClasses.Set(":classic-tabs", classic);
+        PseudoClasses.Set(":modern-tabs", !classic);
     }
 
     private void RefreshSplitters()

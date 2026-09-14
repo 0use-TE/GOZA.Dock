@@ -15,6 +15,7 @@ GOZA.Dock 3.0.6 所有公开类型，含用法示例。生成的方法级索引�
 | [`IDockTabItem`](#idocktabitem) | `GOZA.Dock` | interface | Tab 契约，由 ViewModel 实现 |
 | [`DockTabStripPlacement`](#docktabstripplacement) | `GOZA.Dock` | enum | `Top` / `Bottom` / `Left` / `Right` |
 | [`DockPanePresentation`](#dockpanepresentation) | `GOZA.Dock` | enum | `ClassicSeams` / `ModernCards` 区域表现模式 |
+| [`DockTabPresentation`](#docktabpresentation) | `GOZA.Dock` | enum | 自动、旧版矩形或现代圆角 Tab Header |
 | [`DockTabCloseButtonDisplayMode`](#docktabclosebuttondisplaymode) | `GOZA.Dock` | enum | 关闭按钮常显或仅选中/悬停显示 |
 | [`DockViewHost`](#dockviewhost) | `GOZA.Dock` | class | 用于可复用控件表面的 Parking Lot |
 | [`IDockRegionSession`](#idockregionsession) | `GOZA.Dock` | interface | 拖拽协调钩子，由 `DockRegion` 实现 |
@@ -42,6 +43,7 @@ public sealed class DockShell : ContentControl
 | `Content` | `object?` | `null` | 你的布局。必须是 `Panel`（通常是 `Grid`），否则 Parking Lot 无法挂载。 |
 | `ColorTheme` | `VsCodeColorTheme?` | `null` | **唯一颜色主题入口**。将 workbench 笔刷写入本 Shell 的 `Resources`。**不**设置 `RequestedThemeVariant`。 |
 | `PanePresentation` | `DockPanePresentation` | `ClassicSeams` | 在贴边的 VS Code 经典直缝与圆角现代卡片之间运行时切换；Tab 与 View 保持不变。 |
+| `TabPresentation` | `DockTabPresentation` | `Auto` | 运行时 Tab Header 风格；Auto 跟随 `PanePresentation`，显式值可自由组合。 |
 | `SashSize` | `double` | `12` | 所有分隔条共用的鼠标、触控笔和手指命中宽度；不会改变可见直缝或卡片间距。 |
 | `TabStripSize` | `double` | `32` | 水平条**高度** / 垂直条**宽度**；标题字号同比缩放，间距固定，宽度由文字撑开。 |
 | `EnableViewCache` | `bool` | `true` | 为 `ReuseSurface = true` 的 Tab 启用表面复用。对应 `EnableViewCacheProperty`。 |
@@ -305,7 +307,20 @@ public enum DockPanePresentation
 }
 ```
 
-`ClassicSeams` 会移除 Shell/卡片间距、边框和区域圆角，同时保留覆盖边界的 4px sash 命中区，并在常态绘制 1px `editorGroup.border` 直缝；悬停和拖动使用 `sash.hoverBorder`。
+`ClassicSeams` 会移除 Shell/卡片间距、边框和区域圆角，同时保留覆盖边界的 12px sash 命中区，并在常态绘制 1px `editorGroup.border` 直缝；悬停和拖动使用 `sash.hoverBorder`。
+
+## DockTabPresentation
+
+```csharp
+public enum DockTabPresentation
+{
+    Auto,
+    ModernPills,
+    ClassicTabs
+}
+```
+
+`Auto` 是默认值：经典直缝自动使用经典 Tab，现代卡片自动使用现代圆角 Tab。`ClassicTabs` 采用旧版 VS Code 的满高矩形布局，并直接使用标准 `editorGroupHeader.*` / `tab.*` 颜色键。显式值独立于 `PanePresentation`，切换时不会重建控件。
 
 ## DockTabCloseButtonDisplayMode
 

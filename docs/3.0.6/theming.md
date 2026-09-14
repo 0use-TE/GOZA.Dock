@@ -60,8 +60,23 @@ Title **font scales** with this value (`13 × strip/32`); horizontal padding sta
 
 `DockShell.SashSize` controls the transparent splitter hit target for mouse, pen, and touch. It defaults to `12`; the target is centered over the boundary and does not alter the one-pixel classic seam or the modern card gap.
 
-| ClassicSeams (default) | ModernCards |
+## Tab presentation
+
+`DockShell.TabPresentation` also switches at runtime without recreating tabs or hosted views:
+
+```xml
+<DockShell PanePresentation="ClassicSeams"
+           TabPresentation="Auto" />
+```
+
+- `Auto` (default): `ClassicSeams` selects `ClassicTabs`; `ModernCards` selects `ModernPills`.
+- `ClassicTabs`: legacy VS Code full-height rectangular tabs, 10px title inset, 28px action lane, one-pixel tab separators and active top/body rules.
+- `ModernPills`: rounded inset tabs.
+
+Set an explicit value to combine either tab style with either pane style. Classic tabs consume the standard VS Code keys `editorGroupHeader.tabsBackground`, `editorGroupHeader.tabsBorder`, `tab.activeBackground`, `tab.inactiveBackground`, `tab.activeForeground`, `tab.inactiveForeground`, `tab.hoverBackground`, `tab.hoverForeground`, `tab.border`, `tab.activeBorder`, and `tab.activeBorderTop`.
+
+| ClassicSeams + Auto (default) | ModernCards + Auto |
 |---|---|
-| ![Classic seam presentation](../../images/3.0.6/classic-seams.png) | ![Modern card presentation](../../images/3.0.6/modern-cards.png) |
+| ![Classic seam and classic tab presentation](../../images/3.0.6/classic-tabs.png) | ![Modern card presentation](../../images/3.0.6/modern-cards.png) |
 
 You can still override the same keys manually in `DockShell.Resources` (`DockTabHeight`, …) — see [DOCK-THEMING.zh-CN.md](https://github.com/0use-TE/GOZA.Dock/blob/master/DOCK-THEMING.zh-CN.md).

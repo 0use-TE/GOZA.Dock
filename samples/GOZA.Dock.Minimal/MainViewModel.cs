@@ -14,6 +14,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     private VsCodeColorTheme? _colorTheme;
     private DockPanePresentation _panePresentation = DockPanePresentation.ClassicSeams;
+    private DockTabPresentation _tabPresentation = DockTabPresentation.Auto;
     private double _tabStripSize = DockShell.DefaultTabStripSize;
 
     public MainViewModel()
@@ -62,6 +63,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public IReadOnlyList<DockPanePresentation> PanePresentations { get; } =
         Enum.GetValues<DockPanePresentation>();
 
+    public IReadOnlyList<DockTabPresentation> TabPresentations { get; } =
+        Enum.GetValues<DockTabPresentation>();
+
     /// <summary>直接绑 <c>DockShell.ColorTheme</c>；ComboBox 的 SelectedItem 也是它。</summary>
     public VsCodeColorTheme? ColorTheme
     {
@@ -103,6 +107,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 return;
 
             _panePresentation = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Switches between automatic, modern pill, and classic VS Code tab headers.</summary>
+    public DockTabPresentation TabPresentation
+    {
+        get => _tabPresentation;
+        set
+        {
+            if (_tabPresentation == value)
+                return;
+
+            _tabPresentation = value;
             OnPropertyChanged();
         }
     }
