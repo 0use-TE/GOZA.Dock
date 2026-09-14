@@ -78,7 +78,7 @@ JSON 缺少 `type` 时查 [`VsCodeThemeTypeMap`](https://github.com/0use-TE/GOZA
 |---|---|
 | ![经典直缝与经典 Tab 模式](../../../images/3.0.6/classic-tabs.png) | ![现代卡片区域模式](../../../images/3.0.6/modern-cards.png) |
 
-经典垂直 Tab 保持 32px 条宽，将紧凑的“标题 + 关闭按钮”旋转内容组整体居中，不添加额外占位区，并把 Add → 位置 → 最大化操作固定到底部边缘；拖拽 Ghost 同步使用相同方向和真实 Tab 尺寸：
+经典垂直 Tab 保持 32px 条宽，将紧凑的“标题 + 关闭按钮”旋转内容组整体居中，并复用水平 Tab 的标题/操作区间距，不添加额外占位区；Add → 位置 → 最大化操作固定到底部边缘，拖拽 Ghost 同步使用相同方向和真实 Tab 尺寸：
 
 ![经典垂直 Tab 模式](../../../images/3.0.6/classic-tabs-vertical.png)
 

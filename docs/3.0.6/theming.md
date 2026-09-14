@@ -81,7 +81,7 @@ Non-closable classic tabs use balanced 10px horizontal title insets. Closable ta
 |---|---|
 | ![Classic seam and classic tab presentation](../../images/3.0.6/classic-tabs.png) | ![Modern card presentation](../../images/3.0.6/modern-cards.png) |
 
-Vertical classic tabs keep the 32px strip metric, center the compact rotated title-and-close group without spacer lanes, and pin Add → placement → maximize controls to the bottom edge. Their drag ghost uses the same orientation and live tab footprint:
+Vertical classic tabs keep the 32px strip metric, center the compact rotated title-and-close group with the same title/action spacing as horizontal tabs, add no spacer lanes, and pin Add → placement → maximize controls to the bottom edge. Their drag ghost uses the same orientation and live tab footprint:
 
 ![Classic vertical tab presentation](../../images/3.0.6/classic-tabs-vertical.png)
 

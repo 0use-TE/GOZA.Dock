@@ -908,18 +908,14 @@
     </Setter>
   </Style>
   <!-- Vertical headers measure a compact title + close group and center that group
-       before rotation. No artificial counterweight is added to the tab length. -->
+       before rotation. They retain the same title/action insets as horizontal tabs,
+       without adding an artificial counterweight to the tab length. -->
   <Style Selector="controls|DockRegion:vertical controls|DockTabHeader /template/ Grid#PART_HeaderContent">
-    <Setter Property="Margin" Value="8,0" />
     <Setter Property="HorizontalAlignment" Value="Center" />
   </Style>
   <Style Selector="controls|DockRegion:vertical controls|DockTabHeader /template/ TextBlock#PART_HeaderText">
     <Setter Property="HorizontalAlignment" Value="Center" />
   </Style>
-  <Style Selector="controls|DockRegion:vertical controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
-    <Setter Property="Margin" Value="0" />
-  </Style>
-
   <!-- Classic VS Code editor tabs: full-height rectangular tabs, a one-pixel
        separator between tabs, the header/body rule, and selected top/body rules. -->
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion /template/ Grid#PART_HeaderHost">
@@ -974,12 +970,6 @@
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
     <!-- The 28px close lane supplies the trailing breathing room for closable tabs. -->
     <Setter Property="Margin" Value="10,0,0,0" />
-  </Style>
-  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:vertical controls|DockTabHeader /template/ Grid#PART_HeaderContent">
-    <Setter Property="Margin" Value="8,0" />
-  </Style>
-  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:vertical controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
-    <Setter Property="Margin" Value="0" />
   </Style>
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Width" Value="{DynamicResource DockChromeButtonSize}" />
