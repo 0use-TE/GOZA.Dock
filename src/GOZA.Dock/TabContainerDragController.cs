@@ -891,23 +891,11 @@ public sealed class TabContainerDragController : IDisposable
             var grid = new Grid
             {
                 Margin = padding,
-                ColumnDefinitions = new ColumnDefinitions(vertical ? "Auto,Auto,Auto" : "Auto,Auto"),
+                ColumnDefinitions = new ColumnDefinitions("Auto,Auto"),
+                HorizontalAlignment = vertical ? HorizontalAlignment.Center : HorizontalAlignment.Stretch,
             };
-            if (vertical)
-            {
-                grid.Children.Add(new Border
-                {
-                    Width = closeActionWidth,
-                    IsHitTestVisible = false,
-                });
-                Grid.SetColumn(title, 1);
-                Grid.SetColumn(closeHost, 2);
-            }
-            else
-            {
-                Grid.SetColumn(closeHost, 1);
-            }
             grid.Children.Add(title);
+            Grid.SetColumn(closeHost, 1);
             grid.Children.Add(closeHost);
             content = grid;
         }
