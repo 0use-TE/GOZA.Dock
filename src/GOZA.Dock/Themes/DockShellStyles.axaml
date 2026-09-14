@@ -643,9 +643,10 @@
           <ControlTemplate>
             <LayoutTransformControl x:Name="PART_HeaderTransform">
               <Grid x:Name="PART_HeaderContent"
-                    Margin="{DynamicResource DockTabPadding}"
                     Background="Transparent">
-                <Grid ColumnDefinitions="*,Auto">
+                <Grid x:Name="PART_HeaderLayout"
+                      ColumnDefinitions="*,Auto"
+                      Margin="{DynamicResource DockTabPadding}">
                   <TextBlock x:Name="PART_HeaderText"
                              VerticalAlignment="Center"
                              Foreground="{TemplateBinding Foreground}"
@@ -666,7 +667,7 @@
           </ControlTemplate>
         </Setter>
         <!-- VS Code: close sits near the pill's right edge. -->
-        <Style Selector="^:closable /template/ Grid#PART_HeaderContent">
+        <Style Selector="^:closable /template/ Grid#PART_HeaderLayout">
           <Setter Property="Margin" Value="{DynamicResource DockTabPaddingClosable}" />
         </Style>
       </ControlTheme>
@@ -964,10 +965,10 @@
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader">
     <Setter Property="MinHeight" Value="{DynamicResource DockTabHeight}" />
   </Style>
-  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader /template/ Grid#PART_HeaderContent">
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader /template/ Grid#PART_HeaderLayout">
     <Setter Property="Margin" Value="10,0,10,0" />
   </Style>
-  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader:closable /template/ Grid#PART_HeaderLayout">
     <!-- The 28px close lane supplies the trailing breathing room for closable tabs. -->
     <Setter Property="Margin" Value="10,0,0,0" />
   </Style>

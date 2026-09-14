@@ -793,9 +793,12 @@ public sealed class TabContainerDragController : IDisposable
         var surface = FindTabSurface(_draggedContainer);
         var source = (Control?)surface ?? _draggedContainer;
         var liveText = FindHeaderText(_draggedContainer);
-        var liveHeaderContent = _draggedContainer.GetVisualDescendants()
+        var liveHeaderLayout = _draggedContainer.GetVisualDescendants()
             .OfType<Grid>()
-            .FirstOrDefault(grid => grid.Name == "PART_HeaderContent");
+            .FirstOrDefault(grid => grid.Name == "PART_HeaderLayout")
+            ?? _draggedContainer.GetVisualDescendants()
+                .OfType<Grid>()
+                .FirstOrDefault(grid => grid.Name == "PART_HeaderContent");
         var liveCloseButton = _draggedContainer.GetVisualDescendants()
             .OfType<DockHeaderButton>()
             .FirstOrDefault(button => button.Name == "PART_CloseButton");
@@ -831,7 +834,7 @@ public sealed class TabContainerDragController : IDisposable
             new SolidColorBrush(Color.FromRgb(0x00, 0x78, 0xD4)),
             _host);
 
-        var padding = liveHeaderContent?.Margin ?? (dragItem.IsClosable
+        var padding = liveHeaderLayout?.Margin ?? (dragItem.IsClosable
             ? DockThemeBrushHelper.ResolveValue(
                 "DockTabPaddingClosable",
                 new Thickness(6, 0, 2, 0),
