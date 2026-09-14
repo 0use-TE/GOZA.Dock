@@ -9,10 +9,10 @@
 - Added runtime `DockShell.PanePresentation` switching between `ModernCards` and VS Code-style `ClassicSeams`, without recreating tabs or views. `ClassicSeams` is the default.
 - Added runtime `DockShell.TabPresentation`: `ClassicTabs` reproduces the legacy VS Code full-height rectangular tab strip, `ModernPills` retains the rounded style, and the default `Auto` follows the pane presentation. Both tab styles can be paired with either pane style.
 - Added `DockShell.SashSize`, defaulting to a shared 12px mouse, pen, and touch hit target without widening the visible boundary.
-- The built-in maximize/restore and tab-placement actions are now visible by default. The placement action lives at each region's trailing edge and cycles all four edges. The minimal sample exposes both visibility switches, uses a truly constrained wrapping settings bar, and keeps the tab-size editor fully readable.
+- The built-in maximize/restore and tab-placement actions are now visible by default. The placement action lives at each region's trailing edge and opens a four-way direction picker. The minimal sample exposes both visibility switches, uses a truly constrained wrapping settings bar, and keeps the tab-size editor fully readable.
 - Balanced the trailing inset of non-closable classic tabs while retaining the VS Code 28px close-action lane for closable tabs.
 - Vertical tab headers center a compact title-and-close content group, reuse the horizontal tab title/action spacing, and avoid artificial spacer lanes. Vertical drag ghosts also clone the live tab orientation and footprint.
-- The Minimal sample now keeps its right region on the left edge by default, providing an always-visible vertical-tab regression case.
+- Every Minimal sample region starts with the default top tab strip; the four-way picker changes an individual region at runtime.
 
 ---
 

@@ -207,7 +207,7 @@ Use [`DockHeaderButton`](api-reference.md#dockheaderbutton) for action buttons â
 </DockRegion>
 ```
 
-`HeaderContent` is placed after the tabs and the add button. The built-in placement and maximize actions follow it at the trailing edge; disable either with `ShowTabPlacementButton="False"` or `ShowMaximizeButton="False"`. On `Left`/`Right` regions the chrome stack turns vertical automatically and anchors to the bottom.
+`HeaderContent` is placed after the tabs and the add button. The built-in placement and maximize actions follow it at the trailing edge; the placement action opens a spatial four-way picker. Disable either action with `ShowTabPlacementButton="False"` or `ShowMaximizeButton="False"`. On `Left`/`Right` regions the chrome stack turns vertical automatically and anchors to the bottom.
 
 When `HeaderContent` is a view-model rather than pre-built controls, use `HeaderContentTemplate` to project it â€” the chrome host's `ContentPresenter` already binds `ContentTemplate` to `HeaderContentTemplate`:
 

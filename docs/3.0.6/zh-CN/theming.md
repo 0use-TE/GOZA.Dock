@@ -82,4 +82,8 @@ JSON 缺少 `type` 时查 [`VsCodeThemeTypeMap`](https://github.com/0use-TE/GOZA
 
 ![经典垂直 Tab 模式](../../../images/3.0.6/classic-tabs-vertical.png)
 
+尾端的位置操作会打开紧凑的 2×2 方向选择器；其背景、边框、悬停、激活、图标与焦点颜色继续从现有 VS Code Workbench 资源键解析：
+
+![紧凑 Tab 位置选择器](../../../images/3.0.6/tab-placement-picker.png)
+
 也可继续在 `DockShell.Resources` 里覆写同名键，见 [DOCK-THEMING.zh-CN.md](https://github.com/0use-TE/GOZA.Dock/blob/master/DOCK-THEMING.zh-CN.md)。

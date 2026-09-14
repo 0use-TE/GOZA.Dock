@@ -233,7 +233,7 @@ public void ToggleMaximizeCenter(Grid grid)
 </DockRegion>
 ```
 
-`HeaderContent` 排在 Tab 和 Add 按钮之后，内置 Tab 位置与最大化操作继续排在尾端；可通过 `ShowTabPlacementButton="False"` 或 `ShowMaximizeButton="False"` 分别关闭。在 `Left` / `Right` Region 中，Chrome 栈会自动转为纵向并固定在底部。
+`HeaderContent` 排在 Tab 和 Add 按钮之后，内置 Tab 位置与最大化操作继续排在尾端；位置操作会弹出空间排列的四向选择器。可通过 `ShowTabPlacementButton="False"` 或 `ShowMaximizeButton="False"` 分别关闭。在 `Left` / `Right` Region 中，Chrome 栈会自动转为纵向并固定在底部。
 
 如果 `HeaderContent` 放的是 ViewModel 而非已构建好的 `Control`，用 `HeaderContentTemplate` 来投影——Chrome 宿主的 `ContentPresenter` 已经把 `ContentTemplate` 绑定到 `HeaderContentTemplate`：
 

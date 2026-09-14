@@ -25,6 +25,11 @@ namespace GOZA.Dock.Controls;
 [TemplatePart(PartChromeHost, typeof(Control), IsRequired = true)]
 [TemplatePart(PartTabPlacementButton, typeof(DockHeaderButton), IsRequired = true)]
 [TemplatePart(PartTabPlacementIcon, typeof(DockChromeIcon), IsRequired = true)]
+[TemplatePart(PartTabPlacementPopup, typeof(Popup), IsRequired = true)]
+[TemplatePart(PartTabPlacementTopButton, typeof(DockHeaderButton), IsRequired = true)]
+[TemplatePart(PartTabPlacementRightButton, typeof(DockHeaderButton), IsRequired = true)]
+[TemplatePart(PartTabPlacementBottomButton, typeof(DockHeaderButton), IsRequired = true)]
+[TemplatePart(PartTabPlacementLeftButton, typeof(DockHeaderButton), IsRequired = true)]
 [TemplatePart(PartMaximizeButton, typeof(DockHeaderButton), IsRequired = true)]
 [TemplatePart(PartMaximizeIcon, typeof(DockChromeIcon), IsRequired = true)]
 [TemplatePart(PartDropHint, typeof(Border), IsRequired = true)]
@@ -36,6 +41,11 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     internal const string PartChromeHost = "PART_ChromeHost";
     internal const string PartTabPlacementButton = "PART_TabPlacementButton";
     internal const string PartTabPlacementIcon = "PART_TabPlacementIcon";
+    internal const string PartTabPlacementPopup = "PART_TabPlacementPopup";
+    internal const string PartTabPlacementTopButton = "PART_TabPlacementTopButton";
+    internal const string PartTabPlacementRightButton = "PART_TabPlacementRightButton";
+    internal const string PartTabPlacementBottomButton = "PART_TabPlacementBottomButton";
+    internal const string PartTabPlacementLeftButton = "PART_TabPlacementLeftButton";
     internal const string PartMaximizeButton = "PART_MaximizeButton";
     internal const string PartMaximizeIcon = "PART_MaximizeIcon";
     internal const string PartDropHint = "PART_DropHint";
@@ -119,6 +129,11 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     private Control? _chromeHost;
     private DockHeaderButton? _tabPlacementButton;
     private DockChromeIcon? _tabPlacementIcon;
+    private Popup? _tabPlacementPopup;
+    private DockHeaderButton? _tabPlacementTopButton;
+    private DockHeaderButton? _tabPlacementRightButton;
+    private DockHeaderButton? _tabPlacementBottomButton;
+    private DockHeaderButton? _tabPlacementLeftButton;
     private DockHeaderButton? _maximizeButton;
     private DockChromeIcon? _maximizeIcon;
     private Border? _dropHint;
@@ -327,6 +342,11 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         _chromeHost = e.NameScope.Get<Control>(PartChromeHost);
         _tabPlacementButton = e.NameScope.Get<DockHeaderButton>(PartTabPlacementButton);
         _tabPlacementIcon = e.NameScope.Get<DockChromeIcon>(PartTabPlacementIcon);
+        _tabPlacementPopup = e.NameScope.Get<Popup>(PartTabPlacementPopup);
+        _tabPlacementTopButton = e.NameScope.Get<DockHeaderButton>(PartTabPlacementTopButton);
+        _tabPlacementRightButton = e.NameScope.Get<DockHeaderButton>(PartTabPlacementRightButton);
+        _tabPlacementBottomButton = e.NameScope.Get<DockHeaderButton>(PartTabPlacementBottomButton);
+        _tabPlacementLeftButton = e.NameScope.Get<DockHeaderButton>(PartTabPlacementLeftButton);
         _maximizeButton = e.NameScope.Get<DockHeaderButton>(PartMaximizeButton);
         _maximizeIcon = e.NameScope.Get<DockChromeIcon>(PartMaximizeIcon);
         _dropHint = e.NameScope.Get<Border>(PartDropHint);
@@ -685,6 +705,14 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     {
         if (_tabPlacementButton is not null)
             _tabPlacementButton.Click += OnTabPlacementButtonClick;
+        if (_tabPlacementTopButton is not null)
+            _tabPlacementTopButton.Click += OnTabPlacementTopButtonClick;
+        if (_tabPlacementRightButton is not null)
+            _tabPlacementRightButton.Click += OnTabPlacementRightButtonClick;
+        if (_tabPlacementBottomButton is not null)
+            _tabPlacementBottomButton.Click += OnTabPlacementBottomButtonClick;
+        if (_tabPlacementLeftButton is not null)
+            _tabPlacementLeftButton.Click += OnTabPlacementLeftButtonClick;
         if (_maximizeButton is not null)
             _maximizeButton.Click += OnMaximizeButtonClick;
         if (_headerHost is not null)
@@ -697,6 +725,16 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     {
         if (_tabPlacementButton is not null)
             _tabPlacementButton.Click -= OnTabPlacementButtonClick;
+        if (_tabPlacementTopButton is not null)
+            _tabPlacementTopButton.Click -= OnTabPlacementTopButtonClick;
+        if (_tabPlacementRightButton is not null)
+            _tabPlacementRightButton.Click -= OnTabPlacementRightButtonClick;
+        if (_tabPlacementBottomButton is not null)
+            _tabPlacementBottomButton.Click -= OnTabPlacementBottomButtonClick;
+        if (_tabPlacementLeftButton is not null)
+            _tabPlacementLeftButton.Click -= OnTabPlacementLeftButtonClick;
+        if (_tabPlacementPopup is not null)
+            _tabPlacementPopup.IsOpen = false;
         if (_maximizeButton is not null)
             _maximizeButton.Click -= OnMaximizeButtonClick;
         if (_headerHost is not null)
@@ -712,13 +750,41 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     private void OnTabPlacementButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         e.Handled = true;
-        SetCurrentValue(TabStripPlacementProperty, TabStripPlacement switch
+        if (_tabPlacementPopup is null || _tabPlacementButton is null)
+            return;
+
+        UpdateTabPlacementOptions();
+        _tabPlacementPopup.PlacementTarget = _tabPlacementButton;
+        _tabPlacementPopup.Placement = TabStripPlacement switch
         {
-            DockTabStripPlacement.Top => DockTabStripPlacement.Right,
-            DockTabStripPlacement.Right => DockTabStripPlacement.Bottom,
-            DockTabStripPlacement.Bottom => DockTabStripPlacement.Left,
-            _ => DockTabStripPlacement.Top
-        });
+            DockTabStripPlacement.Bottom => PlacementMode.TopEdgeAlignedRight,
+            DockTabStripPlacement.Left => PlacementMode.RightEdgeAlignedBottom,
+            DockTabStripPlacement.Right => PlacementMode.LeftEdgeAlignedBottom,
+            _ => PlacementMode.BottomEdgeAlignedRight
+        };
+        _tabPlacementPopup.IsOpen = !_tabPlacementPopup.IsOpen;
+    }
+
+    private void OnTabPlacementTopButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
+        SelectTabPlacement(DockTabStripPlacement.Top, e);
+
+    private void OnTabPlacementRightButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
+        SelectTabPlacement(DockTabStripPlacement.Right, e);
+
+    private void OnTabPlacementBottomButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
+        SelectTabPlacement(DockTabStripPlacement.Bottom, e);
+
+    private void OnTabPlacementLeftButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
+        SelectTabPlacement(DockTabStripPlacement.Left, e);
+
+    private void SelectTabPlacement(
+        DockTabStripPlacement placement,
+        Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        e.Handled = true;
+        SetCurrentValue(TabStripPlacementProperty, placement);
+        if (_tabPlacementPopup is not null)
+            _tabPlacementPopup.IsOpen = false;
     }
 
     private void UpdateTabPlacementIcon()
@@ -733,6 +799,24 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             DockTabStripPlacement.Left => DockChromeIconKind.TabPlacementLeft,
             _ => DockChromeIconKind.TabPlacementTop
         };
+
+        UpdateTabPlacementOptions();
+    }
+
+    private void UpdateTabPlacementOptions()
+    {
+        SetCurrentPlacementClass(_tabPlacementTopButton, DockTabStripPlacement.Top);
+        SetCurrentPlacementClass(_tabPlacementRightButton, DockTabStripPlacement.Right);
+        SetCurrentPlacementClass(_tabPlacementBottomButton, DockTabStripPlacement.Bottom);
+        SetCurrentPlacementClass(_tabPlacementLeftButton, DockTabStripPlacement.Left);
+    }
+
+    private void SetCurrentPlacementClass(DockHeaderButton? button, DockTabStripPlacement placement)
+    {
+        if (button is null)
+            return;
+
+        button.Classes.Set("current-placement", TabStripPlacement == placement);
     }
 
     private void OnHeaderPointerPressed(object? sender, PointerPressedEventArgs e)

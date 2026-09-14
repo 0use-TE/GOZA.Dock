@@ -85,4 +85,8 @@ Vertical classic tabs keep the 32px strip metric, center the compact rotated tit
 
 ![Classic vertical tab presentation](../../images/3.0.6/classic-tabs-vertical.png)
 
+The trailing placement action opens a compact two-by-two direction picker. Its background, border, hover, active, icon, and focus colors continue to resolve from the existing VS Code workbench resource keys:
+
+![Compact tab placement picker](../../images/3.0.6/tab-placement-picker.png)
+
 You can still override the same keys manually in `DockShell.Resources` (`DockTabHeight`, …) — see [DOCK-THEMING.zh-CN.md](https://github.com/0use-TE/GOZA.Dock/blob/master/DOCK-THEMING.zh-CN.md).

@@ -115,7 +115,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 | `TabClosedCommand` | `ICommand?` | `null` | **事后通知**——库已经完成了移除和缓存清理；命令参数是被关闭的 `IDockTabItem`。 |
 | `CanDragTabs` | `bool` | `true` | 设为 `false` 时拆掉手势控制器：仍可选中/关闭，但不能重排和跨区移动。运行时切换会立即重新挂载/拆除。 |
 | `ShowMaximizeButton` | `bool` | `true` | 在尾端显示内置最大化/还原按钮。 |
-| `ShowTabPlacementButton` | `bool` | `true` | 在尾端显示 Tab 位置按钮；每次点击按 `Top → Right → Bottom → Left` 循环。 |
+| `ShowTabPlacementButton` | `bool` | `true` | 在尾端显示 Tab 位置按钮；点击后弹出 `Top` / `Left` / `Right` / `Bottom` 四向选择器。 |
 | `CanMaximize` | `bool` | `true` | 是否允许 Region 填满所属 Shell。 |
 | `DoubleClickHeaderToMaximize` | `bool` | `true` | 双击 Header 空白区域时切换最大化。 |
 | `ShowHeaderBodySeparator` | `bool` | `false` | 是否在选中 Header 与 Body 之间保留完整 1px 分隔线。 |

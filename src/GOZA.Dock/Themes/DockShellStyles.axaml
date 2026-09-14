@@ -550,11 +550,54 @@
                                         VerticalAlignment="Center" />
                       <controls:DockHeaderButton x:Name="PART_TabPlacementButton"
                                                  Classes="dock-tab-placement"
-                                                 ToolTip.Tip="Move tab strip to next edge"
+                                                 ToolTip.Tip="Choose tab strip position"
                                                  IsVisible="{TemplateBinding ShowTabPlacementButton}">
                         <controls:DockChromeIcon x:Name="PART_TabPlacementIcon"
                                                  Kind="TabPlacementTop" />
                       </controls:DockHeaderButton>
+                      <Popup x:Name="PART_TabPlacementPopup"
+                             IsLightDismissEnabled="True"
+                             ShouldUseOverlayLayer="True"
+                             OverlayDismissEventPassThrough="False">
+                        <Border Classes="dock-tab-placement-popup"
+                                Padding="3"
+                                Background="{DynamicResource editorGroupHeader.tabsBackground}"
+                                BorderBrush="{DynamicResource surface.border}"
+                                BorderThickness="1"
+                                CornerRadius="4">
+                          <Grid ColumnDefinitions="24,24"
+                                RowDefinitions="24,24">
+                            <controls:DockHeaderButton x:Name="PART_TabPlacementTopButton"
+                                                       Grid.Row="0"
+                                                       Grid.Column="0"
+                                                       Classes="dock-tab-placement-option"
+                                                       ToolTip.Tip="Tabs on top">
+                              <controls:DockChromeIcon Kind="TabPlacementTop" />
+                            </controls:DockHeaderButton>
+                            <controls:DockHeaderButton x:Name="PART_TabPlacementLeftButton"
+                                                       Grid.Row="1"
+                                                       Grid.Column="0"
+                                                       Classes="dock-tab-placement-option"
+                                                       ToolTip.Tip="Tabs on left">
+                              <controls:DockChromeIcon Kind="TabPlacementLeft" />
+                            </controls:DockHeaderButton>
+                            <controls:DockHeaderButton x:Name="PART_TabPlacementRightButton"
+                                                       Grid.Row="1"
+                                                       Grid.Column="1"
+                                                       Classes="dock-tab-placement-option"
+                                                       ToolTip.Tip="Tabs on right">
+                              <controls:DockChromeIcon Kind="TabPlacementRight" />
+                            </controls:DockHeaderButton>
+                            <controls:DockHeaderButton x:Name="PART_TabPlacementBottomButton"
+                                                       Grid.Row="0"
+                                                       Grid.Column="1"
+                                                       Classes="dock-tab-placement-option"
+                                                       ToolTip.Tip="Tabs on bottom">
+                              <controls:DockChromeIcon Kind="TabPlacementBottom" />
+                            </controls:DockHeaderButton>
+                          </Grid>
+                        </Border>
+                      </Popup>
                       <controls:DockHeaderButton x:Name="PART_MaximizeButton"
                                                  Classes="dock-maximize"
                                                  ToolTip.Tip="Maximize or restore region"
@@ -825,6 +868,17 @@
     <Setter Property="Padding" Value="2" />
     <Setter Property="HorizontalAlignment" Value="Center" />
     <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="controls|DockHeaderButton.dock-tab-placement-option.current-placement /template/ ContentPresenter#PART_DockHeaderButtonSurface">
+    <Setter Property="Background" Value="{DynamicResource toolbar.activeBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource focusBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector="controls|DockHeaderButton.dock-tab-placement-option">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="MinWidth" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="MinHeight" Value="24" />
   </Style>
   <Style Selector="controls|DockHeaderButton.dock-tab-close:pointerover /template/ ContentPresenter#PART_DockHeaderButtonSurface">
     <Setter Property="Background" Value="{DynamicResource DockTabCloseHoverBackground}" />

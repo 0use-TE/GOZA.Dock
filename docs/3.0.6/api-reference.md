@@ -115,7 +115,7 @@ One tab region. It owns selection, view realization, tab drag/drop, and close re
 | `TabClosedCommand` | `ICommand?` | `null` | **Notification after the fact.** The library has already removed the tab and evicted its cached view; the command parameter is the closed `IDockTabItem`. |
 | `CanDragTabs` | `bool` | `true` | `false` detaches the gesture controller: tabs can still be selected and closed, but not reordered or moved. Toggling at runtime re-attaches/detaches immediately. |
 | `ShowMaximizeButton` | `bool` | `true` | Shows the built-in maximize/restore button at the trailing edge. |
-| `ShowTabPlacementButton` | `bool` | `true` | Shows the trailing-edge placement button. Each click cycles `Top → Right → Bottom → Left`. |
+| `ShowTabPlacementButton` | `bool` | `true` | Shows the trailing-edge placement button. Clicking it opens a four-way `Top` / `Left` / `Right` / `Bottom` picker. |
 | `CanMaximize` | `bool` | `true` | Allows the region to fill its containing shell. |
 | `DoubleClickHeaderToMaximize` | `bool` | `true` | Toggles maximize from an empty-header double click. |
 | `ShowHeaderBodySeparator` | `bool` | `false` | Keeps the full one-pixel divider between the selected header and body. |

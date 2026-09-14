@@ -9,10 +9,10 @@
 - 新增 `DockShell.PanePresentation`，可在 `ModernCards` 与 VS Code 风格的 `ClassicSeams` 之间运行时切换，且不会重建 Tab 或 View；默认采用 `ClassicSeams`。
 - 新增运行时 `DockShell.TabPresentation`：`ClassicTabs` 复刻旧版 VS Code 满高矩形 Tab 条，`ModernPills` 保留圆角风格，默认 `Auto` 跟随区域模式；两种 Tab 均可与任一区域模式组合。
 - 新增 `DockShell.SashSize`，鼠标、触控笔和手指共用默认 12px 命中区，同时不加宽可见边界。
-- 内置最大化/还原与 Tab 位置按钮改为默认显示。位置按钮固定在各 Region 尾端并循环四个边缘；Minimal 示例提供两个显示开关，设置栏按真实可用宽度换行，Tab 尺寸编辑器保持完整可见。
+- 内置最大化/还原与 Tab 位置按钮改为默认显示。位置按钮固定在各 Region 尾端，点击后弹出四向选择器；Minimal 示例提供两个显示开关，设置栏按真实可用宽度换行，Tab 尺寸编辑器保持完整可见。
 - 经典模式下不可关闭 Tab 的左右留白改为平衡布局；可关闭 Tab 仍保留 VS Code 的 28px 关闭操作区。
 - 垂直 Tab Header 将紧凑的“标题 + 关闭按钮”内容组整体居中，复用水平 Tab 的标题/操作区间距，同时不再加入人为占位区；垂直拖拽 Ghost 同步复制真实 Tab 的方向与尺寸。
-- Minimal 示例的右侧区域现在默认把 Tab 放在左边缘，作为始终可见的垂直 Tab 回归测试场景。
+- Minimal 示例的所有区域都从默认顶部 Tab 条开始，可通过四向选择器分别在运行时切换。
 
 ---
 

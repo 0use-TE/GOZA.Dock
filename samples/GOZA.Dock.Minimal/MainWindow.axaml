@@ -76,7 +76,6 @@
                 </Grid>
                 <DockSplitter Grid.Column="1" />
                 <DockRegion Grid.Column="2"
-                            TabStripPlacement="Left"
                             ItemsSource="{Binding RightTabs}"
                             AddTabCommand="{Binding AddRightTabCommand}"
                             ShowAddButton="True"
