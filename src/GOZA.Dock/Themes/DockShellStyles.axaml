@@ -643,17 +643,25 @@
           <ControlTemplate>
             <LayoutTransformControl x:Name="PART_HeaderTransform">
               <Grid x:Name="PART_HeaderContent"
-                    ColumnDefinitions="*,Auto"
+                    ColumnDefinitions="Auto,*,Auto"
                     Margin="{DynamicResource DockTabPadding}"
                     Background="Transparent">
+                <!-- Becomes visible only for closable vertical tabs. It mirrors the
+                     close action lane so the rotated title stays geometrically centered. -->
+                <Border x:Name="PART_VerticalTitleBalance"
+                        Grid.Column="0"
+                        Width="{DynamicResource DockChromeButtonSize}"
+                        IsVisible="False"
+                        IsHitTestVisible="False" />
                 <TextBlock x:Name="PART_HeaderText"
+                           Grid.Column="1"
                            VerticalAlignment="Center"
                            Foreground="{TemplateBinding Foreground}"
                            FontSize="{TemplateBinding FontSize}"
                            Text="{TemplateBinding Header}"
                            TextTrimming="CharacterEllipsis" />
                 <controls:DockHeaderButton x:Name="PART_CloseButton"
-                                           Grid.Column="1"
+                                           Grid.Column="2"
                                            Classes="dock-tab-close"
                                            Margin="{DynamicResource DockTabCloseGap}"
                                            VerticalAlignment="Center"
@@ -906,6 +914,20 @@
       <RotateTransform Angle="90" />
     </Setter>
   </Style>
+  <!-- Vertical headers use symmetric lanes instead of merely rotating the horizontal
+       two-column layout. The title remains centered even when Close is present. -->
+  <Style Selector="controls|DockRegion:vertical controls|DockTabHeader /template/ Grid#PART_HeaderContent">
+    <Setter Property="Margin" Value="8,0" />
+  </Style>
+  <Style Selector="controls|DockRegion:vertical controls|DockTabHeader /template/ TextBlock#PART_HeaderText">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="controls|DockRegion:vertical controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector="controls|DockRegion:vertical controls|DockTabHeader:closable /template/ Border#PART_VerticalTitleBalance">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
 
   <!-- Classic VS Code editor tabs: full-height rectangular tabs, a one-pixel
        separator between tabs, the header/body rule, and selected top/body rules. -->
@@ -961,6 +983,12 @@
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
     <!-- The 28px close lane supplies the trailing breathing room for closable tabs. -->
     <Setter Property="Margin" Value="10,0,0,0" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:vertical controls|DockTabHeader /template/ Grid#PART_HeaderContent">
+    <Setter Property="Margin" Value="8,0" />
+  </Style>
+  <Style Selector="controls|DockShell:classic-tabs controls|DockRegion:vertical controls|DockTabHeader:closable /template/ Grid#PART_HeaderContent">
+    <Setter Property="Margin" Value="0" />
   </Style>
   <Style Selector="controls|DockShell:classic-tabs controls|DockRegion controls|DockHeaderButton.dock-tab-close">
     <Setter Property="Width" Value="{DynamicResource DockChromeButtonSize}" />

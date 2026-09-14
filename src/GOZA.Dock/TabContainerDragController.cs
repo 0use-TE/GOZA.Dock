@@ -793,6 +793,12 @@ public sealed class TabContainerDragController : IDisposable
         var surface = FindTabSurface(_draggedContainer);
         var source = (Control?)surface ?? _draggedContainer;
         var liveText = FindHeaderText(_draggedContainer);
+        var liveHeaderContent = _draggedContainer.GetVisualDescendants()
+            .OfType<Grid>()
+            .FirstOrDefault(grid => grid.Name == "PART_HeaderContent");
+        var liveCloseButton = _draggedContainer.GetVisualDescendants()
+            .OfType<DockHeaderButton>()
+            .FirstOrDefault(button => button.Name == "PART_CloseButton");
 
         IBrush background = Brushes.Transparent;
         var corner = new CornerRadius(4);
@@ -825,7 +831,7 @@ public sealed class TabContainerDragController : IDisposable
             new SolidColorBrush(Color.FromRgb(0x00, 0x78, 0xD4)),
             _host);
 
-        var padding = dragItem.IsClosable
+        var padding = liveHeaderContent?.Margin ?? (dragItem.IsClosable
             ? DockThemeBrushHelper.ResolveValue(
                 "DockTabPaddingClosable",
                 new Thickness(6, 0, 2, 0),
@@ -833,7 +839,8 @@ public sealed class TabContainerDragController : IDisposable
             : DockThemeBrushHelper.ResolveValue(
                 DockThemeResources.TabPadding,
                 new Thickness(6, 0, 8, 0),
-                _host);
+                _host));
+        var vertical = !_region.TabStripPlacement.IsHorizontal();
 
         var title = new TextBlock
         {
@@ -848,7 +855,10 @@ public sealed class TabContainerDragController : IDisposable
         Control content;
         if (dragItem.IsClosable)
         {
-            var closeSize = DockThemeBrushHelper.ResolveValue("DockTabCloseSurfaceSize", 20d, _host);
+            var closeSurfaceSize = DockThemeBrushHelper.ResolveValue("DockTabCloseSurfaceSize", 20d, _host);
+            var closeActionWidth = liveCloseButton is { Bounds.Width: > 0 }
+                ? liveCloseButton.Bounds.Width
+                : DockThemeBrushHelper.ResolveValue(DockThemeResources.TabCloseActionWidth, 24d, _host);
             var close = new Viewbox
             {
                 Width = 12,
@@ -870,8 +880,8 @@ public sealed class TabContainerDragController : IDisposable
 
             var closeHost = new Border
             {
-                Width = closeSize,
-                Height = closeSize,
+                Width = closeActionWidth,
+                Height = closeSurfaceSize,
                 Margin = DockThemeBrushHelper.ResolveValue("DockTabCloseGap", new Thickness(0), _host),
                 VerticalAlignment = VerticalAlignment.Center,
                 Child = close,
@@ -881,10 +891,23 @@ public sealed class TabContainerDragController : IDisposable
             var grid = new Grid
             {
                 Margin = padding,
-                ColumnDefinitions = new ColumnDefinitions("Auto,Auto"),
+                ColumnDefinitions = new ColumnDefinitions(vertical ? "Auto,Auto,Auto" : "Auto,Auto"),
             };
+            if (vertical)
+            {
+                grid.Children.Add(new Border
+                {
+                    Width = closeActionWidth,
+                    IsHitTestVisible = false,
+                });
+                Grid.SetColumn(title, 1);
+                Grid.SetColumn(closeHost, 2);
+            }
+            else
+            {
+                Grid.SetColumn(closeHost, 1);
+            }
             grid.Children.Add(title);
-            Grid.SetColumn(closeHost, 1);
             grid.Children.Add(closeHost);
             content = grid;
         }
@@ -894,16 +917,35 @@ public sealed class TabContainerDragController : IDisposable
             content = title;
         }
 
+        if (vertical)
+        {
+            content = new LayoutTransformControl
+            {
+                LayoutTransform = new RotateTransform(
+                    _region.TabStripPlacement == DockTabStripPlacement.Left ? -90 : 90),
+                Child = content,
+            };
+        }
+
         var borderThickness = DockThemeBrushHelper.ResolveValue(
             DockThemeResources.DragGhostBorderThickness,
             new Thickness(1),
             _host);
 
-        // Height matches the live pill; width is content-driven (font + padding + close).
+        content.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        var horizontalChrome = borderThickness.Left + borderThickness.Right;
+
+        // Horizontal ghosts remain content-driven so ellipsized labels expand. Vertical
+        // ghosts clone the live tab footprint and rotate the same header content as the
+        // in-strip template; this avoids the wide horizontal card formerly shown there.
+        var width = vertical
+            ? Math.Max(1, Math.Ceiling(source.Bounds.Width))
+            : Math.Max(1, Math.Ceiling(content.DesiredSize.Width + horizontalChrome));
         var height = Math.Max(1, Math.Ceiling(source.Bounds.Height));
 
         var ghost = new Border
         {
+            Width = width,
             Height = height,
             CornerRadius = corner,
             BorderThickness = borderThickness,
@@ -916,9 +958,6 @@ public sealed class TabContainerDragController : IDisposable
             VerticalAlignment = VerticalAlignment.Top,
         };
 
-        content.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        var horizontalChrome = borderThickness.Left + borderThickness.Right;
-        ghost.Width = Math.Ceiling(content.DesiredSize.Width + horizontalChrome);
         return ghost;
     }
 
