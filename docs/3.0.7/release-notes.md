@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## 3.0.7 (latest)
+
+### Fixed
+
+- Fixed the tab placement picker highlight frame being too tall — the blue focus border now correctly highlights exactly one 24×24 grid cell.
+
+---
+
 ## 3.0.6
 
 ### Changed
