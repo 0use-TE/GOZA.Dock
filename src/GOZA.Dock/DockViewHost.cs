@@ -41,6 +41,8 @@ public sealed class DockViewHost
 
         Detach(control);
         host.SetCurrentValue(ContentControl.ContentProperty, control);
+        if (control is IDockSurfaceLifecycle lifecycle)
+            lifecycle.OnDockSurfaceActivated();
         return control;
     }
 
@@ -50,6 +52,8 @@ public sealed class DockViewHost
         if (!_cached.Remove(tabId, out var control))
             return;
 
+        if (control is IDockSurfaceLifecycle lifecycle)
+            lifecycle.OnDockSurfaceDeactivated();
         Detach(control);
         _parkingLot.Children.Remove(control);
     }
@@ -63,6 +67,8 @@ public sealed class DockViewHost
         if (!IsSurfaceForTab(surface, tab))
             return;
 
+        if (surface is IDockSurfaceLifecycle lifecycle)
+            lifecycle.OnDockSurfaceDeactivated();
         host.SetCurrentValue(ContentControl.ContentProperty, null);
 
         if (tab.ReuseSurface)

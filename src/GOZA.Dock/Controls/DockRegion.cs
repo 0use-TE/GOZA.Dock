@@ -571,7 +571,10 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             return;
 
         var viewHost = ResolveViewHost();
-        if (oldItem is IDockTabItem oldTab && oldTab.ReuseSurface && viewHost is not null)
+        // Selection changes are dispatched asynchronously. During a layout reset the
+        // oldItem captured by the property notification can already be stale, while
+        // _previousSelected still describes the surface actually hosted here.
+        if (_previousSelected is IDockTabItem oldTab && oldTab.ReuseSurface && viewHost is not null)
             viewHost.Release(oldTab, _contentHost);
 
         if (newItem is not IDockTabItem tab)
