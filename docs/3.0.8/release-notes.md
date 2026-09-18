@@ -1,5 +1,18 @@
 ﻿# Release notes
 
+## 3.0.8 (latest)
+
+### Added
+
+- **`IDockSurfaceLifecycle`** — optional activate/deactivate callbacks for cached tab surfaces. A parked control stays attached under the hidden parking panel, so visual-tree attachment alone does not mean the tab is showing. Implement the interface on the view (`WebView`, media, GL) to pause work when `DockViewHost` parks it and resume when it is shown again.
+
+### Fixed
+
+- Cached dock surfaces are now released from the surface actually hosted in the region. Selection updates run asynchronously; during a layout reset the property-change `oldItem` can already be stale, which previously parked or evicted the wrong control.
+- Vertical tab drag previews now keep the live tab footprint. The header is arranged as a normal horizontal row inside a frame whose size is the inverse of the live tab, then rotated with `RenderTransform` around its center. This avoids `LayoutTransformControl` feeding the rotation back into measure/arrange and showing a wide horizontal card.
+
+---
+
 ## 3.0.7
 
 ### Fixed

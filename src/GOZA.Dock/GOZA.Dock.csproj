@@ -9,7 +9,7 @@
 		<LangVersion>latest</LangVersion>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IsAotCompatible>true</IsAotCompatible>
-		<Version>3.0.7</Version>
+		<Version>3.0.8</Version>
 
 		<Title>GOZA.Dock</Title>
 		<Description>Cross-platform, AOT-first Avalonia tab workspace with fixed regions, draggable tabs, self-contained Dock chrome, and optional view reuse.</Description>
@@ -22,7 +22,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>GOZA.png</PackageIcon>
-		<PackageReleaseNotes>3.0.6: close buttons are visible by default with an optional selected/hover mode; tab-strip scroll-bar visibility is configurable; DockShell can switch at runtime between default classic seams and modern cards; SashSize defaults to a 12px pointer hit target; the trailing tab-placement action opens a compact four-way picker.</PackageReleaseNotes>
+		<PackageReleaseNotes>3.0.8: IDockSurfaceLifecycle for cached tab surfaces; selection now parks the hosted surface; vertical tab drag previews keep the live footprint.</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>

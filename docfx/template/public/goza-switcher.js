@@ -8,9 +8,12 @@
 
   /** @type {{ default: string, versions: { id: string, label: string }[], pages: string[] }} */
   let config = {
-    default: '3.0.0',
+    default: '3.0.8',
     versions: [
-      { id: '3.0.0', label: '3.0.0 (latest)' },
+      { id: '3.0.8', label: '3.0.8 (latest)' },
+      { id: '3.0.7', label: '3.0.7' },
+      { id: '3.0.6', label: '3.0.6' },
+      { id: '3.0.0', label: '3.0.0' },
       { id: '2.0.0', label: '2.0.0' },
       { id: '1.0.6', label: '1.0.6' },
       { id: '1.0.5', label: '1.0.5' },
