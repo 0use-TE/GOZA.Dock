@@ -792,6 +792,7 @@ public sealed class TabContainerDragController : IDisposable
 
         var surface = FindTabSurface(_draggedContainer);
         var source = (Control?)surface ?? _draggedContainer;
+        var vertical = !_region.TabStripPlacement.IsHorizontal();
         var liveText = FindHeaderText(_draggedContainer);
         var liveHeaderLayout = _draggedContainer.GetVisualDescendants()
             .OfType<Grid>()
@@ -843,8 +844,6 @@ public sealed class TabContainerDragController : IDisposable
                 DockThemeResources.TabPadding,
                 new Thickness(6, 0, 8, 0),
                 _host));
-        var vertical = !_region.TabStripPlacement.IsHorizontal();
-
         var title = new TextBlock
         {
             Text = dragItem.Header ?? string.Empty,
@@ -896,6 +895,7 @@ public sealed class TabContainerDragController : IDisposable
                 Margin = padding,
                 ColumnDefinitions = new ColumnDefinitions("Auto,Auto"),
                 HorizontalAlignment = vertical ? HorizontalAlignment.Center : HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
             };
             grid.Children.Add(title);
             Grid.SetColumn(closeHost, 1);
@@ -910,12 +910,25 @@ public sealed class TabContainerDragController : IDisposable
 
         if (vertical)
         {
-            content = new LayoutTransformControl
+            content.HorizontalAlignment = HorizontalAlignment.Center;
+            content.VerticalAlignment = VerticalAlignment.Center;
+
+            // Arrange the header as an ordinary horizontal row inside a frame whose
+            // dimensions are the inverse of the live vertical tab. RenderTransform then
+            // rotates that already-arranged frame around its center without feeding the
+            // rotation back into measure/arrange (which LayoutTransformControl does).
+            var rotatedFrame = new Grid
             {
-                LayoutTransform = new RotateTransform(
+                Width = Math.Max(1, Math.Ceiling(source.Bounds.Height)),
+                Height = Math.Max(1, Math.Ceiling(source.Bounds.Width)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                RenderTransformOrigin = RelativePoint.Center,
+                RenderTransform = new RotateTransform(
                     _region.TabStripPlacement == DockTabStripPlacement.Left ? -90 : 90),
-                Child = content,
             };
+            rotatedFrame.Children.Add(content);
+            content = rotatedFrame;
         }
 
         var borderThickness = DockThemeBrushHelper.ResolveValue(
@@ -927,8 +940,8 @@ public sealed class TabContainerDragController : IDisposable
         var horizontalChrome = borderThickness.Left + borderThickness.Right;
 
         // Horizontal ghosts remain content-driven so ellipsized labels expand. Vertical
-        // ghosts clone the live tab footprint and rotate the same header content as the
-        // in-strip template; this avoids the wide horizontal card formerly shown there.
+        // ghosts keep the exact live footprint; their child frame is rotated at render
+        // time and therefore does not distort that outer measurement.
         var width = vertical
             ? Math.Max(1, Math.Ceiling(source.Bounds.Width))
             : Math.Max(1, Math.Ceiling(content.DesiredSize.Width + horizontalChrome));
