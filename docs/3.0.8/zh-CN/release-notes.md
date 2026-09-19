@@ -1,5 +1,18 @@
 ﻿# 发布说明
 
+## 3.0.8（最新）
+
+### 新增
+
+- **`IDockSurfaceLifecycle`** — 缓存 Tab 表面的可选激活/停用回调。已 Park 的控件仍挂在隐藏 Parking Lot 面板下，因此仅凭可视树附加不能判断当前 Tab 正在显示。在 View（`WebView`、媒体、GL）上实现该接口，即可在 `DockViewHost` Park 时暂停工作，重新显示时再恢复。
+
+### 修复
+
+- 缓存表面现在从 Region 实际承载的表面释放。选中更新是异步派发的；布局重置时属性通知里的 `oldItem` 可能已经过期，此前会错误 Park 或 Evict 另一个控件。
+- 垂直 Tab 拖拽预览现在保持真实 Tab 尺寸。标题先按普通水平行排进一个与真实 Tab 宽高对调的框架，再用 `RenderTransform` 绕中心旋转。这样不会像 `LayoutTransformControl` 那样把旋转写回测量/布局，从而避免出现过宽的水平卡片。
+
+---
+
 ## 3.0.7
 
 ### 修复
