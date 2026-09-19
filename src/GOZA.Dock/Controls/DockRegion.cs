@@ -386,6 +386,16 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     protected override void OnUnloaded(Avalonia.Interactivity.RoutedEventArgs e)
     {
+        if (_previousSelected is IDockTabItem { ReuseSurface: true } oldTab
+            && ResolveViewHost() is { } viewHost
+            && _contentHost is not null)
+        {
+            viewHost.Release(oldTab, _contentHost);
+        }
+
+        _contentHost?.SetCurrentValue(ContentControl.ContentProperty, null);
+        ActiveContent = null;
+        _previousSelected = null;
         DetachInteraction();
         DetachHeaderScrolling();
         UnhookItemsSource();
@@ -507,6 +517,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     private void OnItemsSourceChanged(IEnumerable? source)
     {
         HookItemsSource();
+        ScheduleCacheReconciliation();
         UpdateHeaderState();
 
         if (GetItemCount(source) == 0)
@@ -536,6 +547,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     private void OnItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        ScheduleCacheReconciliation();
         UpdateHeaderState();
         if (GetItemCount() == 0)
             SetCurrentValue(SelectedItemProperty, null);
@@ -860,4 +872,10 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     private DockViewHost? ResolveViewHost() =>
         this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault()?.ViewHost;
+
+    private void ScheduleCacheReconciliation() =>
+        this.GetVisualAncestors()
+            .OfType<DockShell>()
+            .FirstOrDefault()
+            ?.ScheduleCacheReconciliation();
 }

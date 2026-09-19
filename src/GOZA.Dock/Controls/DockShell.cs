@@ -5,6 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace GOZA.Dock.Controls;
@@ -76,6 +77,7 @@ public sealed partial class DockShell : ContentControl
     private Panel? _maximizedHost;
     private DockRegion? _maximizedRegion;
     private RegionLayoutState? _maximizedLayout;
+    private bool _cacheReconciliationPending;
 
     internal DockViewHost? ViewHost { get; private set; }
 
@@ -157,7 +159,8 @@ public sealed partial class DockShell : ContentControl
 
     static DockShell()
     {
-        EnableViewCacheProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.TryAttachViewHost());
+        EnableViewCacheProperty.Changed.AddClassHandler<DockShell>((shell, change) =>
+            shell.OnEnableViewCacheChanged(change.GetNewValue<bool>()));
         ColorThemeProperty.Changed.AddClassHandler<DockShell>((shell, e) =>
             shell.OnColorThemeChanged(e.GetNewValue<VsCodeColorTheme?>()));
         TabStripSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.WriteHeaderMetrics());
@@ -254,8 +257,17 @@ public sealed partial class DockShell : ContentControl
         if (change.Property == ContentProperty)
         {
             RestoreMaximizedRegion();
+            ViewHost?.Dispose();
+            ViewHost = null;
             TryAttachViewHost();
         }
+    }
+
+    protected override void OnUnloaded(Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        RestoreMaximizedRegion();
+        ViewHost?.Clear();
+        base.OnUnloaded(e);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -353,6 +365,54 @@ public sealed partial class DockShell : ContentControl
 
         ViewHost = new DockViewHost();
         ViewHost.AttachParkingLot(root);
+    }
+
+    private void OnEnableViewCacheChanged(bool enabled)
+    {
+        if (enabled)
+        {
+            TryAttachViewHost();
+            return;
+        }
+
+        ViewHost?.Dispose();
+        ViewHost = null;
+    }
+
+    internal void ScheduleCacheReconciliation()
+    {
+        if (_cacheReconciliationPending || ViewHost is null)
+            return;
+
+        _cacheReconciliationPending = true;
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                _cacheReconciliationPending = false;
+                ReconcileCachedViews();
+            },
+            DispatcherPriority.Background);
+    }
+
+    private void ReconcileCachedViews()
+    {
+        if (ViewHost is not { } viewHost)
+            return;
+
+        var retainedIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var region in this.GetVisualDescendants().OfType<DockRegion>())
+        {
+            if (region.ItemsSource is null)
+                continue;
+
+            foreach (var item in region.ItemsSource)
+            {
+                if (item is IDockTabItem { ReuseSurface: true } tab)
+                    retainedIds.Add(tab.Id);
+            }
+        }
+
+        viewHost.EvictExcept(retainedIds);
     }
 
     private void UpdateMaximizedHostState()

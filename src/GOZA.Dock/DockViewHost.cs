@@ -7,9 +7,10 @@ namespace GOZA.Dock;
 /// Parking lot for reusable control surfaces (WebView, media, etc.).
 /// Activated when <see cref="Controls.DockShell.EnableViewCache"/> is true.
 /// </summary>
-public sealed class DockViewHost
+public sealed class DockViewHost : IDisposable
 {
     private readonly Dictionary<string, Control> _cached = new(StringComparer.Ordinal);
+    private readonly HashSet<Control> _active = [];
     private readonly Panel _parkingLot = new()
     {
         IsVisible = false,
@@ -29,6 +30,8 @@ public sealed class DockViewHost
     public bool TryGetCached(string tabId, [NotNullWhen(true)] out Control? control) =>
         _cached.TryGetValue(tabId, out control);
 
+    internal int CachedCount => _cached.Count;
+
     /// <summary>Attaches a tab surface to <paramref name="host"/> (from cache or <paramref name="surface"/> on first use).</summary>
     public Control Activate(IDockTabItem tab, ContentControl host, Control surface)
     {
@@ -41,7 +44,7 @@ public sealed class DockViewHost
 
         Detach(control);
         host.SetCurrentValue(ContentControl.ContentProperty, control);
-        if (control is IDockSurfaceLifecycle lifecycle)
+        if (_active.Add(control) && control is IDockSurfaceLifecycle lifecycle)
             lifecycle.OnDockSurfaceActivated();
         return control;
     }
@@ -52,10 +55,31 @@ public sealed class DockViewHost
         if (!_cached.Remove(tabId, out var control))
             return;
 
-        if (control is IDockSurfaceLifecycle lifecycle)
+        if (_active.Remove(control) && control is IDockSurfaceLifecycle lifecycle)
             lifecycle.OnDockSurfaceDeactivated();
         Detach(control);
         _parkingLot.Children.Remove(control);
+    }
+
+    /// <summary>Evicts cached surfaces whose tab IDs are no longer owned by this shell.</summary>
+    internal void EvictExcept(IReadOnlySet<string> retainedTabIds)
+    {
+        foreach (var tabId in _cached.Keys.Where(id => !retainedTabIds.Contains(id)).ToArray())
+            Evict(tabId);
+    }
+
+    /// <summary>Evicts every cached surface and releases its visual-tree references.</summary>
+    public void Clear()
+    {
+        foreach (var tabId in _cached.Keys.ToArray())
+            Evict(tabId);
+    }
+
+    public void Dispose()
+    {
+        Clear();
+        if (_parkingLot.Parent is Panel parent)
+            parent.Children.Remove(_parkingLot);
     }
 
     /// <summary>Moves the current surface from <paramref name="host"/> to the parking lot when reusable.</summary>
@@ -67,7 +91,7 @@ public sealed class DockViewHost
         if (!IsSurfaceForTab(surface, tab))
             return;
 
-        if (surface is IDockSurfaceLifecycle lifecycle)
+        if (_active.Remove(surface) && surface is IDockSurfaceLifecycle lifecycle)
             lifecycle.OnDockSurfaceDeactivated();
         host.SetCurrentValue(ContentControl.ContentProperty, null);
 
