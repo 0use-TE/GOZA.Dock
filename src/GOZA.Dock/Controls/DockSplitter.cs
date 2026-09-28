@@ -1,9 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.LogicalTree;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace GOZA.Dock.Controls;
@@ -23,8 +26,33 @@ public sealed class DockSplitter : GridSplitter
 
     public DockSplitter()
     {
-        // VS Code sash resizes live; never show Avalonia's drag-preview overlay by default.
-        ShowsPreview = false;
+        ShowsPreview = DockShell.DefaultShowsSplitterPreview;
+        PreviewContent = new FuncTemplate<Control>(CreatePreviewBar);
+    }
+
+    private Control CreatePreviewBar()
+    {
+        var bar = new Border
+        {
+            Background = DockThemeBrushHelper.Resolve(
+                "sash.hoverBorder", new SolidColorBrush(Color.FromRgb(0, 120, 212)), this),
+            IsHitTestVisible = false,
+        };
+
+        var visualGutter = this.GetVisualAncestors().OfType<DockShell>().FirstOrDefault()?.PanePresentation
+            == DockPanePresentation.ClassicSeams ? ClassicSeamSize : ResolveGap();
+        if (ResizeDirection == GridResizeDirection.Columns)
+        {
+            bar.Width = visualGutter;
+            bar.HorizontalAlignment = HorizontalAlignment.Center;
+        }
+        else
+        {
+            bar.Height = visualGutter;
+            bar.VerticalAlignment = VerticalAlignment.Center;
+        }
+
+        return bar;
     }
 
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
@@ -99,6 +127,7 @@ public sealed class DockSplitter : GridSplitter
         var shell = this.GetVisualAncestors()
             .OfType<DockShell>()
             .FirstOrDefault();
+        ShowsPreview = shell?.ShowsSplitterPreview ?? DockShell.DefaultShowsSplitterPreview;
         var classic = shell?.PanePresentation == DockPanePresentation.ClassicSeams;
         var visualGutter = classic ? ClassicSeamSize : ResolveGap();
         var configuredSashSize = shell?.SashSize ?? DockShell.DefaultSashSize;

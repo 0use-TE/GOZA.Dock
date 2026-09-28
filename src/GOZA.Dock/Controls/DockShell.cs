@@ -51,6 +51,13 @@ public sealed partial class DockShell : ContentControl
     public static readonly StyledProperty<double> SashSizeProperty =
         AvaloniaProperty.Register<DockShell, double>(nameof(SashSize), DefaultSashSize);
 
+    /// <summary>Default to preview resizing on browser/mobile, and live resizing on desktop.</summary>
+    public static bool DefaultShowsSplitterPreview =>
+        OperatingSystem.IsBrowser() || OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+
+    public static readonly StyledProperty<bool> ShowsSplitterPreviewProperty =
+        AvaloniaProperty.Register<DockShell, bool>(nameof(ShowsSplitterPreview), DefaultShowsSplitterPreview);
+
     /// <summary>VS Code default: horizontal tab-strip height / vertical tab-strip width.</summary>
     public const double DefaultTabStripSize = 32;
 
@@ -142,6 +149,16 @@ public sealed partial class DockShell : ContentControl
     }
 
     /// <summary>
+    /// When true, splitters move a preview during dragging and resize regions on release.
+    /// When false, adjacent regions resize continuously.
+    /// </summary>
+    public bool ShowsSplitterPreview
+    {
+        get => GetValue(ShowsSplitterPreviewProperty);
+        set => SetValue(ShowsSplitterPreviewProperty, value);
+    }
+
+    /// <summary>
     /// Tab strip thickness: height for horizontal strips, width for vertical strips.
     /// </summary>
     public double TabStripSize
@@ -169,6 +186,7 @@ public sealed partial class DockShell : ContentControl
         TabPresentationProperty.Changed.AddClassHandler<DockShell>((shell, _) =>
             shell.UpdateTabPresentation());
         SashSizeProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.RefreshSplitters());
+        ShowsSplitterPreviewProperty.Changed.AddClassHandler<DockShell>((shell, _) => shell.RefreshSplitters());
     }
 
     private void UpdatePresentationStates()

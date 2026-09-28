@@ -427,8 +427,6 @@
 
       <ControlTheme x:Key="{x:Type controls:DockSplitter}"
                     TargetType="controls:DockSplitter">
-        <!-- VS Code sash: live resize only (no drag-preview bar). -->
-        <Setter Property="ShowsPreview" Value="False" />
         <Setter Property="Background" Value="Transparent" />
         <!-- The enlarged sash overlaps adjacent panes and must render/hit-test above them. -->
         <Setter Property="ZIndex" Value="35" />
