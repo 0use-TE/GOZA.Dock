@@ -3,6 +3,7 @@ bin/
 obj/
 out/
 artifacts/
+TestResults/
 
 ## DocFX (generated on CI / local docfx build)
 _site/

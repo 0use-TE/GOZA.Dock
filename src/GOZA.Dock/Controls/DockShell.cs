@@ -85,6 +85,7 @@ public sealed partial class DockShell : ContentControl
     private DockRegion? _maximizedRegion;
     private RegionLayoutState? _maximizedLayout;
     private bool _cacheReconciliationPending;
+    private readonly Dictionary<object, (bool Existed, object? Value)> _themeOriginalResources = new();
 
     internal DockViewHost? ViewHost { get; private set; }
 
@@ -245,11 +246,24 @@ public sealed partial class DockShell : ContentControl
 
     private void OnColorThemeChanged(VsCodeColorTheme? theme)
     {
-        if (theme is null)
-            return;
-
-        // Theme lives on this shell — set ColorTheme; do not call static Apply from the host.
-        VsCodeThemeJson.Apply(theme, Resources);
+        // Parse all colors first: an invalid theme must not partially overwrite the active one.
+        var nextResources = new ResourceDictionary();
+        if (theme is not null)
+            VsCodeThemeJson.Apply(theme, nextResources);
+        foreach (var (key, original) in _themeOriginalResources)
+        {
+            if (original.Existed)
+                Resources[key] = original.Value;
+            else
+                Resources.Remove(key);
+        }
+        _themeOriginalResources.Clear();
+        foreach (var (key, value) in nextResources)
+        {
+            var existed = Resources.ContainsKey(key);
+            _themeOriginalResources[key] = (existed, existed ? Resources[key] : null);
+            Resources[key] = value;
+        }
         // Color apply must not wipe structural metrics written by header APIs.
         WriteHeaderMetrics();
     }
@@ -390,11 +404,19 @@ public sealed partial class DockShell : ContentControl
         if (enabled)
         {
             TryAttachViewHost();
+            RefreshRegionContents();
             return;
         }
 
         ViewHost?.Dispose();
         ViewHost = null;
+        RefreshRegionContents();
+    }
+
+    private void RefreshRegionContents()
+    {
+        foreach (var region in this.GetVisualDescendants().OfType<DockRegion>())
+            region.RefreshSelectionContent();
     }
 
     internal void ScheduleCacheReconciliation()

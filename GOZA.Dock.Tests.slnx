@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GOZA.Dock/GOZA.Dock.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GOZA.Dock.Tests/GOZA.Dock.Tests.csproj" />
+    <Project Path="tests/GOZA.Dock.HeadlessTests/GOZA.Dock.HeadlessTests.csproj" />
+  </Folder>
+</Solution>

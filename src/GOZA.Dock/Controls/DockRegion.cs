@@ -142,6 +142,7 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
     private object? _previousSelected;
     private bool _headerScrollingAttached;
     private bool _isMaximized;
+    private readonly HashSet<IDockTabItem> _closingTabs = new(ReferenceEqualityComparer.Instance);
 
     static DockRegion()
     {
@@ -442,24 +443,55 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
         }
     }
 
-    internal void RequestCloseTab(IDockTabItem tab)
+    /// <summary>
+    /// Requests a close, awaiting an optional <see cref="IDockTabCloseGuard"/> before removal.
+    /// Returns false when vetoed, already pending, or backed by an immutable collection.
+    /// Call on the UI thread. <see cref="TabClosedCommand"/> runs only after removal.
+    /// </summary>
+    /// <exception cref="OperationCanceledException">The cancellation token was cancelled.</exception>
+    public async Task<bool> CloseTabAsync(IDockTabItem tab, CancellationToken cancellationToken = default)
     {
-        if (!tab.IsClosable || ItemsSource is not IList list || !list.Contains(tab))
-            return;
-
-        if (ReferenceEquals(SelectedItem, tab))
+        ArgumentNullException.ThrowIfNull(tab);
+        Dispatcher.UIThread.VerifyAccess();
+        if (!tab.IsClosable || ItemsSource is not IList list
+            || !DockTabCollectionOperations.CanMutate(list)
+            || DockTabCollectionOperations.IndexOfReference(list, tab) < 0
+            || !_closingTabs.Add(tab))
+            return false;
+        try
         {
-            var index = list.IndexOf(tab);
-            SetCurrentValue(SelectedItemProperty, index + 1 < list.Count
-                ? list[index + 1]
-                : index > 0 ? list[index - 1] : null);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (tab is IDockTabCloseGuard guard && !await guard.CanCloseAsync(cancellationToken))
+                return false;
+            cancellationToken.ThrowIfCancellationRequested();
+            // The tab may have moved or the collection may have been replaced while awaiting.
+            var index = DockTabCollectionOperations.IndexOfReference(list, tab);
+            if (!ReferenceEquals(ItemsSource, list) || !tab.IsClosable
+                || !DockTabCollectionOperations.CanMutate(list) || index < 0)
+                return false;
+            var selection = SelectedItem;
+            if (ReferenceEquals(selection, tab))
+                SetCurrentValue(SelectedItemProperty, index + 1 < list.Count
+                    ? list[index + 1] : index > 0 ? list[index - 1] : null);
+            try
+            {
+                list.RemoveAt(index);
+            }
+            catch
+            {
+                if (DockTabCollectionOperations.IndexOfReference(list, tab) >= 0)
+                    SetCurrentValue(SelectedItemProperty, selection);
+                throw;
+            }
+            EvictView(tab);
+            if (TabClosedCommand?.CanExecute(tab) == true)
+                TabClosedCommand.Execute(tab);
+            return true;
         }
-
-        list.Remove(tab);
-        EvictView(tab);
-
-        if (TabClosedCommand?.CanExecute(tab) == true)
-            TabClosedCommand.Execute(tab);
+        finally
+        {
+            _closingTabs.Remove(tab);
+        }
     }
 
     public void RegisterContentHost(ContentControl host) { }
@@ -579,7 +611,10 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
 
     private void ApplySelectionContent(object? oldItem, object? newItem)
     {
-        if (!ReferenceEquals(SelectedItem, newItem) || _contentHost is null)
+        if (!IsLoaded || !ReferenceEquals(SelectedItem, newItem) || _contentHost is null)
+            return;
+        if (ReferenceEquals(_previousSelected, newItem)
+            && ActiveContent is not null && ReferenceEquals(_contentHost.Content, ActiveContent))
             return;
 
         var viewHost = ResolveViewHost();
@@ -606,6 +641,14 @@ public sealed class DockRegion : TemplatedControl, IDockRegionSession
             ? viewHost.Activate(tab, _contentHost, surface)
             : surface;
         _previousSelected = newItem;
+    }
+
+    internal void RefreshSelectionContent()
+    {
+        if (!IsLoaded || _contentHost is null)
+            return;
+        _previousSelected = null;
+        ApplySelectionContent(null, SelectedItem);
     }
 
     private void EnsureDefaultSelection()

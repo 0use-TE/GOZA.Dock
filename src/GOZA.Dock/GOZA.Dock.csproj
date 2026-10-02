@@ -9,7 +9,7 @@
 		<LangVersion>latest</LangVersion>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<IsAotCompatible>true</IsAotCompatible>
-		<Version>3.0.8</Version>
+		<Version>3.0.9</Version>
 
 		<Title>GOZA.Dock</Title>
 		<Description>Cross-platform, AOT-first Avalonia tab workspace with fixed regions, draggable tabs, self-contained Dock chrome, and optional view reuse.</Description>
@@ -22,7 +22,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>GOZA.png</PackageIcon>
-		<PackageReleaseNotes>3.0.8: IDockSurfaceLifecycle for cached tab surfaces; selection now parks the hosted surface; vertical tab drag previews keep the live footprint.</PackageReleaseNotes>
+		<PackageReleaseNotes>3.0.9: safer tab moves and rollback; asynchronous close guards; cache and unload lifecycle fixes; robust theme includes and resource restoration; splitter drag previews; unit, headless and managed memory regression tests.</PackageReleaseNotes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>

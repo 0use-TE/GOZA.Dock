@@ -75,6 +75,10 @@ Application.Current!.RequestedThemeVariant =
 </Application.Styles>
 ```
 
+## Tests and guarded closing
+
+Run `dotnet test GOZA.Dock.Tests.slnx -c Release` for unit and headless control tests, without mobile workloads. Tabs can implement `IDockTabCloseGuard` to await save/discard confirmation before removal; programmatic callers use `DockRegion.CloseTabAsync`. See [TESTING.md](TESTING.md) for coverage and runtime cache/theme behavior.
+
 ## Samples
 
 ```bash

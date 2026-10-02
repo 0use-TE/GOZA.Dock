@@ -14,3 +14,6 @@
   href: migration.md
 - name: 发布说明
   href: release-notes.md
+
+- name: NuGet publishing (简体中文)
+  href: ../../publishing.md

@@ -75,6 +75,10 @@ Application.Current!.RequestedThemeVariant =
 </Application.Styles>
 ```
 
+## 测试与关闭确认
+
+运行 `dotnet test GOZA.Dock.Tests.slnx -c Release` 执行普通单元测试与无头控件测试，无需安装移动平台工作负载。Tab 可以实现 `IDockTabCloseGuard`，在移除前异步确认保存或取消；程序主动关闭时使用 `DockRegion.CloseTabAsync`。测试命令、覆盖范围、内存测试注意事项及 AI 执行约定见 [测试指南](docs/testing.md)。
+
 ## 示例
 
 ```bash

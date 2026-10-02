@@ -18,4 +18,8 @@
   <Folder Name="/解决方案项/">
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GOZA.Dock.Tests/GOZA.Dock.Tests.csproj" />
+    <Project Path="tests/GOZA.Dock.HeadlessTests/GOZA.Dock.HeadlessTests.csproj" />
+  </Folder>
 </Solution>

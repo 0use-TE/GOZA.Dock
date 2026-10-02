@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <ProjectReference Include="../../src/GOZA.Dock/GOZA.Dock.csproj" />
+  </ItemGroup>
+  <!-- Test the actual persistence sources without pulling in native WebView/DI hosts. -->
+  <ItemGroup>
+    <Compile Include="../../samples/GOZA.Dock.Demo/Services/DockLayoutPersistence.cs" Link="Demo/DockLayoutPersistence.cs" />
+    <Compile Include="../../samples/GOZA.Dock.Demo/Models/DockLayoutSnapshot.cs" Link="Demo/DockLayoutSnapshot.cs" />
+    <Compile Include="../../samples/GOZA.Dock.Demo/Serialization/DockJsonContext.cs" Link="Demo/DockJsonContext.cs" />
+  </ItemGroup>
+</Project>

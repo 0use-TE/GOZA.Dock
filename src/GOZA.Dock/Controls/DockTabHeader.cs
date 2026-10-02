@@ -58,15 +58,16 @@ public sealed class DockTabHeader : TemplatedControl
             _closeButton.IsVisible = IsClosable;
     }
 
-    private void OnCloseClick(object? sender, RoutedEventArgs e)
+    private async void OnCloseClick(object? sender, RoutedEventArgs e)
     {
         e.Handled = true;
         if (DataContext is not IDockTabItem tab || !tab.IsClosable)
             return;
 
-        this.GetVisualAncestors()
+        var region = this.GetVisualAncestors()
             .OfType<DockRegion>()
-            .FirstOrDefault()
-            ?.RequestCloseTab(tab);
+            .FirstOrDefault();
+        if (region is not null)
+            await region.CloseTabAsync(tab);
     }
 }

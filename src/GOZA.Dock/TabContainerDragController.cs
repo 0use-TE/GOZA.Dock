@@ -22,7 +22,7 @@ public sealed class TabContainerDragController : IDisposable
 {
     private static object? _globalDraggedItem;
     private static TabContainerDragController? _activeController;
-    private static bool _themeChangeSubscribed;
+    private static WeakReference<Application>? _themeChangeApplication;
 
     private readonly Control _host;
     private readonly SelectingItemsControl _tabSelector;
@@ -76,23 +76,23 @@ public sealed class TabContainerDragController : IDisposable
 
     private static void EnsureThemeChangeSubscription()
     {
-        if (_themeChangeSubscribed)
-            return;
-
         if (Application.Current is not Application app)
             return;
-
-        _themeChangeSubscribed = true;
-        app.PropertyChanged += (_, e) =>
+        if (_themeChangeApplication?.TryGetTarget(out var previous) == true)
         {
-            if (e.Property != Application.ActualThemeVariantProperty
-                && e.Property != Application.RequestedThemeVariantProperty)
-            {
+            if (ReferenceEquals(previous, app))
                 return;
-            }
+            previous.PropertyChanged -= OnApplicationThemeChanged;
+        }
+        _themeChangeApplication = new(app);
+        app.PropertyChanged += OnApplicationThemeChanged;
+    }
 
+    private static void OnApplicationThemeChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == Application.ActualThemeVariantProperty
+            || e.Property == Application.RequestedThemeVariantProperty)
             CancelPointerInteraction();
-        };
     }
 
     private void AttachHandlers()
@@ -610,11 +610,11 @@ public sealed class TabContainerDragController : IDisposable
         if (newIndex == oldIndex)
             return;
 
-        var item = list[oldIndex]!;
-        list.RemoveAt(oldIndex);
-        newIndex = Math.Clamp(newIndex, 0, list.Count);
-        list.Insert(newIndex, item);
-        _region.SetCurrentValue(DockRegion.SelectedItemProperty, item);
+        var selection = _region.SelectedItem;
+        if (DockTabCollectionOperations.TryReorder(list, draggedItem, newIndex))
+            _region.SetCurrentValue(DockRegion.SelectedItemProperty, draggedItem);
+        else
+            _region.SetCurrentValue(DockRegion.SelectedItemProperty, selection);
     }
 
     private bool TryCrossRegionDrop(
@@ -628,18 +628,21 @@ public sealed class TabContainerDragController : IDisposable
             || targetTab == _tabSelector
             || draggedItem is null
             || _tabSelector.ItemsSource is not IList sourceList
-            || targetTab.ItemsSource is not IList targetList)
+            || targetTab.ItemsSource is not IList targetList
+            || !DockTabCollectionOperations.CanMutate(sourceList)
+            || !DockTabCollectionOperations.CanMutate(targetList))
         {
             return false;
         }
 
-        PrepareSourceSelectionBeforeRemove(sourceList, draggedItem);
-        sourceList.Remove(draggedItem);
-
         var insertIndex = DockRegionDragCoordinator.GetTabInsertIndex(targetTab, positionInTarget);
-
-        if (!targetList.Contains(draggedItem))
-            targetList.Insert(Math.Clamp(insertIndex, 0, targetList.Count), draggedItem);
+        var selection = _region.SelectedItem;
+        PrepareSourceSelectionBeforeRemove(sourceList, draggedItem);
+        if (!DockTabCollectionOperations.TryMove(sourceList, targetList, draggedItem, insertIndex))
+        {
+            _region.SetCurrentValue(DockRegion.SelectedItemProperty, selection);
+            return false;
+        }
 
         DockRegionDragCoordinator.NotifyCrossContainerDrop(
             _tabSelector,

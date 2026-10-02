@@ -1,0 +1,93 @@
+name: Publish NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Exact package version to publish (must match the project)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-publish
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore GOZA.Dock.Tests.slnx
+      - name: Unit, headless and managed memory tests
+        run: dotnet test GOZA.Dock.Tests.slnx -c Release --no-restore --logger trx --results-directory TestResults
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-test-results-${{ matrix.os }}
+          path: TestResults/*.trx
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Validate release version and publishing identity
+        id: version
+        shell: pwsh
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: |
+          [xml]$project = Get-Content src/GOZA.Dock/GOZA.Dock.csproj
+          $packageVersion = [string]$project.Project.PropertyGroup.Version
+          $expected = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME -replace '^v', '' } else { $env:REQUESTED_VERSION }
+          if ([string]::IsNullOrWhiteSpace($expected) -or $packageVersion -ne $expected) {
+            throw "Requested version '$expected' does not match project version '$packageVersion'."
+          }
+          if ([string]::IsNullOrWhiteSpace($env:NUGET_USER)) {
+            throw 'Set the repository variable NUGET_USER to the NuGet profile name, not an email address.'
+          }
+          "package=$packageVersion" >> $env:GITHUB_OUTPUT
+      - name: Build desktop samples
+        run: |
+          dotnet build samples/GOZA.Dock.Minimal.Desktop/GOZA.Dock.Minimal.Desktop.csproj -c Release
+          dotnet build samples/GOZA.Dock.Demo.Desktop/GOZA.Dock.Demo.Desktop.csproj -c Release
+      - name: Pack library
+        run: dotnet pack src/GOZA.Dock/GOZA.Dock.csproj -c Release -o artifacts/nuget
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: GOZA.Dock-${{ steps.version.outputs.package }}
+          path: artifacts/nuget/*.nupkg
+          if-no-files-found: error
+      - name: NuGet login with OIDC
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish exact package
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.package }}
+        run: dotnet nuget push "artifacts/nuget/GOZA.Dock.$env:PACKAGE_VERSION.nupkg" --api-key "$env:NUGET_API_KEY" --source https://api.nuget.org/v3/index.json

@@ -79,7 +79,9 @@ public static class VsCodeThemeJson
         string? sourcePath = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(json);
-        return LoadCore(json, resolveInclude, sourcePath, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        return LoadCore(json,
+            resolveInclude is null ? null : (_, include) => resolveInclude(include),
+            sourcePath, CreateVisitedSet());
     }
 
     /// <summary>
@@ -89,18 +91,10 @@ public static class VsCodeThemeJson
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         var full = Path.GetFullPath(path);
-        var dir = Path.GetDirectoryName(full)
-            ?? throw new InvalidOperationException($"Cannot resolve directory for '{path}'.");
-
-        return Load(
+        return LoadCore(
             File.ReadAllText(full),
-            include =>
-            {
-                var file = include.Trim().TrimStart('.', '/', '\\');
-                var includePath = Path.Combine(dir, file);
-                return File.ReadAllText(includePath);
-            },
-            full);
+            (parent, include) => File.ReadAllText(CombineIncludePath(parent, include)!),
+            full, CreateVisitedSet());
     }
 
     /// <summary>
@@ -123,22 +117,17 @@ public static class VsCodeThemeJson
     public static VsCodeColorTheme LoadFromAsset(Uri assetUri)
     {
         ArgumentNullException.ThrowIfNull(assetUri);
-        var baseUri = assetUri.ToString();
-        var slash = baseUri.LastIndexOf('/');
-        var folder = slash >= 0 ? baseUri[..(slash + 1)] : baseUri;
-
         using var stream = AssetLoader.Open(assetUri);
         using var reader = new StreamReader(stream);
-        return Load(
+        return LoadCore(
             reader.ReadToEnd(),
-            include =>
+            (parent, include) =>
             {
-                var file = include.Trim().TrimStart('.', '/', '\\');
-                using var includeStream = AssetLoader.Open(new Uri(folder + file));
+                using var includeStream = AssetLoader.Open(new Uri(CombineIncludePath(parent, include)!));
                 using var includeReader = new StreamReader(includeStream);
                 return includeReader.ReadToEnd();
             },
-            baseUri);
+            assetUri.ToString(), CreateVisitedSet());
     }
 
     /// <summary>
@@ -160,11 +149,13 @@ public static class VsCodeThemeJson
 
     private static VsCodeColorTheme LoadCore(
         string json,
-        Func<string, string>? resolveInclude,
+        Func<string?, string, string>? resolveInclude,
         string? sourcePath,
         HashSet<string> visited)
     {
-        var key = sourcePath ?? json.GetHashCode().ToString("X");
+        if (visited.Count >= 128)
+            throw new InvalidOperationException("Theme include chain exceeds the maximum depth of 128.");
+        var key = sourcePath ?? json;
         if (!visited.Add(key))
             throw new InvalidOperationException($"Circular theme include detected near '{sourcePath}'.");
 
@@ -185,7 +176,7 @@ public static class VsCodeThemeJson
                         $"Theme '{sourcePath}' includes '{include}' but no include resolver was provided.");
 
                 var included = LoadCore(
-                    resolveInclude(include),
+                    resolveInclude(sourcePath, include),
                     resolveInclude,
                     CombineIncludePath(sourcePath, include),
                     visited);
@@ -219,30 +210,19 @@ public static class VsCodeThemeJson
         return new VsCodeColorTheme(name, type, merged, sourcePath);
     }
 
+    private static HashSet<string> CreateVisitedSet() =>
+        new(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+
     private static string? CombineIncludePath(string? parent, string include)
     {
-        var file = include.Trim().TrimStart('.', '/', '\\');
+        var file = include.Trim();
         if (string.IsNullOrWhiteSpace(parent))
             return file;
 
-        if (parent.StartsWith("avares://", StringComparison.OrdinalIgnoreCase)
-            || parent.Contains('/', StringComparison.Ordinal))
-        {
-            var slash = parent.LastIndexOf('/');
-            return slash >= 0 ? parent[..(slash + 1)] + file : file;
-        }
-
-        try
-        {
-            var dir = Path.GetDirectoryName(parent);
-            if (dir is null)
-                return file;
-            return Path.GetFullPath(Path.Combine(dir, file));
-        }
-        catch
-        {
-            return file;
-        }
+        if (parent.StartsWith("avares://", StringComparison.OrdinalIgnoreCase))
+            return new Uri(new Uri(parent), file.Replace('\\', '/')).ToString();
+        var dir = Path.GetDirectoryName(parent) ?? string.Empty;
+        return Path.GetFullPath(Path.Combine(dir, file));
     }
 
     /// <summary>

@@ -15,25 +15,60 @@ public static class DockLayoutPersistence
             "GOZA.Dock.Demo",
             "dock-layout.json");
 
-    public static bool TryLoad(out DockLayoutSnapshot? snapshot)
+    public static bool TryLoad(out DockLayoutSnapshot? snapshot) => TryLoad(LayoutFilePath, out snapshot);
+
+    internal static bool TryLoad(string path, out DockLayoutSnapshot? snapshot)
     {
         snapshot = null;
-        var path = LayoutFilePath;
-        if (!File.Exists(path))
+        try
+        {
+            var json = File.ReadAllText(path);
+            var loaded = JsonSerializer.Deserialize(json, DockJsonContext.Default.DockLayoutSnapshot);
+            if (loaded is null || !IsValid(loaded))
+                return false;
+            snapshot = loaded;
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
+        {
             return false;
-
-        var json = File.ReadAllText(path);
-        snapshot = JsonSerializer.Deserialize(json, DockJsonContext.Default.DockLayoutSnapshot);
-        return snapshot is not null;
+        }
     }
 
-    public static void Save(DockLayoutSnapshot snapshot)
+    public static void Save(DockLayoutSnapshot snapshot) => Save(LayoutFilePath, snapshot);
+
+    internal static void Save(string path, DockLayoutSnapshot snapshot)
     {
-        var dir = Path.GetDirectoryName(LayoutFilePath)!;
+        ArgumentNullException.ThrowIfNull(snapshot);
+        if (!IsValid(snapshot))
+            throw new ArgumentException("Layout contains invalid regions or tabs.", nameof(snapshot));
+        path = Path.GetFullPath(path);
+        var dir = Path.GetDirectoryName(path)!;
         Directory.CreateDirectory(dir);
         var json = JsonSerializer.Serialize(snapshot, DockJsonContext.Default.DockLayoutSnapshot);
-        File.WriteAllText(LayoutFilePath, json);
+        var temporaryPath = Path.Combine(dir, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
+        try
+        {
+            using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                using (var writer = new StreamWriter(stream, leaveOpen: true))
+                    writer.Write(json);
+                stream.Flush(flushToDisk: true);
+            }
+            File.Move(temporaryPath, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+                File.Delete(temporaryPath);
+        }
     }
+
+    private static bool IsValid(DockLayoutSnapshot snapshot) =>
+        snapshot.Regions is not null && snapshot.Regions.All(region =>
+            region is not null && !string.IsNullOrWhiteSpace(region.RegionId)
+            && region.Tabs is not null && region.Tabs.All(tab =>
+                tab is not null && !string.IsNullOrWhiteSpace(tab.Id) && tab.Header is not null));
 
     public static DockLayoutSnapshot Capture(
         IReadOnlyDictionary<string, ObservableCollection<IDockTabItem>> regions,

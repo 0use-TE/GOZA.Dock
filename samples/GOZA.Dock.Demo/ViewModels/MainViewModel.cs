@@ -265,7 +265,15 @@ public partial class MainViewModel : ObservableObject
     private void SaveLayout()
     {
         var snapshot = DockLayoutPersistence.Capture(GetRegionMap(), GetSelectedMap());
-        DockLayoutPersistence.Save(snapshot);
+        try
+        {
+            DockLayoutPersistence.Save(snapshot);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Notify("Layout", $"Could not save layout: {exception.Message}");
+            return;
+        }
         Notify("Layout", "Layout saved.");
     }
 
